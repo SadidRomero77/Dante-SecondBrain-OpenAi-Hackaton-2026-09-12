@@ -19,6 +19,9 @@
 
 #include <Wire.h>
 #include <driver/i2s_std.h>
+#include <WiFi.h>
+#include <WebSocketsClient.h>
+#include <Preferences.h>
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7789.h>
@@ -40,6 +43,23 @@ static const int      VOL_DAC  = 92;
 static const size_t CUADROS   = 480;
 static const size_t BYTES_I2S = CUADROS * 2 * sizeof(int16_t);   // 1920
 static const size_t BYTES_CBL = CUADROS * sizeof(int16_t);       // 960
+
+/* --- WiFi ----------------------------------------------------------------
+   El aparato se conecta al PC, no al reves: necesita saber la direccion una
+   sola vez y reconecta solo. Por WebSocket no hace falta la cabecera de 4
+   bytes: una trama binaria es audio y una de texto es control. Ver
+   PROTOCOL.md.
+
+   Las credenciales se guardan en Preferences y las escribe el PC por el
+   propio cable, con "dante setup". Nada de portal cautivo: se configura desde
+   la misma terminal que corre el agente. */
+static bool ok_dac = false, ok_adc = false, ok_i2s = false;
+
+static Preferences prefs;
+static WebSocketsClient wsc;
+static bool wifi_configurado = false;
+static bool wifi_listo = false;         // conectado al servidor
+static uint32_t proximo_reintento = 0;
 
 static const uint8_t MAGIA = 0xA5;
 static const uint8_t T_AUDIO = 1, T_CONTROL = 2, T_LOG = 3;
@@ -300,6 +320,13 @@ static void mostrar_texto(const char *titulo, const char *cuerpo, uint32_t seg) 
 
 // ------------------------------------------------------------ marco serie --
 static void enviar(uint8_t tipo, const void *carga, uint16_t largo) {
+  // Por WiFi cuando lo hay, porque es el camino que sobrevive a que alguien
+  // desenchufe el cable. Si no, por el cable.
+  if (wifi_listo) {
+    if (tipo == T_AUDIO) wsc.sendBIN((const uint8_t *)carga, largo);
+    else                 wsc.sendTXT((const char *)carga, largo);
+    return;
+  }
   uint8_t cab[4] = {MAGIA, tipo, (uint8_t)(largo & 0xFF), (uint8_t)(largo >> 8)};
   Serial.write(cab, 4);
   if (largo) Serial.write((const uint8_t *)carga, largo);
@@ -361,6 +388,76 @@ static uint8_t recibir(uint16_t *largo_out) {
     return 0;                                           // seguimos esperando
   }
   return 0;
+}
+
+static void atender_marco(uint8_t tipo, const uint8_t *carga, uint16_t largo);
+
+/* Eventos del WebSocket. Los marcos entran por aqui y siguen el mismo camino
+   que los del cable: el resto del firmware no sabe por donde llegaron. */
+static void al_evento_ws(WStype_t tipo, uint8_t *carga, size_t largo) {
+  switch (tipo) {
+    case WStype_CONNECTED:
+      wifi_listo = true;
+      estado = LISTO;
+      saludar(ok_dac, ok_adc, ok_i2s);
+      break;
+    case WStype_DISCONNECTED:
+      wifi_listo = false;
+      break;
+    case WStype_BIN:
+      atender_marco(T_AUDIO, carga, (uint16_t)largo);
+      break;
+    case WStype_TEXT:
+      atender_marco(T_CONTROL, carga, (uint16_t)largo);
+      break;
+    default:
+      break;
+  }
+}
+
+/* Levanta el WiFi si hay credenciales guardadas. No bloquea: si la red no
+   aparece, el aparato sigue funcionando por el cable. */
+static void init_wifi() {
+  prefs.begin("dante", true);
+  String ssid = prefs.getString("ssid", "");
+  String clave = prefs.getString("clave", "");
+  String host = prefs.getString("host", "");
+  uint16_t puerto = prefs.getUShort("puerto", 8770);
+  prefs.end();
+
+  if (ssid.isEmpty() || host.isEmpty()) {
+    log_pc("wifi sin configurar; se usa el cable");
+    return;
+  }
+  wifi_configurado = true;
+  WiFi.mode(WIFI_STA);
+  WiFi.setSleep(false);                 // el sueno de WiFi corta el audio
+  WiFi.begin(ssid.c_str(), clave.c_str());
+
+  char m[128];
+  snprintf(m, sizeof(m), "wifi: conectando a %s, servidor %s:%u",
+           ssid.c_str(), host.c_str(), puerto);
+  log_pc(m);
+
+  wsc.begin(host.c_str(), puerto, "/");
+  wsc.onEvent(al_evento_ws);
+  wsc.setReconnectInterval(3000);
+  wsc.enableHeartbeat(15000, 3000, 2);
+}
+
+/* Guarda credenciales que llegan por el cable y reinicia para aplicarlas. */
+static void guardar_wifi(const char *ssid, const char *clave,
+                         const char *host, uint16_t puerto) {
+  prefs.begin("dante", false);
+  prefs.putString("ssid", ssid);
+  prefs.putString("clave", clave);
+  prefs.putString("host", host);
+  prefs.putUShort("puerto", puerto);
+  prefs.end();
+  log_pc("wifi guardado; reiniciando");
+  mostrar_texto("WiFi", "Configurado. Reiniciando...", 3);
+  delay(900);
+  ESP.restart();
 }
 
 // ------------------------------------------------------------------- I2C ---
@@ -458,9 +555,8 @@ void setup() {
 
   delay(300);
   saludar(a, b, c);
+  init_wifi();
 }
-
-static bool ok_dac, ok_adc, ok_i2s;
 
 /* El aparato arranca antes de que el PC abra el puerto, asi que el saludo
    inicial se pierde casi siempre. El PC lo vuelve a pedir al conectarse. */
@@ -468,10 +564,11 @@ static void saludar(bool a, bool b, bool c) {
   ok_dac = a; ok_adc = b; ok_i2s = c;
   char hola[160];
   snprintf(hola, sizeof(hola),
-           "{\"t\":\"hola\",\"fw\":\"0.1.0\",\"sr\":%lu,\"transporte\":\"usb\","
-           "\"dac\":%s,\"adc\":%s,\"i2s\":%s}",
-           (unsigned long)FS, a ? "true" : "false", b ? "true" : "false",
-           c ? "true" : "false");
+           "{\"t\":\"hola\",\"fw\":\"0.2.0\",\"sr\":%lu,\"transporte\":\"%s\","
+           "\"ip\":\"%s\",\"dac\":%s,\"adc\":%s,\"i2s\":%s}",
+           (unsigned long)FS, wifi_listo ? "wifi" : "usb",
+           wifi_listo ? WiFi.localIP().toString().c_str() : "",
+           a ? "true" : "false", b ? "true" : "false", c ? "true" : "false");
   enviar(T_CONTROL, hola, strlen(hola));
 }
 
@@ -512,52 +609,91 @@ void loop() {
     uint16_t largo = 0;
     uint8_t tipo = recibir(&largo);
     if (!tipo) break;
+    atender_marco(tipo, marco, largo);
+  }
 
-    if (tipo == T_AUDIO && largo) {
-      const int16_t *mono = (const int16_t *)marco;
-      size_t cuadros = largo / sizeof(int16_t);
-      if (cuadros > CUADROS) cuadros = CUADROS;
-      for (size_t i = 0; i < cuadros; i++) {
-        bufI2S[i * 2] = mono[i];
-        bufI2S[i * 2 + 1] = mono[i];
-      }
-      size_t esc_n = 0;
-      i2s_channel_write(tx, bufI2S, cuadros * 2 * sizeof(int16_t), &esc_n, 120);
-
-    } else if (tipo == T_CONTROL && largo) {
-      marco[largo] = 0;
-      char *em = strstr((char *)marco, "\"emocion\"");
-      if (em) {
-        if (strstr(em, "escuchando"))      estado = ESCUCHANDO;
-        else if (strstr(em, "pensando"))   estado = PENSANDO;
-        else if (strstr(em, "hablando"))   estado = HABLANDO;
-        else if (strstr(em, "feliz"))      estado = FELIZ;
-        else if (strstr(em, "atencion"))   estado = ATENCION;
-        else                               estado = LISTO;
-      } else if (strstr((char *)marco, "\"texto\"")) {
-        // {"t":"texto","titulo":"...","cuerpo":"...","seg":8}
-        char titulo[40] = "", cuerpo[160] = "";
-        int seg = 8;
-        char *q;
-        if ((q = strstr((char *)marco, "\"titulo\":\""))) {
-          q += 10; int i = 0;
-          while (*q && *q != '"' && i < 38) titulo[i++] = *q++;
-          titulo[i] = 0;
-        }
-        if ((q = strstr((char *)marco, "\"cuerpo\":\""))) {
-          q += 10; int i = 0;
-          while (*q && *q != '"' && i < 158) cuerpo[i++] = *q++;
-          cuerpo[i] = 0;
-        }
-        if ((q = strstr((char *)marco, "\"seg\":"))) seg = atoi(q + 6);
-        mostrar_texto(titulo, cuerpo, seg > 0 ? seg : 8);
-
-      } else if (strstr((char *)marco, "\"hola?\"")) {
-        saludar(ok_dac, ok_adc, ok_i2s);
-      } else if (strstr((char *)marco, "\"parar\"")) {
-        i2s_channel_disable(tx);
-        i2s_channel_enable(tx);
-      }
+  // 4. WiFi: los marcos entran por el callback, esto solo mantiene la conexion.
+  if (wifi_configurado) {
+    wsc.loop();
+    if (!wifi_listo && millis() > proximo_reintento) {
+      proximo_reintento = millis() + 5000;
+      if (WiFi.status() != WL_CONNECTED) WiFi.reconnect();
     }
+  }
+}
+
+/* Atiende un marco venga de donde venga: del cable o de la red. El resto del
+   firmware no distingue, y esa es la idea. */
+static void atender_marco(uint8_t tipo, const uint8_t *carga, uint16_t largo) {
+  if (tipo == T_AUDIO && largo) {
+    const int16_t *mono = (const int16_t *)carga;
+    size_t cuadros = largo / sizeof(int16_t);
+    if (cuadros > CUADROS) cuadros = CUADROS;
+    for (size_t i = 0; i < cuadros; i++) {
+      bufI2S[i * 2] = mono[i];
+      bufI2S[i * 2 + 1] = mono[i];
+    }
+    size_t esc_n = 0;
+    i2s_channel_write(tx, bufI2S, cuadros * 2 * sizeof(int16_t), &esc_n, 120);
+    return;
+  }
+
+  if (tipo != T_CONTROL || !largo) return;
+
+  // Copia con terminador: la carga puede venir de un buffer que no lo tiene.
+  static char txt[1024];
+  uint16_t n = largo < sizeof(txt) - 1 ? largo : sizeof(txt) - 1;
+  memcpy(txt, carga, n);
+  txt[n] = 0;
+
+  char *em = strstr(txt, "\"emocion\"");
+  if (em) {
+    if (strstr(em, "escuchando"))      estado = ESCUCHANDO;
+    else if (strstr(em, "pensando"))   estado = PENSANDO;
+    else if (strstr(em, "hablando"))   estado = HABLANDO;
+    else if (strstr(em, "feliz"))      estado = FELIZ;
+    else if (strstr(em, "atencion"))   estado = ATENCION;
+    else                               estado = LISTO;
+
+  } else if (strstr(txt, "\"texto\"")) {
+    char titulo[40] = "", cuerpo[160] = "";
+    int seg = 8;
+    char *q;
+    if ((q = strstr(txt, "\"titulo\":\""))) {
+      q += 10; int i = 0;
+      while (*q && *q != '"' && i < 38) titulo[i++] = *q++;
+      titulo[i] = 0;
+    }
+    if ((q = strstr(txt, "\"cuerpo\":\""))) {
+      q += 10; int i = 0;
+      while (*q && *q != '"' && i < 158) cuerpo[i++] = *q++;
+      cuerpo[i] = 0;
+    }
+    if ((q = strstr(txt, "\"seg\":"))) seg = atoi(q + 6);
+    mostrar_texto(titulo, cuerpo, seg > 0 ? seg : 8);
+
+  } else if (strstr(txt, "\"wifi\"")) {
+    // {"t":"wifi","ssid":"...","clave":"...","host":"192.168.1.20","puerto":8770}
+    char ssid[64] = "", clave[64] = "", host[64] = "";
+    int puerto = 8770;
+    char *q;
+    if ((q = strstr(txt, "\"ssid\":\""))) {
+      q += 8; int i = 0; while (*q && *q != '"' && i < 62) ssid[i++] = *q++; ssid[i] = 0;
+    }
+    if ((q = strstr(txt, "\"clave\":\""))) {
+      q += 9; int i = 0; while (*q && *q != '"' && i < 62) clave[i++] = *q++; clave[i] = 0;
+    }
+    if ((q = strstr(txt, "\"host\":\""))) {
+      q += 8; int i = 0; while (*q && *q != '"' && i < 62) host[i++] = *q++; host[i] = 0;
+    }
+    if ((q = strstr(txt, "\"puerto\":"))) puerto = atoi(q + 9);
+    if (ssid[0] && host[0]) guardar_wifi(ssid, clave, host, (uint16_t)puerto);
+
+  } else if (strstr(txt, "\"hola?\"")) {
+    saludar(ok_dac, ok_adc, ok_i2s);
+
+  } else if (strstr(txt, "\"parar\"")) {
+    i2s_channel_disable(tx);
+    i2s_channel_enable(tx);
   }
 }

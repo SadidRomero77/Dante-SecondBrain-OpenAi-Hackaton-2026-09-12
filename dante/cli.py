@@ -16,6 +16,7 @@ Comandos de Dante:
   dante hablar --panel Ademas abre el panel web en el navegador.
   dante semilla        Carga una persona de ejemplo con su pasado.
   dante memoria        Muestra que recuerda Dante ahora mismo.
+  dante setup          Le pasa al aparato la red WiFi y la IP del PC.
 """
 
 
@@ -30,6 +31,13 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("smoke", help="prueba la Realtime API")
     s.add_argument("--audio", action="store_true",
                    help="pedir la respuesta hablada y guardarla en WAV")
+
+    st = sub.add_parser("setup", help="configurar el WiFi del aparato")
+    st.add_argument("--ssid", default="", help="nombre de la red")
+    st.add_argument("--clave", default="", help="contrasena de la red")
+    st.add_argument("--host", default="", help="IP de este PC (se detecta sola)")
+    st.add_argument("--puerto", type=int, default=0)
+    st.add_argument("--borrar", action="store_true", help="olvidar la red guardada")
 
     se = sub.add_parser("semilla", help="cargar datos de ejemplo")
     se.add_argument("--borrar", action="store_true", help="vaciar antes de sembrar")
@@ -68,6 +76,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.comando == "smoke":
         from .smoke import correr
         return correr(con_audio=args.audio)
+
+    if args.comando == "setup":
+        from .setup import correr as configurar
+        return configurar(ssid=args.ssid, clave=args.clave, host=args.host,
+                          puerto=args.puerto, borrar=args.borrar)
 
     if args.comando == "semilla":
         from .semilla import correr as sembrar

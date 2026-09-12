@@ -45,6 +45,7 @@ dante monitor          Lee el puerto serie del aparato.
 dante puente           Microfono -> PC -> parlante, sin modelo de por medio.
 dante semilla          Carga una persona de ejemplo con su pasado.
 dante memoria          Muestra que recuerda Dante ahora mismo.
+dante setup            Le pasa al aparato la red WiFi y la IP del PC.
 
 dante hablar           Conversar. Manten apretado BOOT, habla, suelta.
 dante hablar --panel   Ademas abre el panel web en http://127.0.0.1:8800
@@ -84,8 +85,21 @@ a mitad de una conversación y seguir por red sin reiniciar nada.
 El aparato se conecta al PC, no al revés — necesita saber la dirección una sola
 vez y reconecta solo.
 
-> El firmware con WiFi todavía está por escribirse; el lado del servidor ya está
-> listo y probado contra un aparato simulado.
+Para pasar el aparato a WiFi, con el cable puesto:
+
+```
+uv run dante setup
+```
+
+Pregunta la red, la contraseña y detecta sola la IP de este PC. Se la escribe al
+aparato por el mismo cable y lo reinicia. **No hay portal cautivo ni hotspot**:
+se configura desde la misma terminal que corre el agente, y después se
+desconecta el cable.
+
+> El ESP32 no ve redes de 5 GHz. Tiene que ser una de 2.4.
+
+El aparato manda por WiFi cuando lo tiene y por cable cuando no, así que
+desenchufar el cable no corta la conversación.
 
 ## Si el audio del aparato falla
 

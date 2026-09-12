@@ -79,7 +79,7 @@ El agente no sabe por cuál está hablando, y esa es justamente la idea.
 ### Del aparato al PC
 
 ```json
-{"t":"hola", "fw":"0.1.0", "sr":24000, "transporte":"usb"}
+{"t":"hola", "fw":"0.2.0", "sr":24000, "transporte":"usb|wifi", "ip":"192.168.1.33"}
 {"t":"boton", "v":"abajo"}
 {"t":"boton", "v":"arriba"}
 {"t":"listo"}
@@ -109,6 +109,15 @@ aparato no transmite audio, y por eso no hace falta cancelación de eco.
 turno; mañana, para poder interrumpir hablando.
 
 `texto` es opcional: un subtítulo corto bajo Dante, útil si el usuario oye mal.
+
+```json
+{"t":"wifi", "ssid":"MiRed", "clave":"...", "host":"192.168.1.12", "puerto":8770}
+```
+
+`wifi` guarda la red y la dirección del PC en la memoria no volátil del aparato
+y lo reinicia. Se manda **por el cable**, con `dante setup`. No hay portal
+cautivo: se configura desde la misma terminal que corre el agente, y después se
+puede desenchufar.
 
 ## Ciclo de una conversación
 
