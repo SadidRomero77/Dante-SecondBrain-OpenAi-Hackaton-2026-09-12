@@ -718,12 +718,21 @@ static void atender_marco(uint8_t tipo, const uint8_t *carga, uint16_t largo) {
 
   char *em = strstr(txt, "\"emocion\"");
   if (em) {
+    Estado antes = estado;
     if (strstr(em, "escuchando"))      estado = ESCUCHANDO;
     else if (strstr(em, "pensando"))   estado = PENSANDO;
     else if (strstr(em, "hablando"))   estado = HABLANDO;
     else if (strstr(em, "feliz"))      estado = FELIZ;
     else if (strstr(em, "atencion"))   estado = ATENCION;
     else                               estado = LISTO;
+
+    // La oreja acompana al animo sola. Solo al cambiar: repetir el mismo
+    // animo no debe volver a moverla, o temblaria toda la conversacion.
+    if (estado != antes) {
+      if (estado == FELIZ)                                gesto_pedido = 1;
+      else if (estado == ESCUCHANDO || estado == ATENCION) gesto_pedido = 2;
+      else if (estado == PENSANDO)                         gesto_pedido = 3;
+    }
 
   } else if (strstr(txt, "\"texto\"")) {
     char titulo[40] = "", cuerpo[160] = "";
@@ -741,6 +750,12 @@ static void atender_marco(uint8_t tipo, const uint8_t *carga, uint16_t largo) {
     }
     if ((q = strstr(txt, "\"seg\":"))) seg = atoi(q + 6);
     mostrar_texto(titulo, cuerpo, seg > 0 ? seg : 8);
+
+  } else if (strstr(txt, "\"gesto\"")) {
+    // Gesto pedido a proposito por el agente (la herramienta mover_oreja).
+    if (strstr(txt, "saludo"))        gesto_pedido = 1;
+    else if (strstr(txt, "atencion")) gesto_pedido = 2;
+    else if (strstr(txt, "duda"))     gesto_pedido = 3;
 
   } else if (strstr(txt, "\"wifi\"")) {
     // {"t":"wifi","ssid":"...","clave":"...","host":"192.168.1.20","puerto":8770}
