@@ -11,6 +11,13 @@ dependencies = [
     "numpy>=1.26",
     # Windows no trae la base de zonas horarias IANA; zoneinfo la necesita.
     "tzdata>=2024.1",
+    # Vision: opencv-contrib trae el reconocedor de rostros LBPH, que el
+    # opencv normal no incluye.
+    "opencv-contrib-python>=4.10",
+    "pillow>=10.0",
+    # Panel del cuidador
+    "fastapi>=0.115",
+    "uvicorn>=0.32",
 ]
 
 [project.scripts]
