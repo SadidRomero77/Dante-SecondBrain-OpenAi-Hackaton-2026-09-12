@@ -64,8 +64,14 @@ class Camara:
         import cv2
 
         try:
-            self.cap = cv2.VideoCapture(self.indice, cv2.CAP_DSHOW)
-            if not self.cap.isOpened():
+            # DirectShow solo sirve para camaras conectadas al PC. Con una
+            # direccion de red (una ESP32-CAM, por ejemplo) no falla rapido:
+            # se queda esperando. Por eso ni lo intentamos en ese caso.
+            if isinstance(self.indice, int):
+                self.cap = cv2.VideoCapture(self.indice, cv2.CAP_DSHOW)
+                if not self.cap.isOpened():
+                    self.cap = cv2.VideoCapture(self.indice)
+            else:
                 self.cap = cv2.VideoCapture(self.indice)
             if not self.cap.isOpened():
                 self.error = f"no pude abrir la camara {self.indice}"
