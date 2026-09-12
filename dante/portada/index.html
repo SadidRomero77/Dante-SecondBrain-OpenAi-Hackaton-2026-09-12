@@ -69,7 +69,205 @@
 <body>
   <nav class="nav">
     <div class="container nav-inner">
-      <a class="brand" href="#top">Ki<span>bo</span></a>
+      <a class="brand" href="#top" style="display:inline-flex;align-items:center;gap:9px"><svg id="dante-svg" class="dante-avatar" viewBox="0 0 160 160" width="34" height="34" aria-label="Dante el perro compañero">
+      <defs>
+        <!-- Degradados cálidos y sombreados para las facetas poligonales del pelaje -->
+        <linearGradient id="grad-frente" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fed77d"/>
+          <stop offset="100%" stop-color="#f5b84e"/>
+        </linearGradient>
+        <linearGradient id="grad-mejilla-izq" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e38e24"/>
+          <stop offset="100%" stop-color="#cb7414"/>
+        </linearGradient>
+        <linearGradient id="grad-mejilla-der" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#d67f1b"/>
+          <stop offset="100%" stop-color="#be670c"/>
+        </linearGradient>
+        <linearGradient id="grad-hocico" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fff5e6"/>
+          <stop offset="100%" stop-color="#f7ddba"/>
+        </linearGradient>
+        <linearGradient id="grad-oreja-izq" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e29427"/>
+          <stop offset="100%" stop-color="#be670c"/>
+        </linearGradient>
+        <linearGradient id="grad-oreja-der" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#d6841e"/>
+          <stop offset="100%" stop-color="#b15907"/>
+        </linearGradient>
+        <linearGradient id="grad-collar" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#1b724e"/>
+          <stop offset="50%" stop-color="#2ca16e"/>
+          <stop offset="100%" stop-color="#165c3e"/>
+        </linearGradient>
+        <linearGradient id="grad-oro" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffe678"/>
+          <stop offset="50%" stop-color="#f8be22"/>
+          <stop offset="100%" stop-color="#cf8904"/>
+        </linearGradient>
+        <radialGradient id="grad-ojo" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#4e3120"/>
+          <stop offset="65%" stop-color="#24170f"/>
+          <stop offset="100%" stop-color="#140c07"/>
+        </radialGradient>
+        <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="130%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#552200" flood-opacity="0.16"/>
+        </filter>
+      </defs>
+
+      <!-- BASE: cuello y collar a una distancia prudente, sin salirse del icono -->
+      <g id="cuello-y-collar">
+        <path d="M 62 116 L 58 132 Q 80 140 102 132 L 98 116 Z" fill="#dc851d"/>
+        <path d="M 60 128 L 58 134 Q 80 140 102 134 L 100 128 Z" fill="#c97312"/>
+        <path id="banda-collar" d="M 52 126 Q 80 138 108 126 L 106 136 Q 80 146 54 136 Z" fill="url(#grad-collar)" stroke="#134a33" stroke-width="1.1"/>
+        <circle cx="64" cy="132" r="1.5" fill="#f8cf52"/>
+        <circle cx="96" cy="132" r="1.5" fill="#f8cf52"/>
+        <circle cx="80" cy="138" r="2.7" fill="none" stroke="#e8a817" stroke-width="1.45"/>
+        <g id="medalla-hueso" transform="translate(80, 142)">
+          <path d="M -5.4 -2.8 C -7.2 -4.7 -9.4 -2.2 -7.6 -0.6 C -9.4 1.1 -7.2 3.6 -5.4 1.8 L 5.4 1.8 C 7.2 3.6 9.4 1.1 7.6 -0.6 C 9.4 -2.2 7.2 -4.7 5.4 -2.8 Z" fill="url(#grad-oro)" stroke="#b57404" stroke-width="0.7"/>
+          <circle cx="0" cy="-0.35" r="0.75" fill="#fff" opacity="0.85"/>
+        </g>
+      </g>
+
+      <!-- CABEZA CON ESTRUCTURA BIEN MOLDEADA EN PLANOS POLIGONALES -->
+      <g id="cabeza-grupo" class="cabeza-grupo">
+        <!-- Orejas dentro de la cabeza para que se muevan con ella -->
+        <g id="oreja-izq" class="oreja oreja-izq">
+          <path d="M 46 48 C 26 46 10 66 14 92 C 17 104 31 101 39 85 C 45 74 51 59 51 49 Z" fill="#9e4e04"/>
+          <path d="M 48 48 C 29 46 14 65 17 89 C 19 99 32 96 39 82 C 45 71 52 58 52 48 Z" fill="url(#grad-oreja-izq)"/>
+          <path d="M 41 53 C 30 53 23 66 25 81 C 29 87 34 83 38 73 Z" fill="#883e02" opacity="0.75"/>
+          <path d="M 44 49 C 32 49 22 62 23 75" fill="none" stroke="#fcd484" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+        </g>
+        <g id="oreja-der" class="oreja oreja-der">
+          <path d="M 114 48 C 134 46 150 66 146 92 C 143 104 129 101 121 85 C 115 74 109 59 109 49 Z" fill="#924602"/>
+          <path d="M 112 48 C 131 46 146 65 143 89 C 141 99 128 96 121 82 C 115 71 108 58 108 48 Z" fill="url(#grad-oreja-der)"/>
+          <path d="M 119 53 C 130 53 137 66 135 81 C 131 87 126 83 122 73 Z" fill="#7d3701" opacity="0.75"/>
+          <path d="M 116 49 C 128 49 138 62 137 75" fill="none" stroke="#fcd484" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+        </g>
+        <!-- Facetas geométricas / polígonos esculpidos de la cabeza -->
+        <g id="poligonos-cabeza">
+          <!-- 1. Plano Frente Superior / Corona -->
+          <polygon points="62,38 98,38 104,54 56,54" fill="#fed679"/>
+
+          <!-- 2. Plano Diamante Central de la Frente -->
+          <polygon points="56,54 104,54 100,72 80,78 60,72" fill="#f8bf53"/>
+
+          <!-- 3. Faceta Lateral Izquierda (Sien superior) -->
+          <polygon points="62,38 56,54 44,52" fill="#e8982c"/>
+
+          <!-- 4. Faceta Lateral Derecha (Sien superior) -->
+          <polygon points="98,38 104,54 116,52" fill="#df8e22"/>
+
+          <!-- 5. Mejilla Izquierda Superior (Polígono angular que ensancha la cara) -->
+          <polygon points="44,52 56,54 60,72 40,78 34,64" fill="url(#grad-mejilla-izq)"/>
+
+          <!-- 6. Mejilla Derecha Superior (Polígono angular simétrico) -->
+          <polygon points="116,52 104,54 100,72 120,78 126,64" fill="url(#grad-mejilla-der)"/>
+
+          <!-- 7. Mejilla Izquierda Inferior (Mandíbula) -->
+          <polygon points="34,64 40,78 54,98 44,106 32,84" fill="#c97312"/>
+
+          <!-- 8. Mejilla Derecha Inferior (Mandíbula) -->
+          <polygon points="126,64 120,78 106,98 116,106 128,84" fill="#be670c"/>
+
+          <!-- 9. Quijada y Barbilla (Planos inferiores) -->
+          <polygon points="44,106 54,98 80,110 66,126 50,120" fill="#dc851d"/>
+          <polygon points="116,106 106,98 80,110 94,126 110,120" fill="#ce7714"/>
+          <polygon points="66,126 80,110 94,126 80,128" fill="#e8952b"/>
+
+          <!-- Líneas de estructura sutiles entre facetas -->
+          <path d="M 62 38 L 98 38 L 104 54 L 120 78 L 116 106 L 94 126 L 66 126 L 44 106 L 40 78 L 56 54 Z" fill="none" stroke="#ad5b07" stroke-width="1.2" opacity="0.32"/>
+        </g>
+
+        <!-- PELITO DIMINUTO EN LA CORONA (Para que no se vea calvo) -->
+        <g id="pelito-cabeza" class="pelito-tuft">
+          <path d="M 76 38 C 77 30 79 25 82 26 C 84 27 83 33 85 38 C 87 31 91 30 90 38 Z" fill="#fed679" stroke="#ad5b07" stroke-width="1" stroke-linejoin="round"/>
+          <path d="M 79 34 C 80 29 81 28 82 28" fill="none" stroke="#fff1bd" stroke-width="1.2" stroke-linecap="round"/>
+        </g>
+
+        <!-- CEJAS EXPRESIVAS -->
+        <g id="cejas">
+          <path id="ceja-izq" class="ceja ceja-izq" d="M 48 50 Q 58 45 66 49" fill="none" stroke="#7a3f0f" stroke-width="3" stroke-linecap="round"/>
+          <path id="ceja-der" class="ceja ceja-der" d="M 94 49 Q 102 45 112 50" fill="none" stroke="#7a3f0f" stroke-width="3" stroke-linecap="round"/>
+        </g>
+
+        <!-- OJOS (Animados con párpados, reflejos y estado feliz) -->
+        <!-- Ojo Izquierdo -->
+        <g id="ojo-izq-cont" class="ojo-contenedor" transform="translate(58, 63)">
+          <g id="ojo-izq-abierto" class="ojo-abierto">
+            <ellipse cx="0" cy="0" rx="10" ry="12" fill="#ffffff" stroke="#ecd7c4" stroke-width="0.8"/>
+            <path d="M -9.5 -2 C -9 -9 9 -9 9.5 -2 C 6 -4 -6 -4 -9.5 -2 Z" fill="#d9c5b2" opacity="0.45"/>
+            <g id="pupila-izq" class="pupila">
+              <ellipse cx="0.5" cy="0.5" rx="7.5" ry="9" fill="url(#grad-ojo)"/>
+              <circle cx="0.5" cy="0.5" r="7.5" fill="none" stroke="#a2571b" stroke-width="1"/>
+              <circle cx="-2.5" cy="-3.5" r="3" fill="#ffffff"/>
+              <circle cx="3" cy="3.5" r="1.3" fill="#ffffff" opacity="0.9"/>
+            </g>
+            <path id="parpado-izq" class="parpado" d="M -11 -13 L 11 -13 L 11 0 Q 0 4 -11 0 Z" fill="#e8982c" style="transform-origin: 0px -12px; transform: scaleY(0); transition: transform 0.12s ease;"/>
+          </g>
+          <path id="ojo-izq-feliz" class="ojo-feliz" d="M -9 3 Q 0 -8 9 3" fill="none" stroke="#2c1a0e" stroke-width="3.6" stroke-linecap="round" style="display: none;"/>
+        </g>
+
+        <!-- Ojo Derecho -->
+        <g id="ojo-der-cont" class="ojo-contenedor" transform="translate(102, 63)">
+          <g id="ojo-der-abierto" class="ojo-abierto">
+            <ellipse cx="0" cy="0" rx="10" ry="12" fill="#ffffff" stroke="#ecd7c4" stroke-width="0.8"/>
+            <path d="M -9.5 -2 C -9 -9 9 -9 9.5 -2 C 6 -4 -6 -4 -9.5 -2 Z" fill="#d9c5b2" opacity="0.45"/>
+            <g id="pupila-der" class="pupila">
+              <ellipse cx="-0.5" cy="0.5" rx="7.5" ry="9" fill="url(#grad-ojo)"/>
+              <circle cx="-0.5" cy="0.5" r="7.5" fill="none" stroke="#a2571b" stroke-width="1"/>
+              <circle cx="-3.5" cy="-3.5" r="3" fill="#ffffff"/>
+              <circle cx="2" cy="3.5" r="1.3" fill="#ffffff" opacity="0.9"/>
+            </g>
+            <path id="parpado-der" class="parpado" d="M -11 -13 L 11 -13 L 11 0 Q 0 4 -11 0 Z" fill="#df8e22" style="transform-origin: 0px -12px; transform: scaleY(0); transition: transform 0.12s ease;"/>
+          </g>
+          <path id="ojo-der-feliz" class="ojo-feliz" d="M -9 3 Q 0 -8 9 3" fill="none" stroke="#2c1a0e" stroke-width="3.6" stroke-linecap="round" style="display: none;"/>
+        </g>
+
+        <!-- Mejillas con rubor sutil -->
+        <ellipse cx="42" cy="79" rx="7" ry="4" fill="#f87a55" opacity="0.28"/>
+        <ellipse cx="118" cy="79" rx="7" ry="4" fill="#f87a55" opacity="0.28"/>
+
+        <!-- HOCICO (Estructura poligonal-redondeada con trufa, boca y lengua) -->
+        <g id="hocico-grupo" class="hocico-grupo" filter="url(#soft-shadow)">
+          <!-- Base crema del hocico -->
+          <path d="M 64 74 C 70 71, 90 71, 96 74 C 105 78, 107 90, 103 99 C 97 108, 89 113, 80 113 C 71 113, 63 108, 57 99 C 53 90, 55 78, 64 74 Z" fill="url(#grad-hocico)" stroke="#e4cbab" stroke-width="1.2"/>
+          <ellipse cx="80" cy="85" rx="14" ry="7" fill="#ebd2b2" opacity="0.5"/>
+
+          <!-- Puntos de bigote caricaturizados -->
+          <circle cx="68" cy="94" r="1" fill="#c49f76"/>
+          <circle cx="72" cy="97" r="1" fill="#c49f76"/>
+          <circle cx="88" cy="97" r="1" fill="#c49f76"/>
+          <circle cx="92" cy="94" r="1" fill="#c49f76"/>
+
+          <!-- Boca y lengua -->
+          <g id="boca-grupo">
+            <!-- Boca cerrada / sonrisa amigable -->
+            <path id="boca-cerrada" d="M 69 98 Q 75 102 80 98 Q 85 102 91 98" fill="none" stroke="#52321c" stroke-width="2.2" stroke-linecap="round"/>
+
+            <!-- Boca abierta con lengua alegre (en feliz o hablando) -->
+            <g id="boca-abierta" style="display: none;">
+              <path d="M 72 98 Q 80 99 88 98 Q 89 110 80 113 Q 71 110 72 98 Z" fill="#631722"/>
+              <g id="lengua-animada" class="lengua-animada">
+                <path d="M 73 104 Q 80 101 87 104 C 88 116 86 122 80 123 C 74 122 72 116 73 104 Z" fill="#f86284" stroke="#d43f62" stroke-width="0.8"/>
+                <path d="M 80 106 L 80 118" fill="none" stroke="#de4366" stroke-width="1.2" stroke-linecap="round"/>
+                <ellipse cx="77" cy="112" rx="1.8" ry="3" fill="#ff9cb4" opacity="0.65"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- Trufa de la nariz -->
+          <g id="trufa-nariz">
+            <path d="M 72 79 C 75 76, 85 76, 88 79 C 90 82, 87 87, 80 89 C 73 87, 70 82, 72 79 Z" fill="#291b12" stroke="#1d120a" stroke-width="1"/>
+            <ellipse cx="76" cy="83.5" rx="1.6" ry="1.2" fill="#150c06"/>
+            <ellipse cx="84" cy="83.5" rx="1.6" ry="1.2" fill="#150c06"/>
+            <ellipse cx="77.5" cy="80" rx="3.5" ry="1.5" fill="#ffffff" opacity="0.5" transform="rotate(-8, 77.5, 80)"/>
+            <line x1="80" y1="89" x2="80" y2="98" stroke="#52321c" stroke-width="2.2" stroke-linecap="round"/>
+          </g>
+        </g>
+      </g>
+    </svg>Ki<span>bo</span></a>
       <div class="nav-links">
         <a href="#problema" data-i18n="nav.problem">El problema</a>
         <a href="#memoria" data-i18n="nav.memory">Memoria</a>

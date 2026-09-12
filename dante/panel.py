@@ -3876,7 +3876,11 @@ def crear_app(sesion, bucle):
                         # Los ojos los presta el visitante. Se guarda el
                         # ultimo cuadro y nada mas: no hay historial ni nada
                         # que toque el disco, porque es la camara de su casa.
-                        propio.cuadro_navegador = (d.get("v") or "")[:900000]
+                        crudo = d.get("v") or ""
+                        if not propio.cuadro_navegador and crudo:
+                            print(f"   [camara] primer cuadro del navegador: "
+                                  f"{len(crudo)} caracteres")
+                        propio.cuadro_navegador = crudo[:900000]
                     elif d.get("t") == "texto":
                         asyncio.run_coroutine_threadsafe(
                             propio.decir_texto(d.get("v", "")), propio.bucle)
