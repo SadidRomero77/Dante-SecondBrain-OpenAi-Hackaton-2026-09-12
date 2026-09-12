@@ -110,8 +110,72 @@ HERRAMIENTAS = [
     {
         "type": "function",
         "name": "agenda",
-        "description": "Que hay hoy: medicamentos, citas, visitas.",
-        "parameters": {"type": "object", "properties": {}},
+        "description": (
+            "Los recordatorios: medicamentos, citas, visitas y fechas "
+            "importantes. Usala siempre que te pregunten que hay hoy, que "
+            "tiene que hacer, o si tiene algo pendiente."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "cuando": {
+                    "type": "string", "enum": ["hoy", "todo"],
+                    "description": "hoy (lo normal) o todo para la lista entera",
+                },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "name": "poner_recordatorio",
+        "description": (
+            "Anota un recordatorio nuevo. Usala cuando te pidan que le "
+            "recuerdes algo, o cuando te cuenten una cita, una visita o una "
+            "fecha importante."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "que": {
+                    "type": "string",
+                    "description": "Que hay que recordar, en pocas palabras",
+                },
+                "cuando": {
+                    "type": "string",
+                    "description": (
+                        "Exactamente una de estas tres formas:\n"
+                        "  'diario HH:MM' para todos los dias (una pastilla)\n"
+                        "  'anual MM-DD' para todos los anos (un cumpleanos)\n"
+                        "  'YYYY-MM-DDTHH:MM' para una sola vez (una cita)\n"
+                        "Calcula la fecha a partir del dia de hoy, que sabes."
+                    ),
+                },
+                "tipo": {
+                    "type": "string",
+                    "enum": ["medicacion", "cita", "visita", "fecha", "otro"],
+                },
+            },
+            "required": ["que", "cuando"],
+        },
+    },
+    {
+        "type": "function",
+        "name": "quitar_recordatorio",
+        "description": (
+            "Borra un recordatorio. Usala cuando te pidan que ya no le "
+            "recuerdes algo. Si hay varios parecidos te los devuelve para que "
+            "preguntes cual, en vez de borrar el que no era."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "que": {
+                    "type": "string",
+                    "description": "Palabras del recordatorio. Ej: pastilla azul",
+                },
+            },
+            "required": ["que"],
+        },
     },
     {
         "type": "function",
@@ -386,7 +450,12 @@ class Sesion:
     async def configurar(self) -> None:
         # La tarjeta va al final y no cambia entre turnos: es lo que el cache
         # de prompt puede reusar.
+        from .mundo import fecha_larga
+        from datetime import datetime
+        ahora = datetime.now()
         instrucciones = (ajustes.personalidad(self.db)
+                         + f"\n\nHoy es {fecha_larga(ahora)}, "
+                           f"{ahora.strftime('%Y-%m-%d')}."
                          + "\n\n--- LO QUE RECUERDAS ---\n"
                          + memoria.tarjeta_de_perfil(self.db))
         await self._ev({
@@ -555,11 +624,39 @@ class Sesion:
             self.cara("feliz")
 
         elif nombre == "agenda":
-            e = memoria.agenda_de(self.db, "hoy")
-            salida = {"hoy": e}
-            print(f"   [memoria] agenda -> {len(e)}")
+            cuando = a.get("cuando") or "hoy"
+            e = memoria.agenda_de(self.db, cuando)
+            salida = {cuando: e} if e else {
+                cuando: [],
+                "_nota": "No hay nada anotado. Dilo tal cual: no te lo inventes.",
+            }
+            print(f"   [memoria] agenda({cuando}) -> {len(e)}")
             if e:
                 self.pantalla("Hoy", " · ".join(e), 9)
+
+        elif nombre == "poner_recordatorio":
+            id_ = memoria.poner_evento(self.db, a.get("que", ""),
+                                       a.get("cuando", ""), a.get("tipo", ""))
+            if id_:
+                salida = {"anotado": a.get("que"), "cuando": a.get("cuando")}
+                print(f"   [agenda] + {a.get('que')} ({a.get('cuando')})")
+                self.pantalla("Anotado", a.get("que", ""), 7)
+            else:
+                salida = {"error": "no entendi cuando. Usa 'diario HH:MM', "
+                                   "'anual MM-DD' o 'YYYY-MM-DDTHH:MM'."}
+
+        elif nombre == "quitar_recordatorio":
+            hallados = memoria.buscar_eventos(self.db, a.get("que", ""))
+            if not hallados:
+                salida = {"error": "no encontre ningun recordatorio asi"}
+            elif len(hallados) > 1:
+                # Borrar el que no era es peor que preguntar una vez mas.
+                salida = {"hay_varios": [h["que"] for h in hallados],
+                          "_nota": "Preguntale cual antes de borrar."}
+            else:
+                memoria.quitar_evento(self.db, hallados[0]["id"])
+                salida = {"borrado": hallados[0]["que"]}
+                print(f"   [agenda] - {hallados[0]['que']}")
 
         elif nombre == "quien_esta":
             salida = self.ojos.quien_esta()

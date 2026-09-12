@@ -145,14 +145,16 @@ def recordatorios_vencidos(c: sqlite3.Connection) -> list[sqlite3.Row]:
     fuera = []
     for e in c.execute("SELECT * FROM eventos WHERE hecho=0").fetchall():
         cu = (e["cuando"] or "").strip()
-        if cu.startswith("diario"):
-            hora = cu.split()[-1]
+        clase, cuando_toca, hora = _partes(cu)
+        if clase in ("diario", "anual"):
+            if clase == "anual" and cuando_toca != ahora.strftime("%m-%d"):
+                continue
             try:
                 h, m = (int(x) for x in hora.split(":"))
             except ValueError:
                 continue
             vencio = ahora.hour * 60 + ahora.minute >= h * 60 + m
-            # Los diarios se avisan una vez por dia, no una vez y nunca mas.
+            # Se avisan una vez por dia, no una vez y nunca mas.
             if vencio and (e["avisado"] or "")[:10] != hoy:
                 fuera.append(e)
         else:
@@ -300,19 +302,97 @@ def recordar(c: sqlite3.Connection, consulta: str, tope: int = 6) -> list[dict]:
     ]
 
 
+# Tres formas de decir cuando, y nada mas. Cualquier cosa que no encaje en
+# una de las tres seria un recordatorio que nunca suena.
+#   diario HH:MM        todos los dias        una pastilla
+#   anual MM-DD HH:MM   todos los anos        un cumpleanos
+#   YYYY-MM-DDTHH:MM    una sola vez          la cita del jueves
+HORA_POR_DEFECTO = "09:00"
+
+
+def _partes(cuando: str) -> tuple[str, str, str]:
+    """Devuelve (clase, cuando_toca, hora). Clase vacia = no se entiende."""
+    cu = (cuando or "").strip()
+    trozos = cu.split()
+    if cu.startswith("diario"):
+        return "diario", "", (trozos[-1] if len(trozos) > 1 else HORA_POR_DEFECTO)
+    if cu.startswith("anual") and len(trozos) >= 2:
+        return "anual", trozos[1], (trozos[2] if len(trozos) > 2 else HORA_POR_DEFECTO)
+    # Una fecha suelta tiene que ser una fecha de verdad. Aceptar cualquier
+    # texto guardaria un recordatorio que no suena nunca: queda anotado, se ve
+    # en la lista, y el dia que hace falta no dice nada.
+    if cu:
+        try:
+            from datetime import datetime as _dt
+            _dt.fromisoformat(cu)
+            return "unico", cu, ""
+        except ValueError:
+            pass
+    return "", "", ""
+
+
+def _toca_hoy(cuando: str) -> bool:
+    hoy = date.today()
+    clase, cuando_toca, _ = _partes(cuando)
+    if clase == "diario":
+        return True
+    if clase == "anual":
+        return cuando_toca == hoy.strftime("%m-%d")
+    return cuando_toca.startswith(hoy.isoformat())
+
+
+def _en_palabras(e: sqlite3.Row) -> str:
+    clase, cuando_toca, hora = _partes(e["cuando"])
+    if clase == "diario":
+        return f"{e['que']} — todos los dias a las {hora}"
+    if clase == "anual":
+        mes, dia = (cuando_toca.split("-") + [""])[:2]
+        return f"{e['que']} — todos los anos el {dia}/{mes}"
+    return f"{e['que']} — {cuando_toca}"
+
+
 def agenda_de(c: sqlite3.Connection, cuando: str = "hoy") -> list[str]:
-    hoy = date.today().isoformat()
     filas = c.execute(
         "SELECT que, cuando, tipo FROM eventos WHERE hecho=0 ORDER BY cuando"
     ).fetchall()
-    salida = []
-    for e in filas:
-        cu = e["cuando"]
-        if cu.startswith("diario"):
-            salida.append(f"{e['que']} — todos los dias a las {cu.split()[-1]}")
-        elif cu.startswith(hoy) or cuando == "todo":
-            salida.append(f"{e['que']} — {cu}")
-    return salida
+    return [_en_palabras(e) for e in filas
+            if cuando == "todo" or _toca_hoy(e["cuando"])]
+
+
+def eventos_todos(c: sqlite3.Connection) -> list[dict]:
+    """Para el portal: todos, con su forma cruda y en palabras."""
+    return [
+        {"id": e["id"], "que": e["que"], "cuando": e["cuando"],
+         "tipo": e["tipo"] or "", "clase": _partes(e["cuando"])[0],
+         "en_palabras": _en_palabras(e), "hoy": _toca_hoy(e["cuando"]),
+         "hecho": bool(e["hecho"])}
+        for e in c.execute("SELECT * FROM eventos ORDER BY cuando").fetchall()
+    ]
+
+
+def poner_evento(c: sqlite3.Connection, que: str, cuando: str,
+                 tipo: str = "") -> int:
+    que, cuando = que.strip(), (cuando or "").strip()
+    if not que or not _partes(cuando)[0]:
+        return 0
+    cur = c.execute("INSERT INTO eventos(que,cuando,tipo,hecho) VALUES(?,?,?,0)",
+                    (que, cuando, tipo.strip()))
+    c.commit()
+    return int(cur.lastrowid)
+
+
+def buscar_eventos(c: sqlite3.Connection, texto: str) -> list[sqlite3.Row]:
+    texto = (texto or "").strip()
+    if not texto:
+        return []
+    return c.execute("SELECT * FROM eventos WHERE que LIKE ? ORDER BY cuando",
+                     (f"%{texto}%",)).fetchall()
+
+
+def quitar_evento(c: sqlite3.Connection, id_: int) -> bool:
+    cur = c.execute("DELETE FROM eventos WHERE id=?", (id_,))
+    c.commit()
+    return cur.rowcount > 0
 
 
 # ---------------------------------------------------------------- escribir --

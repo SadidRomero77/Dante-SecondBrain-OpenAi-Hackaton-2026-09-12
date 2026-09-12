@@ -193,6 +193,7 @@ form{display:flex;flex-direction:column;gap:16px}
     <button class="tab on" data-v="charla">Conversar</button>
     <button class="tab" data-v="gente">Personas</button>
     <button class="tab" data-v="voz">Mensajes</button>
+    <button class="tab" data-v="agenda">Recordatorios</button>
     <button class="tab" data-v="senales">Cómo está</button>
     <button class="tab" data-v="cfg">Ajustes</button>
   </nav>
@@ -265,6 +266,41 @@ form{display:flex;flex-direction:column;gap:16px}
 </div></main>
 
 <!-- ============ SEÑALES ============ -->
+<!-- ============ RECORDATORIOS ============ -->
+<main id="v-agenda">
+  <div class="caja" style="max-width:760px;margin:0 auto">
+    <h2>Recordatorios y fechas 🐕</h2>
+    <div class="aviso" id="aviso-ag">Anotado. Dante ya lo sabe.</div>
+    <div class="pad" style="padding-bottom:6px">
+      <p class="ayuda">Dante los dice <b>solo, cuando llega la hora</b> — nadie
+      tiene que preguntarle. Y si ella pregunta «¿qué tengo hoy?», se los cuenta.</p>
+    </div>
+    <form class="pad" id="ag-nuevo">
+      <label>¿Qué hay que recordar?
+        <input name="que" placeholder="Pastilla azul de la presión" required></label>
+      <div class="dos">
+        <label>¿Cada cuánto?<select name="clase">
+          <option value="diario">Todos los días</option>
+          <option value="unico">Un día concreto</option>
+          <option value="anual">Todos los años</option></select></label>
+        <label>¿Qué es?<select name="tipo">
+          <option value="medicacion">Medicamento</option>
+          <option value="visita">Visita</option>
+          <option value="cita">Cita</option>
+          <option value="fecha">Fecha importante</option>
+          <option value="otro">Otra cosa</option></select></label>
+      </div>
+      <div class="dos">
+        <label id="l-fecha" style="display:none">¿Qué día?
+          <input type="date" name="fecha"></label>
+        <label>¿A qué hora?<input type="time" name="hora" value="09:00"></label>
+      </div>
+      <button type="submit" class="pri grande">Anotar</button>
+    </form>
+    <div id="agenda"></div>
+  </div>
+</main>
+
 <main id="v-senales">
   <div class="caja" style="max-width:760px;margin:0 auto">
     <h2>Cómo estuvo esta semana <small id="n-sen"></small></h2>
@@ -496,6 +532,7 @@ document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
   b.classList.add('on'); $('#v-'+b.dataset.v).classList.add('on');
   if (b.dataset.v==='gente') cargarGente();
   if (b.dataset.v==='senales') cargarSenales();
+  if (b.dataset.v==='agenda') cargarAgenda();
   if (b.dataset.v==='voz') cargarVoces();
 });
 
@@ -524,6 +561,61 @@ form2.onsubmit = e => { e.preventDefault();
   window.scrollTo({top:0,behavior:'smooth'}); };
 function avisar(sel, txt){ const a=$(sel); a.textContent=txt; a.style.display='block';
   setTimeout(()=>a.style.display='none', 3600); }
+
+/* ---------- recordatorios ---------- */
+const fNuevo = $('#ag-nuevo');
+// El dia solo se pide cuando hace falta: para algo diario sobra, y un campo
+// que no se usa hace dudar de si habia que llenarlo.
+fNuevo.elements.clase.onchange = () => {
+  const c = fNuevo.elements.clase.value;
+  $('#l-fecha').style.display = (c === 'diario') ? 'none' : '';
+};
+const COMO = {medicacion:'💊', visita:'🚪', cita:'📋', fecha:'🎂', otro:'🦴'};
+async function cargarAgenda(){
+  const r = await (await fetch('/api/recordatorios')).json();
+  pintarAgenda(r.recordatorios || []);
+}
+function pintarAgenda(lista){
+  const g = $('#agenda');
+  if (!lista.length){
+    g.innerHTML = '<div class="pad ayuda">Todavía no hay ninguno. '
+                + 'Dante también los anota si se lo pedís hablando.</div>'; return; }
+  g.innerHTML = '';
+  lista.forEach(e => {
+    const d = document.createElement('div');
+    d.className = 'ficha';
+    d.innerHTML = `<div style="flex:1">
+        <b>${COMO[e.tipo]||'🦴'} ${e.que}</b>
+        <div class="ayuda">${e.en_palabras.split('—')[1]||''}
+          ${e.hoy ? '<b style="color:var(--miel)">· hoy</b>' : ''}</div>
+      </div>`;
+    const b = document.createElement('button');
+    b.textContent = 'Quitar'; b.className = 'chico';
+    b.onclick = async () => {
+      const r = await (await fetch('/api/recordatorios/'+e.id,{method:'DELETE'})).json();
+      pintarAgenda(r.recordatorios||[]);
+      avisar('#aviso-ag','Quitado.');
+    };
+    d.appendChild(b); g.appendChild(d);
+  });
+}
+fNuevo.onsubmit = async ev => {
+  ev.preventDefault();
+  const d = Object.fromEntries(new FormData(fNuevo).entries());
+  const hora = d.hora || '09:00';
+  let cuando;
+  if (d.clase === 'diario')      cuando = 'diario ' + hora;
+  else if (d.clase === 'anual')  cuando = 'anual ' + (d.fecha||'').slice(5);
+  else                           cuando = (d.fecha||'') + 'T' + hora;
+  const r = await (await fetch('/api/recordatorios',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({que:d.que, cuando, tipo:d.tipo})})).json();
+  if (!r.ok){ avisar('#aviso-ag', r.error||'No pude anotarlo.'); return; }
+  pintarAgenda(r.recordatorios||[]);
+  fNuevo.reset(); fNuevo.elements.hora.value = '09:00';
+  $('#l-fecha').style.display='none';
+  avisar('#aviso-ag','Anotado. Dante ya lo sabe.');
+};
 
 /* ---------- personas ---------- */
 async function cargarGente(){
@@ -749,6 +841,37 @@ def crear_app(sesion, bucle):
                 "SELECT nombre, relacion, notas, ultima_visita, "
                 "cara IS NOT NULL AS cara FROM personas ORDER BY nombre").fetchall()
             return {"personas": [dict(f) for f in filas]}
+        finally:
+            c.close()
+
+    @app.get("/api/recordatorios")
+    def ver_recordatorios():
+        c = memoria.abrir()
+        try:
+            return {"recordatorios": memoria.eventos_todos(c)}
+        finally:
+            c.close()
+
+    @app.post("/api/recordatorios")
+    async def poner_recordatorio(datos: dict):
+        c = memoria.abrir()
+        try:
+            id_ = memoria.poner_evento(c, datos.get("que", ""),
+                                       datos.get("cuando", ""),
+                                       datos.get("tipo", ""))
+            if not id_:
+                return {"ok": False,
+                        "error": "Falta el texto o la fecha no se entiende."}
+            return {"ok": True, "recordatorios": memoria.eventos_todos(c)}
+        finally:
+            c.close()
+
+    @app.delete("/api/recordatorios/{id_}")
+    def quitar_recordatorio(id_: int):
+        c = memoria.abrir()
+        try:
+            memoria.quitar_evento(c, id_)
+            return {"ok": True, "recordatorios": memoria.eventos_todos(c)}
         finally:
             c.close()
 
