@@ -25,3 +25,4 @@ data/mensajes/
 .ip.tmp
 .cmd.tmp
 *.tmp
+*.log

@@ -26,6 +26,26 @@ Everywhere* (Bogota, AI Tinkerers).
 
 ---
 
+## Donde vive
+
+**En produccion: https://kibo.kibosecondbrain.com**
+
+```
+navegador -> Cloudflare (HTTPS) -> EC2 -> Caddy :443 -> contenedor :8800
+```
+
+EC2 `t3.small` en `us-east-1`, nombre `kibo`. **No hay SSH**: la red desde
+donde se desplego bloquea el 22, asi que se administra con
+`aws ssm send-command`, que va por HTTPS. Quedo mejor asi. Para desplegar:
+entrar a /opt/kibo, `git reset --hard origin/main`, `docker build`, relanzar.
+
+Las llaves viven en el almacen de AWS (`/kibo/openai`, `/kibo/exa-api-key`,
+`/kibo/auth0-*`), no dentro del contenedor.
+
+**El login esta APAGADO** (`DANTE_DEMO_LOGIN=0`) porque la direccion de
+vuelta no esta dada de alta en Auth0 y el portal quedaba inaccesible. Se
+enciende en cuanto esos tres campos esten puestos.
+
 ## Que funciona hoy
 
 Todo esto esta probado en hardware, no solo compilado.
@@ -106,6 +126,34 @@ aviso falso a una familia preocupada cuesta mas que no avisar.
 
 **Habla sin que le pregunten.** Los recordatorios y los recados los da el.
 Quien los necesita es justamente quien no se va a acordar de pedirlos.
+
+## Trampas del despliegue
+
+Todas se ven igual desde fuera -"el portal no anda"- y ninguna se puede
+descubrir en local.
+
+**`ws://` en una pagina servida por https.** El navegador corta la conexion
+por contenido inseguro y NO la deja ni salir: al servidor no llega ni una
+peticion. Parece que el portal no hace nada.
+
+**Una ruta que no contesta se lleva el sitio entero.** La de la camara
+giraba para siempre sin enviar nada; cada peticion se quedaba con un hilo del
+servidor, que son finitos. Con unas pocas visitas dejaba de responder todo.
+
+**El tope de 8.000 caracteres por mensaje.** Un cuadro de camara en base64
+pesa 60.000: se tiraban todos antes de leerlos, y Kibo decia "no te veo" con
+la camara encendida y la imagen en pantalla.
+
+**Los modelos de caras se bajaban al arrancar.** 38 MB que fallaban en
+silencio, y el resultado se veia como "nadie a la vista". Van dentro de la
+imagen.
+
+**Cloudflare responde 403 a clientes automaticos.** Un curl o un script
+reciben 403 en todas las rutas mientras un navegador recibe 200: al probar el
+despliegue parece roto y no lo esta.
+
+**Auth0 rechaza direcciones de vuelta no registradas.** Las llaves correctas
+no bastan; es la proteccion central de OAuth y solo se arregla en su panel.
 
 ## Trampas que ya costaron caro
 

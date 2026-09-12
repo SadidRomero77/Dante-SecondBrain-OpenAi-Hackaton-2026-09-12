@@ -1,5 +1,17 @@
 # Kibo — tu compañero, tu memoria
 
+### 👉 **Probalo sin instalar nada: [kibo.kibosecondbrain.com](https://kibo.kibosecondbrain.com)**
+
+Abrí ese enlace desde cualquier país. Vas a ver qué es Kibo, y al entrar al
+portal recibís **tu propio Kibo con la memoria en blanco**: se presenta, te
+pregunta quién sos, y lo configurás conversando. No comparte nada con otros
+visitantes. Podés prestarle la cámara de tu navegador para que te reconozca.
+
+> Cada visita dura **8 minutos** y hay **4 a la vez** como máximo. No es una
+> limitación del producto: es un freno de gasto, porque el audio cuesta dinero
+> de verdad y una dirección pública sin límite vacía una cuenta en una tarde.
+
+
 Un agente de voz con memoria que vive en un aparato físico sobre la mesa.
 Escucha, recuerda, ve, y tiene cara.
 
@@ -37,6 +49,61 @@ inventar.
 | **El botón de «no me acuerdo»** | Pulsación larga: le cuenta quién es, dónde está y qué día es. |
 
 ---
+
+---
+
+## Las dos formas de correrlo
+
+Kibo hace dos cosas distintas segun donde viva, y conviene no confundirlas.
+
+**En tu maquina, con el perrito.** `kibo hablar --panel`. Tiene el hardware
+por USB, la camara del PC y tu memoria de verdad. Es el Kibo que acompaña a
+una persona en su casa, y el que se muestra en vivo.
+
+**En un servidor, para que lo pruebe cualquiera.** `kibo servir`. No hay
+aparato ni camara: cada visitante recibe su propio Kibo con memoria en
+blanco y le presta la camara de su navegador. Es lo que corre en
+[kibo.kibosecondbrain.com](https://kibo.kibosecondbrain.com).
+
+El aparato no desaparece en la nube: el firmware marca hacia afuera por
+WebSocket, asi que un perrito puede conectarse a un servidor desde cualquier
+WiFi. Deja de ser obligatorio, que es distinto de dejar de existir.
+
+## Variables que solo importan en el servidor
+
+```
+DANTE_DEMO=1              cada visitante, su propio Kibo con memoria en blanco
+DANTE_DEMO_MAX=4          cuantas visitas a la vez como maximo
+DANTE_DEMO_MINUTOS=8      cuanto dura cada una
+DANTE_DEMO_LOGIN=1        exigir cuenta para entrar al portal (0 lo apaga)
+DANTE_PANEL_URL=https://…  la direccion publica, para que Auth0 vuelva bien
+DANTE_MARCA=Kibo          el nombre que se lee en pantalla
+```
+
+`DANTE_DEMO_LOGIN` existe como interruptor a proposito: si la direccion de
+vuelta no esta dada de alta en Auth0, el login falla y el portal queda
+inaccesible **para todos**. Poder revertirlo en un minuto vale mas que la
+elegancia de no tener el interruptor.
+
+## Auth0: lo que hay que dar de alta
+
+Tener las llaves no alcanza. Auth0 comprueba que la direccion de vuelta este
+en una lista antes de devolver a nadie, y esa lista solo se edita desde su
+panel. Sin esto el login responde `Callback URL mismatch` por mucho que las
+credenciales sean correctas.
+
+En `manage.auth0.com` → la aplicacion → **Settings**:
+
+| Campo | Valor |
+|---|---|
+| Allowed Callback URLs | `https://kibo.kibosecondbrain.com/callback` |
+| Allowed Logout URLs | `https://kibo.kibosecondbrain.com/` |
+| Allowed Web Origins | `https://kibo.kibosecondbrain.com` |
+
+Es la proteccion central de OAuth, no un tramite: sin ella, cualquiera con el
+Client ID -que es publico- podria montar una web falsa, mandar alli a los
+usuarios y quedarse con sus sesiones al volver.
+
 
 ## Instalación
 
