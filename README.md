@@ -1,4 +1,4 @@
-# Dante — segundo cerebro
+# Kobi — Tu compañero, Tu memoria
 
 Un agente de voz con memoria que vive en un aparato físico sobre la mesa.
 Escucha, recuerda, ve, y tiene cara.
