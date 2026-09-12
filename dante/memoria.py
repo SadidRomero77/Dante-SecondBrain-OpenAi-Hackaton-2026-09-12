@@ -389,6 +389,23 @@ def buscar_eventos(c: sqlite3.Connection, texto: str) -> list[sqlite3.Row]:
                      (f"%{texto}%",)).fetchall()
 
 
+def editar_evento(c: sqlite3.Connection, id_: int, que: str, cuando: str,
+                  tipo: str = "") -> bool:
+    """Cambia un recordatorio. Rechaza igual que al crearlo.
+
+    Y limpia el aviso: si alguien corrige la hora, lo ya avisado de hoy deja
+    de valer. Sin esto, mover la pastilla de las 9 a las 11 no sonaria hasta
+    manana.
+    """
+    que, cuando = que.strip(), (cuando or "").strip()
+    if not que or not _partes(cuando)[0]:
+        return False
+    c.execute("UPDATE eventos SET que=?, cuando=?, tipo=?, avisado=NULL "
+              "WHERE id=?", (que, cuando, (tipo or "").strip(), id_))
+    c.commit()
+    return True
+
+
 def quitar_evento(c: sqlite3.Connection, id_: int) -> bool:
     cur = c.execute("DELETE FROM eventos WHERE id=?", (id_,))
     c.commit()

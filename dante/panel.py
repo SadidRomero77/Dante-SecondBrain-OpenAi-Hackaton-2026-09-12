@@ -76,12 +76,42 @@ h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.02em}
 .tab:hover{background:var(--hueso);color:var(--tinta)}
 .tab.on{background:var(--miel-suave);color:var(--miel)}
 
+/* la carita respira: quieta parece apagada, y esto no es un panel de control */
+@keyframes respirar{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.carita{animation:respirar 3.4s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.carita{animation:none}}
+
+/* ---------- el pulso de hoy ---------- */
+.pulso{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));
+  gap:10px;margin-bottom:16px}
+.dato{background:var(--tarjeta);border:1px solid var(--borde);border-radius:14px;
+  padding:13px 15px;box-shadow:var(--sombra);transition:transform .18s,border-color .18s}
+.dato:hover{transform:translateY(-2px);border-color:var(--miel)}
+.dato b{display:block;font-size:25px;font-weight:800;line-height:1.15;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.dato span{font-size:12px;color:var(--tinta2);font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em}
+.dato.hay b{color:var(--miel)}
+.hoy-lista{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.pastilla{background:var(--miel-suave);color:var(--miel);border-radius:999px;
+  padding:5px 13px;font-size:13px;font-weight:700}
+
 /* ---------- estructura ---------- */
 main{display:none;max-width:1180px;margin:0 auto;padding:20px}
 main.on{display:block}
 .cols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(340px,1fr);gap:18px;
   align-items:start}
 @media(max-width:920px){.cols{grid-template-columns:1fr}}
+.ficha{transition:transform .18s,box-shadow .18s}
+.ficha:hover{transform:translateX(3px)}
+.tab{position:relative}
+.tab.on::after{content:"";position:absolute;left:50%;bottom:2px;width:16px;
+  height:2px;border-radius:2px;background:var(--miel);transform:translateX(-50%)}
+main.on{animation:entrar .22s ease-out}
+@keyframes entrar{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){main.on{animation:none}}
+.editando{background:var(--miel-suave);border-radius:12px;padding:11px}
+.editando input,.editando select{margin:3px 0}
 .caja{background:var(--tarjeta);border:1px solid var(--borde);border-radius:18px;
   overflow:hidden;box-shadow:var(--sombra)}
 .caja h2{margin:0;padding:15px 20px;font-size:15px;font-weight:800;
@@ -200,7 +230,9 @@ form{display:flex;flex-direction:column;gap:16px}
 </header>
 
 <!-- ============ CONVERSAR ============ -->
-<main id="v-charla" class="on"><div class="cols">
+<main id="v-charla" class="on">
+<div class="pulso" id="pulso"></div>
+<div class="cols">
   <div class="caja">
     <h2>🐾 Lo que ve Dante</h2>
     <img id="video" src="/camara.mjpg" alt="cámara">
@@ -589,16 +621,93 @@ function pintarAgenda(lista){
         <div class="ayuda">${e.en_palabras.split('—')[1]||''}
           ${e.hoy ? '<b style="color:var(--miel)">· hoy</b>' : ''}</div>
       </div>`;
+    const ed = document.createElement('button');
+    ed.textContent = 'Editar'; ed.className = 'chico';
+    ed.onclick = () => editarFicha(d, e);
     const b = document.createElement('button');
     b.textContent = 'Quitar'; b.className = 'chico';
     b.onclick = async () => {
+      if (!confirm('¿Quitar «'+e.que+'»?')) return;
       const r = await (await fetch('/api/recordatorios/'+e.id,{method:'DELETE'})).json();
       pintarAgenda(r.recordatorios||[]);
       avisar('#aviso-ag','Quitado.');
     };
-    d.appendChild(b); g.appendChild(d);
+    d.appendChild(ed); d.appendChild(b); g.appendChild(d);
   });
 }
+// Editar donde está, sin abrir otra pantalla: quien corrige una hora quiere
+// ver el resto de la lista mientras lo hace.
+function editarFicha(fila, e){
+  const hora = (e.cuando.match(/(\d{2}:\d{2})/)||['09:00'])[0];
+  const dia  = e.clase==='anual' ? '2000-'+e.cuando.split(' ')[1]
+             : e.clase==='unico' ? e.cuando.slice(0,10) : '';
+  fila.className = 'ficha editando';
+  fila.innerHTML = `
+    <div style="flex:1">
+      <input class="e-que" value="${e.que.replace(/"/g,'&quot;')}" style="width:100%">
+      <div class="dos" style="gap:8px">
+        <select class="e-clase">
+          <option value="diario">Todos los días</option>
+          <option value="unico">Un día concreto</option>
+          <option value="anual">Todos los años</option></select>
+        <select class="e-tipo">
+          <option value="medicacion">Medicamento</option>
+          <option value="visita">Visita</option>
+          <option value="cita">Cita</option>
+          <option value="fecha">Fecha importante</option>
+          <option value="otro">Otra cosa</option></select>
+      </div>
+      <div class="dos" style="gap:8px">
+        <input type="date" class="e-dia" value="${dia}">
+        <input type="time" class="e-hora" value="${hora}">
+      </div>
+    </div>`;
+  fila.querySelector('.e-clase').value = e.clase;
+  fila.querySelector('.e-tipo').value  = e.tipo || 'otro';
+  const dia_ = fila.querySelector('.e-dia');
+  const verDia = () => dia_.style.visibility =
+    (fila.querySelector('.e-clase').value==='diario') ? 'hidden' : 'visible';
+  fila.querySelector('.e-clase').onchange = verDia; verDia();
+
+  const ok = document.createElement('button');
+  ok.textContent = 'Guardar'; ok.className = 'chico pri';
+  ok.onclick = async () => {
+    const cl = fila.querySelector('.e-clase').value;
+    const h  = fila.querySelector('.e-hora').value || '09:00';
+    const f  = dia_.value;
+    const cuando = cl==='diario' ? 'diario '+h
+                 : cl==='anual'  ? 'anual '+(f||'').slice(5)
+                 : (f||'')+'T'+h;
+    const r = await (await fetch('/api/recordatorios/'+e.id,{method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({que:fila.querySelector('.e-que').value, cuando,
+                           tipo:fila.querySelector('.e-tipo').value})})).json();
+    if (!r.ok){ avisar('#aviso-ag', r.error||'No pude guardarlo.'); return; }
+    pintarAgenda(r.recordatorios||[]);
+    avisar('#aviso-ag','Cambiado. Dante ya lo sabe.');
+  };
+  const no = document.createElement('button');
+  no.textContent = 'Dejar'; no.className = 'chico';
+  no.onclick = () => cargarAgenda();
+  fila.appendChild(ok); fila.appendChild(no);
+}
+
+/* ---------- el pulso de hoy ---------- */
+async function cargarPulso(){
+  const h = await (await fetch('/api/hoy')).json();
+  const n = h.pendientes.length;
+  $('#pulso').innerHTML = `
+    <div class="dato ${n?'hay':''}"><b>${n}</b><span>hoy pendiente${n===1?'':'s'}</span></div>
+    <div class="dato"><b>${h.hechos}</b><span>cosas que recuerda</span></div>
+    <div class="dato"><b>${h.personas}</b><span>personas · ${h.caras} caras</span></div>
+    <div class="dato"><b>${h.charlas}</b><span>conversaciones</span></div>`;
+  if (n) $('#pulso').insertAdjacentHTML('beforeend',
+    `<div class="dato" style="grid-column:1/-1"><span>lo de hoy</span>
+      <div class="hoy-lista">${h.pendientes.map(
+        p=>`<span class="pastilla">${p.split('—')[0]}</span>`).join('')}</div></div>`);
+}
+cargarPulso();
+setInterval(cargarPulso, 30000);
 fNuevo.onsubmit = async ev => {
   ev.preventDefault();
   const d = Object.fromEntries(new FormData(fNuevo).entries());
@@ -844,6 +953,29 @@ def crear_app(sesion, bucle):
         finally:
             c.close()
 
+    @app.get("/api/hoy")
+    def ver_hoy():
+        """Un vistazo de como esta Dante ahora mismo.
+
+        Es lo primero que ve quien abre el portal, asi que responde lo que
+        de verdad se pregunta: que hay pendiente, a quien conoce, cuanto
+        recuerda. Numeros, no adornos.
+        """
+        c = memoria.abrir()
+        try:
+            p = memoria.principal(c)
+            n = lambda q: c.execute(q).fetchone()["n"]
+            return {
+                "persona": p["nombre"] if p else "",
+                "pendientes": memoria.agenda_de(c, "hoy"),
+                "personas": n("SELECT COUNT(*) n FROM personas"),
+                "caras": n("SELECT COUNT(*) n FROM personas WHERE cara IS NOT NULL"),
+                "hechos": n("SELECT COUNT(*) n FROM hechos"),
+                "charlas": n("SELECT COUNT(*) n FROM episodios"),
+            }
+        finally:
+            c.close()
+
     @app.get("/api/recordatorios")
     def ver_recordatorios():
         c = memoria.abrir()
@@ -860,6 +992,20 @@ def crear_app(sesion, bucle):
                                        datos.get("cuando", ""),
                                        datos.get("tipo", ""))
             if not id_:
+                return {"ok": False,
+                        "error": "Falta el texto o la fecha no se entiende."}
+            return {"ok": True, "recordatorios": memoria.eventos_todos(c)}
+        finally:
+            c.close()
+
+    @app.put("/api/recordatorios/{id_}")
+    async def editar_recordatorio(id_: int, datos: dict):
+        c = memoria.abrir()
+        try:
+            ok = memoria.editar_evento(c, id_, datos.get("que", ""),
+                                       datos.get("cuando", ""),
+                                       datos.get("tipo", ""))
+            if not ok:
                 return {"ok": False,
                         "error": "Falta el texto o la fecha no se entiende."}
             return {"ok": True, "recordatorios": memoria.eventos_todos(c)}
