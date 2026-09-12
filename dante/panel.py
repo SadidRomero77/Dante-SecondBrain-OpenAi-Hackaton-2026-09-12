@@ -288,6 +288,17 @@ form{display:flex;flex-direction:column;gap:16px}
       </label>
       <button id="grabar" class="pri grande">🔴 Mantené para grabar</button>
       <div class="pista" id="tiempo" style="padding:12px 0 0">hasta 60 segundos</div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin:18px 0 12px">
+        <div style="flex:1;height:1px;background:var(--borde)"></div>
+        <span class="ayuda" style="font-weight:700">o escribilo</span>
+        <div style="flex:1;height:1px;background:var(--borde)"></div>
+      </div>
+      <p class="ayuda" style="margin-top:0">Si estás en el trabajo o no te
+      sale grabarte, escribilo. Dante se lo lee con su voz. Un recado que
+      llega vale más que uno hablado que nunca mandaste.</p>
+      <textarea id="recado" placeholder="Mamá, mañana voy a las 4. No te preocupes por el almuerzo."></textarea>
+      <button id="b-recado" class="pri" style="margin-top:8px">Dejar el recado</button>
     </div>
     <div class="aviso" id="aviso-voz"></div>
   </div>
@@ -613,6 +624,19 @@ form2.onsubmit = e => { e.preventDefault();
   window.scrollTo({top:0,behavior:'smooth'}); };
 function avisar(sel, txt){ const a=$(sel); a.textContent=txt; a.style.display='block';
   setTimeout(()=>a.style.display='none', 3600); }
+
+$('#b-recado').onclick = async () => {
+  const de = $('#de').value.trim(), texto = $('#recado').value.trim();
+  if (!de)    { avisar('#aviso-voz','Poné de parte de quién es.'); return; }
+  if (!texto) { avisar('#aviso-voz','Escribí el recado.'); return; }
+  const r = await (await fetch('/api/recado',{method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({de, texto})})).json();
+  if (!r.ok){ avisar('#aviso-voz', r.motivo||'No pude guardarlo.'); return; }
+  $('#recado').value = '';
+  avisar('#aviso-voz','Listo. Dante se lo dice apenas hablen.');
+  cargarVoces();
+};
 
 /* ---------- recordatorios ---------- */
 const fNuevo = $('#ag-nuevo');
@@ -1124,6 +1148,11 @@ def crear_app(sesion, bucle):
             return {"mensajes": [dict(f) for f in filas]}
         finally:
             c.close()
+
+    @app.post("/api/recado")
+    async def dejar_recado(datos: dict):
+        from . import mensajes as _m
+        return _m.guardar_texto(datos.get("de", ""), datos.get("texto", ""))
 
     @app.post("/api/mensaje")
     async def dejar_mensaje(peticion: Request, de: str = ""):

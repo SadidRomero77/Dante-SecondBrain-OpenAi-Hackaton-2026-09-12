@@ -780,6 +780,17 @@ class Sesion:
         if not fila:
             return {"ok": False, "motivo": "no encuentro ese mensaje"}
 
+        # Un recado escrito no tiene audio: lo lee Dante con su voz.
+        if not fila["archivo"]:
+            memoria.marcar_escuchado(self.db, id_)
+            self.pantalla(f"Recado de {fila['de']}", fila["transcripcion"] or "", 12)
+            self.avisar("mensaje", de=fila["de"], id=id_)
+            print(f"   [mensajes] recado escrito de {fila['de']}")
+            return {"ok": True, "de": fila["de"], "escrito": True,
+                    "texto": fila["transcripcion"],
+                    "nota": "Es un recado escrito: leelo en voz alta tal como "
+                            "esta, diciendo primero de quien es."}
+
         pcm = mensajes.leer_pcm(fila["archivo"])
         if not pcm:
             return {"ok": False, "motivo": "el archivo del mensaje no esta"}
@@ -848,6 +859,31 @@ async def _presentarse(s: "Sesion") -> None:
     s.t0 = time.time()
     await s._ev({"type": "response.create",
                  "response": {"instructions": ajustes.ONBOARDING}})
+
+
+async def _dar_recados(s: "Sesion") -> None:
+    """Si la familia dejo algo, Dante lo dice al empezar.
+
+    Un recado que hay que ir a buscar no es un recado. Quien lo dejo confia
+    en que llegue, y quien lo recibe no sabe que existe para preguntarlo.
+    """
+    await asyncio.sleep(1.4)
+    pend = memoria.mensajes_pendientes(s.db)
+    if not pend:
+        return
+    quienes = []
+    for m in pend:
+        if m["de"] not in quienes:
+            quienes.append(m["de"])
+    print(f">> RECADOS de {', '.join(quienes)}")
+    s.cara("feliz")
+    s.respondiendo = True
+    s.t0 = time.time()
+    await s._ev({"type": "response.create", "response": {"instructions":
+        "Saluda corto y dile enseguida que le dejaron un recado, de quien es, "
+        "y usa reproducir_mensaje para dárselo. Sin preguntar si quiere oírlo "
+        "primero: se lo das, y después ya vera que hace.\n\n"
+        f"Hay {len(pend)} recado(s), de: {', '.join(quienes)}."}})
 
 
 async def _vigilar_recordatorios(s: "Sesion") -> None:
@@ -1016,6 +1052,9 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
                 aparte.append(asyncio.create_task(_presentarse(s)))
             elif con_diario if con_diario is not None else diario.toca_hoy(db):
                 aparte.append(asyncio.create_task(_dar_diario(s)))
+            elif memoria.mensajes_pendientes(db):
+                # Ni presentacion ni diario: si hay recados, se abren con eso.
+                aparte.append(asyncio.create_task(_dar_recados(s)))
             aparte.append(asyncio.create_task(_vigilar_recordatorios(s)))
             if simular:
                 # Fuera del grupo de espera: si estuviera dentro, terminar el

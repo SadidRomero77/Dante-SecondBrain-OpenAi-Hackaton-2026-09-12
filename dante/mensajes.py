@@ -45,6 +45,31 @@ def guardar(de: str, pcm: bytes, transcripcion: str = "", para: str = "") -> dic
     return {"ok": True, "id": id_, "segundos": round(segundos, 1), "archivo": nombre}
 
 
+def guardar_texto(de: str, texto: str, para: str = "") -> dict:
+    """Un recado escrito, sin grabar nada.
+
+    Existe porque no todo el mundo graba. Un hijo en el trabajo escribe
+    "manana voy a las 4" en diez segundos; grabarse la voz le da corte, o
+    esta en una reunion, y entonces no deja nada. Un recado escrito que
+    llega vale mas que uno hablado que nunca se mando.
+
+    Se guarda sin archivo. Al entregarlo, Dante lo lee el mismo con su voz
+    en vez de reproducir un audio que no existe.
+    """
+    de, texto = de.strip(), texto.strip()
+    if not de:
+        return {"ok": False, "motivo": "falta de quien es el recado"}
+    if len(texto) < 2:
+        return {"ok": False, "motivo": "el recado esta vacio"}
+    c = memoria.abrir()
+    try:
+        id_ = memoria.guardar_mensaje(c, de, "", 0.0, texto, para)
+        memoria.registrar_persona(c, de)
+    finally:
+        c.close()
+    return {"ok": True, "id": id_, "escrito": True}
+
+
 def leer_pcm(archivo: str) -> bytes:
     ruta = CARPETA / archivo
     if not ruta.exists():
@@ -87,8 +112,9 @@ def pendientes_texto(c) -> str:
         if x["de"] not in quienes:
             quienes.append(x["de"])
     lista = ", ".join(quienes)
-    return (f"Hay {len(m)} mensaje(s) de voz sin escuchar, de {lista}. "
-            f"Menciónalo con naturalidad y ofrece reproducirlo.")
+    return (f"Hay {len(m)} recado(s) sin entregar, de {lista}. "
+            f"Menciónalo con naturalidad y usa reproducir_mensaje: unos son "
+            f"de voz y otros escritos, y la herramienta se encarga de los dos.")
 
 
 def _limpio(t: str) -> str:
