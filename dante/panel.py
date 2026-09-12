@@ -22,6 +22,8 @@ Sirve para tres cosas:
 
 from __future__ import annotations
 
+import base64
+
 
 
 import asyncio
@@ -32,15 +34,18 @@ import threading
 
 import time
 
+from pathlib import Path
+
 
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, StreamingResponse
 
 
 
 from . import ajustes, auth, config, memoria, mensajes as msg
+from .favicon_b64 import B64 as FAVICON_B64
 
 
 
@@ -50,7 +55,10 @@ PAGINA = """<!doctype html>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Dante</title>
+<title>Kibo</title>
+
+<link rel="icon" type="image/png" href="data:image/png;base64,@@FAVICON@@">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -2582,7 +2590,7 @@ def crear_app(sesion, bucle):
 
     """Arma la aplicacion web sobre una sesion que ya esta corriendo."""
 
-    app = FastAPI(title="Dante")
+    app = FastAPI(title="Kibo")
 
     clientes: set = set()
 
@@ -2598,7 +2606,10 @@ def crear_app(sesion, bucle):
 
         ruta = peticion.url.path
 
-        if not auth.activo() or ruta in ("/login", "/callback", "/salir"):
+        if not auth.activo() or ruta in (
+            "/login", "/callback", "/salir",
+            "/favicon.svg", "/favicon.ico", "/favicon.png",
+        ):
 
             return await siguiente(peticion)
 
@@ -2756,7 +2767,24 @@ def crear_app(sesion, bucle):
 
     def inicio():
 
-        return PAGINA
+        return PAGINA.replace("@@FAVICON@@", FAVICON_B64)
+
+
+
+    @app.get("/favicon.png")
+    def favicon_png():
+
+        return FileResponse(Path(__file__).resolve().parent / "favicon.png", media_type="image/png")
+
+
+
+    @app.get("/favicon.ico")
+    @app.get("/favicon.svg")
+    def favicon_ico():
+
+        ico = Path(__file__).resolve().parent / "favicon.ico"
+
+        return FileResponse(ico, media_type="image/x-icon")
 
 
 
