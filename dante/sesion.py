@@ -28,6 +28,28 @@ RITMO = 0.020               # exactamente tiempo real
 PRECARGA = 6                # trozos en cola antes de empezar: 120 ms de colchon
 
 
+def _callar_ruido_de_windows(bucle) -> None:
+    """Silencia una aserción conocida de asyncio en Windows.
+
+    El bucle Proactor lanza AssertionError desde _loop_writing cuando queda una
+    escritura pendiente al cerrarse un transporte. Es un fallo conocido de
+    CPython, no nuestro, y no rompe nada: la conversación sigue igual. Pero
+    aparece en la consola con toda la traza y en medio de un demo asusta.
+
+    Se silencia SOLO ese caso. Cualquier otro error sigue mostrándose entero:
+    tapar errores de verdad es peor que la traza que estamos escondiendo.
+    """
+    def manejar(_bucle, ctx):
+        e = ctx.get("exception")
+        traza = str(ctx.get("source_traceback", "")) + str(ctx.get("message", ""))
+        if isinstance(e, AssertionError) and "_loop_writing" in (
+                traza + str(ctx.get("handle", ""))):
+            return
+        _bucle.default_exception_handler(ctx)
+
+    bucle.set_exception_handler(manejar)
+
+
 def _reloj_fino() -> None:
     """Pide a Windows un temporizador de 1 ms.
 
@@ -737,6 +759,8 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
     if not config.API_KEY:
         print("Falta OPENAI_API_KEY en .env. Corre 'dante doctor'.")
         return 1
+
+    _callar_ruido_de_windows(asyncio.get_running_loop())
 
     puerto = _puerto()
     donde = puerto or "sin aparato"

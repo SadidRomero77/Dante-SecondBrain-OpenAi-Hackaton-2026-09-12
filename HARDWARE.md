@@ -19,7 +19,7 @@ Fecha: 9 de septiembre de 2026.
 FQBN completo:
 
 ```
-esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,PSRAM=opi,FlashSize=16M,PartitionScheme=app3M_fat9M_16MB,UploadMode=default
+esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,PSRAM=disabled,FlashSize=16M,PartitionScheme=app3M_fat9M_16MB,UploadMode=default
 ```
 
 Equivalente en el menú Herramientas del Arduino IDE:
@@ -122,6 +122,21 @@ amplificador se los corremos a la izquierda antes de escribir.
 El micrófono manda por el **canal izquierdo**, porque su pin `L/R` va a tierra.
 
 El cableado exacto sobre protoboard está en `WIRING.md`.
+
+## La PSRAM va desactivada, y está bien así
+
+El firmware **no usa PSRAM**: los búferes de audio son estáticos y de unos 4 KB.
+La habíamos activado al principio pensando en los búferes grandes que pedía el
+códec viejo, y ese diseño ya no existe.
+
+Conviene dejarla desactivada además por esto: si algún cable toca `GPIO35`,
+`36` o `37` —las líneas de la PSRAM— el chip **flashea bien pero el programa
+muere al arrancar, antes de imprimir una sola letra**. Silencio absoluto, sin
+ninguna pista. Con la PSRAM desactivada esas líneas dejan de importar.
+
+Pasó de verdad al cablear el servo, y costó una hora encontrarlo. La forma de
+aislarlo: flashear un sketch que solo imprima. Si ese tampoco corre, el
+problema no es tu código.
 
 ## Trampas descubiertas
 
