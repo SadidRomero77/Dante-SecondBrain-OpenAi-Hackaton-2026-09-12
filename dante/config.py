@@ -28,6 +28,9 @@ PUERTO_WS = int(_v("DANTE_PUERTO_WS", "8770"))
 # que es lo correcto en una casa. En un contenedor hay que poner 0.0.0.0 o el
 # mapeo de puertos no llega a ningun lado.
 PANEL_HOST = _v("DANTE_PANEL_HOST", "127.0.0.1")
+# Direccion publica del portal cuando esta detras de un tunel. Sin esto,
+# el portal cree que vive en localhost y Auth0 rechaza el login.
+PANEL_URL = _v("DANTE_PANEL_URL", "").rstrip("/")
 
 CAMARA = _v("DANTE_CAMARA")
 EXA_API_KEY = _v("EXA_API_KEY")

@@ -184,7 +184,10 @@ def avisos() -> list[str]:
     """Lo que esta mal configurado y conviene decir al arrancar."""
     fuera = []
     from . import config as _c
-    expuesto = _c.PANEL_HOST not in ("127.0.0.1", "localhost")
+    # Un tunel expone el portal aunque uvicorn solo escuche en localhost:
+    # mirar el host no alcanza para saber si esta a la vista de internet.
+    expuesto = (_c.PANEL_HOST not in ("127.0.0.1", "localhost")
+                or bool(_c.PANEL_URL))
     if not activo():
         if expuesto:
             fuera.append("EL PORTAL ESTA EXPUESTO A LA RED Y SIN LOGIN. "
@@ -195,6 +198,10 @@ def avisos() -> list[str]:
             fuera.append("el portal esta abierto, pero solo escucha en esta "
                          "maquina (sin Auth0)")
     elif not PERMITIDOS:
-        fuera.append("AUTH0_CORREOS esta vacio: CUALQUIERA con cuenta de "
-                     "Google puede entrar")
+        aviso = ("AUTH0_CORREOS esta vacio: CUALQUIERA con cuenta de "
+                 "Google puede entrar")
+        if _c.PANEL_URL:
+            aviso += (", y el portal esta publicado en internet. Va a ver la "
+                      "camara en vivo y los recuerdos de la persona.")
+        fuera.append(aviso)
     return fuera

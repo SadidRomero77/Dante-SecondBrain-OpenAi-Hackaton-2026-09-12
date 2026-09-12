@@ -602,13 +602,22 @@ def crear_app(sesion, bucle):
             return await siguiente(peticion)
         return RedirectResponse("/login")
 
+    def _raiz(peticion: Request) -> str:
+        """De donde cree el portal que cuelga.
+
+        Detras de un tunel, peticion.base_url dice localhost, que es donde
+        escucha uvicorn y no donde entra la gente. Auth0 compara la direccion
+        de vuelta caracter por caracter, asi que si no coincide el login falla
+        entero. Por eso DANTE_PANEL_URL manda cuando esta puesta.
+        """
+        return config.PANEL_URL or str(peticion.base_url).rstrip("/")
+
     @app.get("/login")
     def login(peticion: Request):
         if not auth.activo():
             return RedirectResponse("/")
         e = auth.nuevo_estado()
-        volver = str(peticion.base_url).rstrip("/") + "/callback"
-        return RedirectResponse(auth.url_de_login(volver, e))
+        return RedirectResponse(auth.url_de_login(_raiz(peticion) + "/callback", e))
 
     @app.get("/callback")
     def callback(peticion: Request, code: str = "", state: str = ""):
@@ -616,8 +625,7 @@ def crear_app(sesion, bucle):
             return HTMLResponse(
                 "<p>El enlace de entrada vencio o ya se uso. "
                 "<a href='/login'>Vuelve a entrar</a>.</p>", 400)
-        volver = str(peticion.base_url).rstrip("/") + "/callback"
-        u = auth.canjear(code, volver)
+        u = auth.canjear(code, _raiz(peticion) + "/callback")
         if not u:
             return HTMLResponse("<p>No pude verificar tu cuenta.</p>", 400)
         if u.get("rechazado"):
@@ -627,14 +635,15 @@ def crear_app(sesion, bucle):
         r = RedirectResponse("/")
         # secure solo fuera de localhost: en http://127.0.0.1 el navegador
         # descartaria una galletita marcada como segura.
-        local = peticion.url.hostname in ("127.0.0.1", "localhost")
+        local = (not config.PANEL_URL
+                 and peticion.url.hostname in ("127.0.0.1", "localhost"))
         r.set_cookie(auth.COOKIE, auth.galleta_de(u), httponly=True,
                      samesite="lax", secure=not local, max_age=auth.DURACION)
         return r
 
     @app.get("/salir")
     def salir(peticion: Request):
-        r = RedirectResponse(auth.url_de_salida(str(peticion.base_url))
+        r = RedirectResponse(auth.url_de_salida(_raiz(peticion) + "/")
                              if auth.activo() else "/")
         r.delete_cookie(auth.COOKIE)
         return r
@@ -881,5 +890,7 @@ def arrancar(sesion, puerto: int = 8800) -> str:
     servidor = uvicorn.Server(cfg)
     threading.Thread(target=servidor.run, daemon=True).start()
 
+    if config.PANEL_URL:
+        return config.PANEL_URL
     visible = "127.0.0.1" if config.PANEL_HOST in ("0.0.0.0", "") else config.PANEL_HOST
     return f"http://{visible}:{puerto}"
