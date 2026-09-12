@@ -292,9 +292,19 @@ form{display:flex;flex-direction:column;gap:16px}
       </div>
       <div class="dos">
         <label>Voz<select name="voz">
-          <option value="marin">marin</option><option value="cedar">cedar</option>
-          <option value="alloy">alloy</option><option value="sage">sage</option>
-          <option value="coral">coral</option></select></label>
+          <option value="coral">coral — clarita y alegre</option>
+          <option value="shimmer">shimmer — suave y ligera</option>
+          <option value="sage">sage — tranquila</option>
+          <option value="ballad">ballad — dulce</option>
+          <option value="marin">marin — adulta</option>
+          <option value="cedar">cedar — grave</option>
+          <option value="alloy">alloy — neutra</option></select></label>
+        <label>Edad de la voz<select name="edad_voz">
+          <option value="nino">como un cachorrito</option>
+          <option value="joven">joven</option>
+          <option value="adulto">adulta</option></select></label>
+      </div>
+      <div class="dos">
         <label>Ciudad<input name="ciudad" placeholder="Bogotá"></label>
       </div>
       <label>¿Cómo querés que se comporte?

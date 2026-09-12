@@ -19,7 +19,8 @@ CAMPOS: dict[str, tuple[str, str, str]] = {
     "trato":            ("tu", "Como tratarlo", "opciones:tu|usted"),
     "nombre_mascota":   ("Dante", "Nombre de la mascota", "texto"),
     "especie":          ("perro", "Que es la mascota", "texto"),
-    "voz":              ("marin", "Voz", "opciones:marin|cedar|alloy|sage|coral"),
+    "voz":              ("coral", "Voz", "opciones:coral|shimmer|sage|ballad|marin|cedar|alloy"),
+    "edad_voz":         ("nino", "Edad de la voz", "opciones:nino|joven|adulto"),
     "ciudad":           ("Bogota", "Ciudad", "texto"),
     "caracter":         ("", "Como quieres que se comporte", "parrafo"),
     "temas_queridos":   ("", "Temas que le gusta conversar", "parrafo"),
@@ -47,6 +48,33 @@ def guardar(c: sqlite3.Connection, datos: dict) -> dict[str, str]:
         if k in CAMPOS:
             memoria.poner_ajuste(c, k, str(v).strip())
     return leer(c)
+
+
+# Como suena. El modelo de voz obedece indicaciones de estilo, asi que el
+# timbre no sale solo de elegir una voz: se le pide como hablar.
+#
+# Ojo con una contradiccion facil: que Dante suene a nino NO significa
+# tratar a la persona como si lo fuera. Sigue siendo un adulto quien
+# escucha, y la regla de no infantilizarla manda sobre el tono.
+EDAD_VOZ: dict[str, list[str]] = {
+    "nino": [
+        "",
+        "Tu voz:",
+        "- Hablas como un cachorro chiquito: agudo, ligero y con energia.",
+        "- Se te nota la ilusion. Cuando algo te alegra, se oye.",
+        "- Palabras sencillas y frases cortitas, como las de un nino de siete anos.",
+        "- Nada de solemnidad ni de tono de locutor. Eres una cria, no un mayordomo.",
+        "- Pero cuando ella este triste o asustada, bajas el ritmo y te pones "
+        "suave. Un cachorro tambien sabe quedarse quieto al lado de alguien.",
+        "- Aunque suenes a nino, jamas le hables a ella como si fuera una nina.",
+    ],
+    "joven": [
+        "",
+        "Tu voz:",
+        "- Suenas joven y despierto, con calidez y sin solemnidad.",
+    ],
+    "adulto": [],
+}
 
 
 def personalidad(c: sqlite3.Connection) -> str:
@@ -80,6 +108,8 @@ def personalidad(c: sqlite3.Connection) -> str:
         "- Directo al grano: responde primero, explica despues solo si hace falta.",
         "- Con carino, sin ser meloso ni infantilizarla.",
     ]
+
+    partes += EDAD_VOZ.get(a["edad_voz"], EDAD_VOZ["nino"])
 
     if a["caracter"].strip():
         partes += ["", "Como quiere esta familia que te comportes:",
