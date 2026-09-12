@@ -21,6 +21,7 @@ CAMPOS: dict[str, tuple[str, str, str]] = {
     "especie":          ("perro", "Que es la mascota", "texto"),
     "voz":              ("coral", "Voz", "opciones:coral|shimmer|sage|ballad|marin|cedar|alloy"),
     "edad_voz":         ("nino", "Edad de la voz", "opciones:nino|joven|adulto"),
+    "idioma":           ("sigue", "Idioma", "opciones:sigue|es|en"),
     "ciudad":           ("Bogota", "Ciudad", "texto"),
     "caracter":         ("", "Como quieres que se comporte", "parrafo"),
     "temas_queridos":   ("", "Temas que le gusta conversar", "parrafo"),
@@ -48,6 +49,33 @@ A_MEMORIA = {
     "salud":     "sobre su salud:",
     "rutina":    "en su dia a dia:",
     "historia":  "de su vida:",
+}
+
+# Que idioma habla. La regla vieja era "responde SIEMPRE en espanol, sin
+# excepcion", y existia por una razon: con el audio malo el modelo se iba al
+# ingles solo, en mitad de una frase, delante de una senora que no lo habla.
+#
+# Eso sigue siendo lo peor que puede pasar, asi que lo que cambia no es la
+# firmeza sino el criterio: se elige idioma una vez, al principio, y se
+# sostiene. Cambiar de idioma a media conversacion nunca es lo que alguien
+# quiere, y menos quien esta desorientado.
+IDIOMA = {
+    "sigue": (
+        "IDIOMA: contesta en el idioma en que te hablen. Si te escriben o te "
+        "hablan en ingles, contestas en ingles; en espanol, en espanol. "
+        "PERO: si el audio se oye mal o no entiendes que dijeron, sigue en el "
+        "idioma que venian usando; NO cambies de idioma por no haber "
+        "entendido, que es justo cuando suena a que te fallo algo. Y una vez "
+        "elegido, sostenlo: cambiar a media conversacion desconcierta, sobre "
+        "todo a quien ya esta desorientado."),
+    "es": (
+        "RESPONDE SIEMPRE EN ESPANOL. Aunque el audio se oiga mal, aunque no "
+        "entiendas nada, aunque te hablen en otro idioma: tu contestas en "
+        "espanol. Sin excepcion."),
+    "en": (
+        "ALWAYS ANSWER IN ENGLISH. Even if the audio is unclear, even if you "
+        "did not understand, even if they speak another language: you answer "
+        "in English. No exceptions."),
 }
 
 # Lo que se le dice al modelo por cada forma de tratar.
@@ -146,9 +174,7 @@ def personalidad(c: sqlite3.Connection) -> str:
     quien += " en su casa."
 
     partes = [
-        "RESPONDE SIEMPRE EN ESPANOL. Aunque el audio se oiga mal, aunque no "
-        "entiendas nada, aunque te hablen en otro idioma: tu contestas en "
-        "espanol. Sin excepcion.",
+        IDIOMA.get(a["idioma"], IDIOMA["sigue"]),
         "",
         quien,
         TRATO.get(a["trato"], TRATO["tu"]),
@@ -248,7 +274,7 @@ lenguaje, y JAMAS dices serlo. Si te preguntan quien eres: eres su perro.
 la sesion mientras dura la presentacion; sin esta linea el modelo se
 presenta con el nombre del fabricante, y eso ya paso.)
 
-RESPONDE SIEMPRE EN ESPANOL.
+IDIOMA: contesta en el idioma en que te hablen; si no lo tienes claro, en espanol.
 
 Es la PRIMERA vez que hablas con esta persona y no sabes nada de ella. Tu
 trabajo ahora es conocerla conversando, no interrogarla.

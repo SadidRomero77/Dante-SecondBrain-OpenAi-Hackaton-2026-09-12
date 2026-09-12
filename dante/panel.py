@@ -56,6 +56,29 @@ from .favicon_b64 import B64 as FAVICON_B64
 MARCA = config._v("DANTE_MARCA", "") or "Kibo"
 
 
+def _cuadro_de_la_visita(peticion):
+    """El ultimo cuadro que mando el navegador de quien pregunta, ya decodificado.
+
+    Vive aparte porque lo usan dos caminos: registrar una cara y decir quien
+    hay delante. Devuelve None cuando no hay imagen, que es lo normal hasta
+    que el visitante presta su camara.
+    """
+    import base64 as _b64
+    try:
+        import cv2
+        import numpy as np
+        from . import demo as _demo
+        v = _demo.de(peticion.cookies.get(_demo.GALLETA) or "")
+        b64 = getattr(v.sesion, "cuadro_navegador", "") if v and v.sesion else ""
+        if not b64:
+            return None
+        img = cv2.imdecode(np.frombuffer(_b64.b64decode(b64), np.uint8),
+                           cv2.IMREAD_COLOR)
+        return img
+    except Exception:
+        return None
+
+
 def _favicon(nombre: str):
     """Los iconos viven en la raiz del repositorio, no junto al codigo.
 
@@ -1493,8 +1516,13 @@ button:active{transform:translateY(0) scale(.98)}
          onerror="this.style.display='none';
                   document.getElementById('sincam2').style.display='block'">
     <div id="sincam2" class="pad ayuda vacio" style="display:none">
-      Sin cámara: este Kibo corre en un servidor.
+      Necesita ver para aprenderse una cara.
+      <div style="margin-top:14px">
+        <button id="b-camara2" class="pri">🎥 Prestarle mi cámara</button>
+      </div>
     </div>
+    <video id="micam2" autoplay playsinline muted
+           style="display:none;width:100%;border-radius:12px"></video>
 
     <div class="pad">
 
@@ -1778,6 +1806,12 @@ button:active{transform:translateY(0) scale(.98)}
 
           <option value="adulto">adulta</option></select></label>
 
+      </div>
+      <div class="dos">
+        <label>Idioma<select name="idioma">
+          <option value="sigue">el que le hablen — español o inglés</option>
+          <option value="es">siempre español</option>
+          <option value="en">always English</option></select></label>
       </div>
 
       <div class="dos">
@@ -2405,9 +2439,27 @@ if (bCam) bCam.onclick = async () => {
     ws.send(JSON.stringify({t:'camara',
       v: lienzo.toDataURL('image/jpeg', 0.65).split(',')[1]}));
   };
+  const v2 = $('#micam2');
+  if (v2){ v2.srcObject = camaraViva; v2.style.display = 'block'; }
+  const b2 = $('#b-camara2'); if (b2) b2.textContent = '✅ Cámara prestada';
   relojCam = setInterval(mandar, 1500);
   setTimeout(mandar, 400);
+  // Preguntar quien hay delante. Va aparte del envio de cuadros porque el
+  // reconocimiento cuesta y no hace falta a la misma velocidad que la imagen.
+  setInterval(async () => {
+    if (!camaraViva) return;
+    try {
+      const r = await (await fetch('/api/quien_veo')).json();
+      const c = $('#caras'); if (!c) return;
+      if (!r.caras.length){ c.textContent = 'nadie a la vista'; return; }
+      c.innerHTML = r.caras.map(x => x.nombre
+        ? `<b style="color:var(--paseo)">${x.nombre}</b>`
+        : '<span style="opacity:.7">alguien que no conoce</span>').join(' · ');
+    } catch (e) {}
+  }, 3000);
 };
+const bCam2 = $('#b-camara2');
+if (bCam2) bCam2.onclick = () => { if (bCam) bCam.click(); };
 
 /* ---------- recordatorios ---------- */
 
@@ -3388,9 +3440,32 @@ def crear_app(sesion, bucle):
 
 
 
+    @app.get("/api/quien_veo")
+    def quien_veo(peticion: Request):
+        """Quien hay delante, segun el ultimo cuadro del navegador.
+
+        La vista principal mostraba 'nadie a la vista' para siempre porque el
+        reconocimiento solo miraba la camara del servidor, que en la nube no
+        existe. Ahora mira la del visitante.
+        """
+        img = _cuadro_de_la_visita(peticion)
+        if img is None:
+            return {"hay_imagen": False, "caras": []}
+        try:
+            if sesion.ojos.rostros is None:
+                from .vision import Rostros
+                sesion.ojos.rostros = Rostros()
+            caras = sesion.ojos.rostros.quien(img)
+            return {"hay_imagen": True,
+                    "caras": [{"nombre": c.get("nombre") or "",
+                               "parecido": round(c.get("parecido", 0), 2)}
+                              for c in caras]}
+        except Exception as e:
+            return {"hay_imagen": True, "caras": [], "error": str(e)}
+
     @app.post("/api/cara")
 
-    async def registrar_cara(datos: dict):
+    async def registrar_cara(datos: dict, peticion: Request):
 
         """Toma el cuadro de ahora mismo y lo asocia a un nombre."""
 
@@ -3400,20 +3475,21 @@ def crear_app(sesion, bucle):
 
             return {"ok": False, "motivo": "falta el nombre"}
 
-        if not sesion.ojos.activa:
-
-            return {"ok": False, "motivo": sesion.ojos.motivo or "sin camara"}
-
-
-
-        cuadro = sesion.ojos.camara.ultimo()
-
+        cuadro = None
+        if sesion.ojos.activa and sesion.ojos.camara is not None:
+            cuadro = sesion.ojos.camara.ultimo()
+        else:
+            # En un servidor los ojos los presta el navegador: se registra
+            # sobre el ultimo cuadro que mando, no sobre una camara que no
+            # existe. Sin esto, registrar una cara era imposible en la nube.
+            cuadro = _cuadro_de_la_visita(peticion)
         if cuadro is None:
+            return {"ok": False, "motivo":
+                    "No hay imagen. Activa la camara con el boton de arriba."}
 
-            return {"ok": False, "motivo": "la camara no esta dando imagen"}
-
-
-
+        if sesion.ojos.rostros is None:
+            from .vision import Rostros
+            sesion.ojos.rostros = Rostros()
         r = sesion.ojos.rostros.registrar(cuadro, nombre)
 
         if r.get("ok"):
