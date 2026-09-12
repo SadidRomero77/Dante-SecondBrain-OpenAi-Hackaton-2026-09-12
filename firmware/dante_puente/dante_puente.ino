@@ -19,11 +19,17 @@
 
 #include <Wire.h>
 #include <driver/i2s_std.h>
+#include <SPI.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7789.h>
+#include <Fonts/FreeSansBold18pt7b.h>
 
 static const int PIN_I2C_SDA = 1,  PIN_I2C_SCL = 2;
 static const int PIN_I2S_MCLK = 38, PIN_I2S_BCLK = 14, PIN_I2S_WS = 13;
 static const int PIN_I2S_DIN = 12, PIN_I2S_DOUT = 45;
 static const int PIN_PA_EN = 48,   PIN_LUZ = 42,       PIN_BOTON = 0;
+static const int PIN_LCD_CS = 47,  PIN_LCD_DC = 39,    PIN_LCD_SCK = 41,
+                 PIN_LCD_MOSI = 40;
 
 static const uint8_t DIR_ES8311 = 0x18, DIR_ES7210 = 0x41;
 
@@ -41,6 +47,108 @@ static const uint8_t T_AUDIO = 1, T_CONTROL = 2, T_LOG = 3;
 
 static i2s_chan_handle_t tx = nullptr, rx = nullptr;
 static void saludar(bool a, bool b, bool c);
+
+// ---------------------------------------------------------------- pantalla --
+/* Estados que se muestran. El PC los manda con {"t":"emocion"}; el aparato
+   no decide ninguno, solo los dibuja. */
+enum Estado { ARRANCANDO, LISTO, ESCUCHANDO, PENSANDO, HABLANDO, ERROR };
+
+static SPIClass spiLCD(HSPI);
+static Adafruit_ST7789 tft(&spiLCD, PIN_LCD_CS, PIN_LCD_DC, -1);
+
+static volatile Estado estado = ARRANCANDO;
+static volatile int nivel_mic = 0;      // 0..100, para la barra
+static volatile bool redibujar = true;
+
+static uint16_t color_de(Estado e) {
+  switch (e) {
+    case LISTO:      return tft.color565(60, 80, 100);
+    case ESCUCHANDO: return tft.color565(40, 170, 90);
+    case PENSANDO:   return tft.color565(200, 145, 40);
+    case HABLANDO:   return tft.color565(210, 95, 45);
+    case ERROR:      return tft.color565(180, 55, 45);
+    default:         return tft.color565(50, 50, 60);
+  }
+}
+
+static const char *texto_de(Estado e) {
+  switch (e) {
+    case LISTO:      return "LISTO";
+    case ESCUCHANDO: return "TE ESCUCHO";
+    case PENSANDO:   return "PENSANDO";
+    case HABLANDO:   return "HABLANDO";
+    case ERROR:      return "ERROR";
+    default:         return "ARRANCANDO";
+  }
+}
+
+static const char *pista_de(Estado e) {
+  switch (e) {
+    case LISTO:      return "manten apretado BOOT y habla";
+    case ESCUCHANDO: return "suelta BOOT cuando termines";
+    case PENSANDO:   return "esperando a Dante...";
+    case HABLANDO:   return "aprieta BOOT para interrumpir";
+    case ERROR:      return "revisa la conexion";
+    default:         return "";
+  }
+}
+
+/* Dibuja en el nucleo 0, para no robarle tiempo al audio, que corre en el 1.
+   Solo repinta cuando cambia el estado; la barra de nivel se actualiza sola. */
+static void tarea_pantalla(void *) {
+  Estado ultimo = (Estado)-1;
+  int ultimo_nivel = -1;
+
+  for (;;) {
+    Estado e = estado;
+
+    if (e != ultimo || redibujar) {
+      ultimo = e;
+      redibujar = false;
+      ultimo_nivel = -1;
+
+      tft.fillScreen(ST77XX_BLACK);
+      tft.fillRect(0, 0, 320, 8, color_de(e));
+
+      tft.setFont(&FreeSansBold18pt7b);
+      tft.setTextColor(color_de(e));
+      int16_t x1, y1; uint16_t w, h;
+      tft.getTextBounds(texto_de(e), 0, 0, &x1, &y1, &w, &h);
+      tft.setCursor((320 - w) / 2, 92);
+      tft.print(texto_de(e));
+
+      tft.setFont(nullptr);
+      tft.setTextSize(1);
+      tft.setTextColor(tft.color565(130, 140, 150));
+      const char *p = pista_de(e);
+      tft.setCursor((320 - (int)strlen(p) * 6) / 2, 210);
+      tft.print(p);
+    }
+
+    // Barra de nivel: la prueba visible de que el microfono esta captando.
+    if (e == ESCUCHANDO) {
+      int n = nivel_mic;
+      if (n != ultimo_nivel) {
+        ultimo_nivel = n;
+        int ancho = 280 * n / 100;
+        tft.fillRect(20, 140, ancho, 26, color_de(e));
+        tft.fillRect(20 + ancho, 140, 280 - ancho, 26, tft.color565(25, 30, 35));
+        tft.drawRect(19, 139, 282, 28, tft.color565(60, 70, 80));
+      }
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(50));
+  }
+}
+
+static void init_pantalla() {
+  spiLCD.begin(PIN_LCD_SCK, -1, PIN_LCD_MOSI, PIN_LCD_CS);
+  tft.init(240, 320);
+  tft.setRotation(1);              // apaisada: MIRROR_X + SWAP_XY
+  tft.fillScreen(ST77XX_BLACK);
+  digitalWrite(PIN_LUZ, HIGH);
+  xTaskCreatePinnedToCore(tarea_pantalla, "pantalla", 4096, nullptr, 1, nullptr, 0);
+}
 static int16_t bufI2S[CUADROS * 2];
 static int16_t bufCable[CUADROS];
 
@@ -164,11 +272,14 @@ void setup() {
   pinMode(PIN_PA_EN, OUTPUT); digitalWrite(PIN_PA_EN, LOW);
   pinMode(PIN_BOTON, INPUT_PULLUP);
 
+  init_pantalla();
+
   Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 100000);
   bool a = init_es8311(VOL_DAC);
   bool b = init_es7210(GAN_MIC);
   bool c = init_i2s();
   digitalWrite(PIN_PA_EN, HIGH);
+  estado = (a && b && c) ? LISTO : ERROR;
 
   delay(300);
   saludar(a, b, c);
@@ -199,7 +310,6 @@ void loop() {
     const char *m = (ahora == LOW) ? "{\"t\":\"boton\",\"v\":\"abajo\"}"
                                    : "{\"t\":\"boton\",\"v\":\"arriba\"}";
     enviar(T_CONTROL, m, strlen(m));
-    digitalWrite(PIN_LUZ, ahora == LOW ? LOW : HIGH);
   }
 
   // 2. microfono -> PC. Promedia los dos canales: suena mas limpio que uno solo.
@@ -208,6 +318,15 @@ void loop() {
     size_t cuadros = leidos / (2 * sizeof(int16_t));
     for (size_t i = 0; i < cuadros; i++) {
       bufCable[i] = (int16_t)(((int32_t)bufI2S[i * 2] + bufI2S[i * 2 + 1]) / 2);
+    }
+    if (estado == ESCUCHANDO) {
+      int32_t pico = 0;
+      for (size_t i = 0; i < cuadros; i += 4) {   // uno de cada cuatro alcanza
+        int32_t v = abs(bufCable[i]);
+        if (v > pico) pico = v;
+      }
+      int n = (int)(pico * 100L / 12000L);        // 12000 ya es voz fuerte
+      nivel_mic = n > 100 ? 100 : n;
     }
     enviar(T_AUDIO, bufCable, cuadros * sizeof(int16_t));
   }
@@ -227,7 +346,13 @@ void loop() {
     i2s_channel_write(tx, bufI2S, cuadros * 2 * sizeof(int16_t), &esc_n, 60);
   } else if (tipo == T_CONTROL && largo) {
     entrada[largo] = 0;
-    if (strstr((char *)entrada, "\"hola?\"")) {
+    char *em = strstr((char *)entrada, "\"emocion\"");
+    if (em) {
+      if (strstr(em, "escuchando"))      estado = ESCUCHANDO;
+      else if (strstr(em, "pensando"))   estado = PENSANDO;
+      else if (strstr(em, "hablando"))   estado = HABLANDO;
+      else                               estado = LISTO;
+    } else if (strstr((char *)entrada, "\"hola?\"")) {
       saludar(ok_dac, ok_adc, ok_i2s);
     } else if (strstr((char *)entrada, "\"parar\"")) {
       i2s_channel_disable(tx);
