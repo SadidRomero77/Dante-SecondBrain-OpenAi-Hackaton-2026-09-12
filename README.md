@@ -302,6 +302,7 @@ src/trigger/      tareas de Trigger.dev
 | Sketch | Para qué |
 |---|---|
 | `dante_puente` | **El de verdad**: audio por USB y WiFi, botón, y la cara |
+| `dante_prueba` | Verifica de una pasada pantalla, amplificador y micrófono |
 | `dante_scan` | Prueba de vida: luz, PSRAM, escaneo del bus I2C |
 | `dante_audio` | Audio en la placa: tono, grabar y reproducir |
 | `dante_regs` | Diagnóstico: lee de vuelta los registros del ES7210 |
