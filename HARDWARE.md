@@ -62,6 +62,21 @@ Frecuencia de muestreo de la placa: **24000 Hz** de entrada y de salida.
 Es la misma que usa la Realtime API de OpenAI, así que el audio viaja sin
 convertirse en ningún punto.
 
+**El MCLK debe ir a 12.288 MHz — 512 × fs, no 256 ×.** La tabla de coeficientes
+del ES7210 no tiene ninguna entrada para 24 kHz con MCLK a 256 × fs; la más baja
+que admite a esa frecuencia es 512 ×. El ES8311 acepta las dos, así que 512 × es
+el único múltiplo que sirve para ambos a la vez. En el driver de I2S:
+`clk_cfg.mclk_multiple = I2S_MCLK_MULTIPLE_512`.
+
+Coeficientes usados, de las filas `{12288000, 24000}` de cada tabla oficial:
+
+| | ES8311 | ES7210 |
+|---|---|---|
+| divisores | `pre_div=2, pre_multi=0, adc_div=1, dac_div=1` | `adc_div=1, doubler=0, dll=1` |
+| osr | `adc=0x10, dac=0x10` | `0x20` |
+| lrck | `h=0x00, l=0xff` | `h=0x02, l=0x00` |
+| bclk_div | `4` | — |
+
 ### Pantalla ST7789 — 320×240 apaisada
 
 | Señal | GPIO |
@@ -96,3 +111,7 @@ Orientación: `MIRROR_X`, `SWAP_XY`.
 
 3. **La carpeta `Arduino15/.../esp32/3.3.8` está vacía.** El core que de verdad
    está instalado es el **3.3.11**.
+
+4. **Nunca hacer eco continuo micrófono → parlante para probar.** Se realimenta
+   y chilla. Grabar un rato y reproducir después prueba las mismas dos rutas,
+   sin acople, y además es como va a funcionar de verdad con el botón.
