@@ -12,6 +12,7 @@ Comandos de Dante:
   dante smoke --audio   Igual, pero pide la respuesta hablada y la guarda en WAV.
   dante monitor        Reinicia el aparato y muestra lo que imprime por serie.
   dante puente         Microfono -> PC -> parlante. Aprieta BOOT y habla.
+  dante hablar         Dante conversando. Aprieta BOOT, habla, suelta.
 """
 
 
@@ -26,6 +27,12 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("smoke", help="prueba la Realtime API")
     s.add_argument("--audio", action="store_true",
                    help="pedir la respuesta hablada y guardarla en WAV")
+
+    h = sub.add_parser("hablar", help="conversar con Dante")
+    h.add_argument("--simular", type=float, default=0.0, metavar="SEG",
+                   help="finge apretar el boton N segundos, para probar sin la placa")
+    h.add_argument("--limite", type=float, default=0.0, metavar="SEG",
+                   help="salir solo despues de N segundos")
 
     pu = sub.add_parser("puente", help="prueba el camino completo por USB")
     pu.add_argument("--segundos", type=float, default=60.0)
@@ -45,6 +52,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.comando == "smoke":
         from .smoke import correr
         return correr(con_audio=args.audio)
+
+    if args.comando == "hablar":
+        from .sesion import correr as hablar
+        return hablar(simular=args.simular, limite=args.limite)
 
     if args.comando == "puente":
         from .puente import correr as puentear
