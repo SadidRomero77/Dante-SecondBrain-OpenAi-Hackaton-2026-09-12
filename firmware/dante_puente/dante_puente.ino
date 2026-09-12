@@ -41,7 +41,7 @@ static const int PIN_DIARIO = 38;
    pantalla, ni los botones, ni la flash, ni la PSRAM, ni los pines que quedan
    reservados por si algun dia se conecta la camara. */
 static const int PIN_SERVO = 10;
-static const int SERVO_CANAL = 4;        // canal LEDC propio, sin librerias
+static int servo_bits = 0;               // resolucion que acepto la placa (0 = sin servo)
 static const int SERVO_REPOSO = 80;      // grados con la oreja caida
 static const int SERVO_ARRIBA = 135;     // grados con la oreja levantada
 static const int PIN_LCD_CS = 47,  PIN_LCD_DC = 39,    PIN_LCD_SCK = 41,
@@ -342,14 +342,22 @@ static void init_pantalla() {
    ninguna espera toque el audio, que vive en el nucleo 1. */
 
 static void servo_grados(int g) {
+  if (!servo_bits) return;          // sin PWM no hay nada que escribir
   if (g < 0) g = 0; else if (g > 180) g = 180;
-  // 0.5 ms a 2.5 ms sobre un periodo de 20 ms, en 16 bits.
+  // 0.5 ms a 2.5 ms sobre un periodo de 20 ms.
   uint32_t us = 500 + (uint32_t)g * 2000 / 180;
-  ledcWrite(PIN_SERVO, (uint32_t)((uint64_t)us * 65535 / 20000));
+  uint32_t tope = (1UL << servo_bits) - 1;
+  ledcWrite(PIN_SERVO, (uint32_t)((uint64_t)us * tope / 20000));
 }
 
 static void init_servo() {
-  ledcAttach(PIN_SERVO, 50, 16);
+  // El ESP32-S3 solo llega a 14 bits de resolucion en el LEDC; el ESP32
+  // original llegaba a 20. Pedir 16 falla en silencio y el pin se queda
+  // mudo: el servo se sacude al conectarlo pero no obedece ninguna orden.
+  // Por eso buscamos la resolucion mas alta que la placa acepte de verdad.
+  for (int b = 14; b >= 10 && !servo_bits; b--)
+    if (ledcAttach(PIN_SERVO, 50, b)) servo_bits = b;
+  if (!servo_bits) { Serial.println("servo: el LEDC no acepto ninguna resolucion"); return; }
   servo_grados(SERVO_REPOSO);
   delay(300);
   ledcWrite(PIN_SERVO, 0);               // soltar: quieto no consume ni zumba
