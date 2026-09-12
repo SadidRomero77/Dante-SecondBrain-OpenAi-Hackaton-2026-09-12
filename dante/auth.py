@@ -183,9 +183,17 @@ def gastar_estado(e: str) -> bool:
 def avisos() -> list[str]:
     """Lo que esta mal configurado y conviene decir al arrancar."""
     fuera = []
+    from . import config as _c
+    expuesto = _c.PANEL_HOST not in ("127.0.0.1", "localhost")
     if not activo():
-        fuera.append("el portal esta ABIERTO: sin Auth0, quien alcance el "
-                     "puerto entra sin login")
+        if expuesto:
+            fuera.append("EL PORTAL ESTA EXPUESTO A LA RED Y SIN LOGIN. "
+                         "Cualquiera que alcance este puerto puede oir las "
+                         "conversaciones y cambiar la configuracion. "
+                         "Configura Auth0 antes de dejarlo asi.")
+        else:
+            fuera.append("el portal esta abierto, pero solo escucha en esta "
+                         "maquina (sin Auth0)")
     elif not PERMITIDOS:
         fuera.append("AUTH0_CORREOS esta vacio: CUALQUIERA con cuenta de "
                      "Google puede entrar")

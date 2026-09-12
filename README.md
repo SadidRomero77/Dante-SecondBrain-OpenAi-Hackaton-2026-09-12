@@ -233,6 +233,31 @@ npx trigger.dev@latest dev
 
 ---
 
+## Docker
+
+Para hostearlo en cualquier parte:
+
+```bash
+cp .env.example .env      # pon tus llaves
+docker compose up -d
+```
+
+El portal queda en el `8800` y el aparato entra por WiFi al `8770`.
+
+| El contenedor | |
+|---|---|
+| ✅ | el agente, la memoria, el portal, la búsqueda, los trabajos |
+| ✅ | el aparato conectado por **WiFi** |
+| ❌ | el aparato por **cable USB**, salvo en Linux pasando el dispositivo |
+| ❌ | la **cámara** del anfitrión en Windows o Mac — Docker no la ve |
+
+En una casa lo natural es correrlo sin contenedor y que el aparato entre por el
+cable. El contenedor es para **hostearlo**: el aparato llega por WiFi y la
+familia entra al portal desde donde sea.
+
+> Al exponerlo, `DANTE_PANEL_HOST=0.0.0.0` y **Auth0 deja de ser opcional**. El
+> agente avisa fuerte al arrancar si queda expuesto sin login.
+
 ## Privacidad
 
 - La memoria es **un archivo SQLite** en tu disco. Se respalda copiándolo y se
@@ -241,6 +266,11 @@ npx trigger.dev@latest dev
   y los hechos se quedan.
 - El `.env` está en `.gitignore` y **nunca** debe subirse. Para compartir el
   proyecto está `.env.example`, que no tiene ningún valor real.
+- La cara **no se guarda como foto**: solo un vector de 128 números del que no
+  se puede reconstruir el rostro.
+
+Lo que se protege, lo que se corrigió en la auditoría y lo que todavía falta
+está en [`SECURITY.md`](SECURITY.md).
 
 ---
 

@@ -1,0 +1,11 @@
+.git
+.venv
+node_modules
+.trigger
+data
+.tools
+__pycache__
+*.pyc
+.env
+firmware
+PLAN.html

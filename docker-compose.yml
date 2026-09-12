@@ -1,0 +1,43 @@
+services:
+  dante:
+    build: .
+    image: dante:local
+    restart: unless-stopped
+
+    ports:
+      - "8800:8800"    # el portal
+      - "8770:8770"    # el aparato, por WiFi
+
+    # Las llaves nunca van en la imagen: se leen del .env al arrancar.
+    env_file: .env
+
+    environment:
+      # Dentro del contenedor no hay puerto serie. El aparato entra por WiFi.
+      DANTE_PUERTO_SERIE: "ninguno"
+      DANTE_DB: /datos/dante.db
+      # Sin camara por defecto: en Windows y Mac, Docker no ve la del anfitrion.
+      DANTE_CAMARA: ""
+      # En un contenedor hay que escuchar en todas las interfaces o el mapeo
+      # de puertos no llega. Con esto expuesto, configura Auth0.
+      DANTE_PANEL_HOST: "0.0.0.0"
+
+    volumes:
+      # La memoria, los modelos de rostro y los secretos. Sin esto se pierden
+      # cada vez que se recrea el contenedor.
+      - dante-datos:/datos
+
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8800/api/quien_soy',timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # En Linux, para usar la camara y el cable descomenta esto:
+    # devices:
+    #   - /dev/video0:/dev/video0
+    #   - /dev/ttyACM0:/dev/ttyACM0
+
+volumes:
+  dante-datos:

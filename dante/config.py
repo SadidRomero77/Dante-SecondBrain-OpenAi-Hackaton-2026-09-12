@@ -24,6 +24,10 @@ VOZ = _v("DANTE_VOZ", "marin")
 TRANSPORTE = _v("DANTE_TRANSPORTE", "auto")
 PUERTO_SERIE = _v("DANTE_PUERTO_SERIE")
 PUERTO_WS = int(_v("DANTE_PUERTO_WS", "8770"))
+# En que interfaz escucha el portal. 127.0.0.1 significa "solo esta maquina",
+# que es lo correcto en una casa. En un contenedor hay que poner 0.0.0.0 o el
+# mapeo de puertos no llega a ningun lado.
+PANEL_HOST = _v("DANTE_PANEL_HOST", "127.0.0.1")
 
 CAMARA = _v("DANTE_CAMARA")
 EXA_API_KEY = _v("EXA_API_KEY")

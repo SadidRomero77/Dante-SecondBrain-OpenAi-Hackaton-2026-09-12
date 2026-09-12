@@ -655,8 +655,10 @@ def arrancar(sesion, puerto: int = 8800) -> str:
     sesion.bucle = bucle
     app = crear_app(sesion, bucle)
 
-    cfg = uvicorn.Config(app, host="127.0.0.1", port=puerto,
+    cfg = uvicorn.Config(app, host=config.PANEL_HOST, port=puerto,
                          log_level="warning", access_log=False)
     servidor = uvicorn.Server(cfg)
     threading.Thread(target=servidor.run, daemon=True).start()
-    return f"http://127.0.0.1:{puerto}"
+
+    visible = "127.0.0.1" if config.PANEL_HOST in ("0.0.0.0", "") else config.PANEL_HOST
+    return f"http://{visible}:{puerto}"
