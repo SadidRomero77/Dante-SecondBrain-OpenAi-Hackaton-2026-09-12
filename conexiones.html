@@ -1,0 +1,173 @@
+<title>Conexiones de Dante</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#0d1117; --card:#161b22; --linea:#283039; --tinta:#e6edf3; --tinta2:#8b98a5;
+  --v33:#58a6ff; --v5:#ff7b52; --gnd:#8b98a5; --reloj:#c77dff; --datos:#56d364;
+  --ctrl:#ffc857; --spi:#39d0c8; --peligro:#ff6b6b;
+}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){
+  --bg:#f6f8fa; --card:#fff; --linea:#d8dee4; --tinta:#1f2328; --tinta2:#5b6570;
+  --v33:#0969da; --v5:#bc4c00; --gnd:#57606a; --reloj:#8250df; --datos:#1a7f37;
+  --ctrl:#9a6700; --spi:#0f766e; --peligro:#cf222e;}}
+:root[data-theme="light"]{
+  --bg:#f6f8fa; --card:#fff; --linea:#d8dee4; --tinta:#1f2328; --tinta2:#5b6570;
+  --v33:#0969da; --v5:#bc4c00; --gnd:#57606a; --reloj:#8250df; --datos:#1a7f37;
+  --ctrl:#9a6700; --spi:#0f766e; --peligro:#cf222e;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tinta);
+  font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:32px 20px 90px}
+h1{font-size:clamp(1.6rem,5vw,2.2rem);margin:0 0 8px;letter-spacing:-.02em}
+.lede{color:var(--tinta2);margin:0 0 26px;font-size:1.05rem}
+h2{font-size:1.15rem;margin:38px 0 6px;letter-spacing:-.01em}
+h2 .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;
+  background:var(--tinta);color:var(--bg);font:700 13px "IBM Plex Mono",monospace;
+  margin-right:10px;vertical-align:2px}
+.nota{color:var(--tinta2);font-size:.92rem;margin:0 0 16px}
+
+.regla{background:color-mix(in srgb,var(--v33) 13%,transparent);
+  border:1px solid color-mix(in srgb,var(--v33) 40%,transparent);
+  border-radius:12px;padding:20px 22px;margin:0 0 30px}
+.regla b{color:var(--v33)}
+.regla p{margin:0 0 10px}.regla p:last-child{margin:0}
+
+.peli{background:color-mix(in srgb,var(--peligro) 13%,transparent);
+  border:1px solid color-mix(in srgb,var(--peligro) 42%,transparent);
+  border-radius:12px;padding:16px 20px;margin:26px 0}
+.peli b{color:var(--peligro)}
+.peli p{margin:0}
+
+.mod{background:var(--card);border:1px solid var(--linea);border-radius:14px;
+  overflow:hidden;margin-bottom:8px}
+.mod h3{margin:0;padding:14px 20px;font-size:.95rem;border-bottom:1px solid var(--linea);
+  display:flex;align-items:center;gap:10px}
+.mod h3 span{font:600 11px "IBM Plex Mono",monospace;color:var(--tinta2);
+  text-transform:uppercase;letter-spacing:.09em;margin-left:auto}
+
+.par{display:grid;grid-template-columns:1fr 90px 1fr;align-items:center;
+  padding:0 18px;border-bottom:1px solid var(--linea)}
+.par:last-child{border-bottom:none}
+.izq,.der{padding:13px 0;display:flex;align-items:center;gap:10px}
+.der{justify-content:flex-end;text-align:right}
+.chip{font:700 15px "IBM Plex Mono",monospace;padding:5px 12px;border-radius:8px;
+  border:1.5px solid currentColor;white-space:nowrap}
+.hilo{height:3px;border-radius:2px;position:relative}
+.hilo::before,.hilo::after{content:"";position:absolute;top:50%;width:8px;height:8px;
+  border-radius:50%;transform:translateY(-50%);background:currentColor}
+.hilo::before{left:-4px}.hilo::after{right:-4px}
+.que{font-size:.8rem;color:var(--tinta2)}
+
+.v33{color:var(--v33)} .v5{color:var(--v5)} .gnd{color:var(--gnd)}
+.reloj{color:var(--reloj)} .datos{color:var(--datos)} .ctrl{color:var(--ctrl)}
+.spi{color:var(--spi)}
+.hilo.v33{background:var(--v33)} .hilo.v5{background:var(--v5)}
+.hilo.gnd{background:var(--gnd)} .hilo.reloj{background:var(--reloj)}
+.hilo.datos{background:var(--datos)} .hilo.ctrl{background:var(--ctrl)}
+.hilo.spi{background:var(--spi)}
+
+.pasos{counter-reset:p;list-style:none;padding:0;margin:0}
+.pasos li{counter-increment:p;background:var(--card);border:1px solid var(--linea);
+  border-radius:11px;padding:15px 18px 15px 56px;margin-bottom:9px;position:relative}
+.pasos li::before{content:counter(p);position:absolute;left:16px;top:14px;
+  width:26px;height:26px;border-radius:50%;background:var(--v33);color:var(--bg);
+  display:grid;place-items:center;font:700 13px "IBM Plex Mono",monospace}
+.pasos b{color:var(--tinta)}
+.pasos code{font:600 14px "IBM Plex Mono",monospace;background:color-mix(in srgb,var(--tinta) 10%,transparent);
+  border-radius:5px;padding:2px 7px}
+
+.lista{background:var(--card);border:1px solid var(--linea);border-radius:12px;
+  padding:4px 4px 4px 0;margin:0 0 8px}
+.lista li{padding:12px 18px 12px 6px;border-bottom:1px solid var(--linea);color:var(--tinta2)}
+.lista li:last-child{border-bottom:none}
+.lista li b{color:var(--tinta)}
+</style>
+
+<div class="wrap">
+<h1>Conexiones de Dante</h1>
+<p class="lede">25 cables, con el hueco exacto de cada punta. Calculado sobre tu montaje real.</p>
+
+<div class="regla">
+  <p><b>Cómo está tu montaje</b></p>
+  <p><b>Protoboard 1</b> — la ESP32 tiene su primera hilera en la columna <code>a</code>, con <code>3V3</code> en <b>a22</b> y <code>GND</code> en <b>a1</b>. Ahí también están el amplificador (columna <code>j</code>, filas 2 a 8) y el micrófono (filas 26 a 28).</p>
+  <p><b>Protoboard 2</b> — la segunda hilera de la ESP32 en la columna <code>j</code>, con <code>GND</code> en <b>j22</b>, y la pantalla en la columna <code>a</code>, filas 15 a 22.</p>
+  <p style="color:var(--tinta2);font-size:.93rem">De ahí salen las posiciones de todos los pines. Los cables nunca van al hueco del pin: van a otro hueco <b>de la misma fila</b>, del mismo lado del canal.</p>
+</div>
+
+<div class="peli">
+  <p><b>Antes de enchufar:</b> el <code style="font-family:'IBM Plex Mono',monospace">VDD</code> del micrófono (cable 12) va al riel <b>rojo</b>, que es 3V3. Si por error llega 5V, se quema.</p>
+</div>
+
+<h2><span class="n">1</span>Alimentación · 4 cables</h2>
+<p class="nota">Hacé estos primero y enchufá el USB. La placa tiene que encender.</p>
+<div class="mod">
+  <h3>Los rieles <span>4 cables</span></h3>
+  <div class="par"><div class="izq"><span class="chip v33">PB1 e22</span><span class="que">3V3</span></div><div class="hilo v33"></div><div class="der"><span class="chip v33">PB1 riel +</span></div></div>
+  <div class="par"><div class="izq"><span class="chip gnd">PB1 e1</span><span class="que">GND</span></div><div class="hilo gnd"></div><div class="der"><span class="chip gnd">PB1 riel −</span></div></div>
+  <div class="par"><div class="izq"><span class="chip v33">PB1 riel +</span></div><div class="hilo v33"></div><div class="der"><span class="chip v33">PB2 riel +</span></div></div>
+  <div class="par"><div class="izq"><span class="chip gnd">PB2 i22</span><span class="que">GND</span></div><div class="hilo gnd"></div><div class="der"><span class="chip gnd">PB2 riel −</span></div></div>
+</div>
+
+<h2><span class="n">2</span>Amplificador MAX98357A · 7 cables</h2>
+<p class="nota">Sus pines están en la columna <code>j</code> de PB1. Los cables van a la fila <code>i</code>, justo al lado.</p>
+<div class="mod">
+  <h3>MAX98357A <span>7 cables</span></h3>
+  <div class="par"><div class="izq"><span class="chip reloj">PB1 i2</span><span class="que">LRC</span></div><div class="hilo reloj"></div><div class="der"><span class="que">GPIO13</span><span class="chip reloj">PB1 d4</span></div></div>
+  <div class="par"><div class="izq"><span class="chip reloj">PB1 i3</span><span class="que">BCLK</span></div><div class="hilo reloj"></div><div class="der"><span class="que">GPIO14</span><span class="chip reloj">PB1 d3</span></div></div>
+  <div class="par"><div class="izq"><span class="chip datos">PB1 i4</span><span class="que">DIN</span></div><div class="hilo datos"></div><div class="der"><span class="que">GPIO45</span><span class="chip datos">PB2 i8</span></div></div>
+  <div class="par"><div class="izq"><span class="chip gnd">PB1 i5</span><span class="que">GAIN · 12 dB</span></div><div class="hilo gnd"></div><div class="der"><span class="chip gnd">PB1 riel −</span></div></div>
+  <div class="par"><div class="izq"><span class="chip ctrl">PB1 i6</span><span class="que">SD</span></div><div class="hilo ctrl"></div><div class="der"><span class="que">GPIO48</span><span class="chip ctrl">PB2 i7</span></div></div>
+  <div class="par"><div class="izq"><span class="chip gnd">PB1 i7</span><span class="que">GND</span></div><div class="hilo gnd"></div><div class="der"><span class="chip gnd">PB1 riel −</span></div></div>
+  <div class="par"><div class="izq"><span class="chip v5">PB1 i8</span><span class="que">VIN</span></div><div class="hilo v5"></div><div class="der"><span class="que">5V</span><span class="chip v5">PB1 d2</span></div></div>
+</div>
+
+<h2><span class="n">3</span>Micrófono INMP441 · 6 cables</h2>
+<p class="nota">Sus pines están partidos por el canal: tres en <code>f</code> y tres en <code>e</code>. Los de <code>f</code> salen por <code>g</code>, y los de <code>e</code> salen por <code>c</code>.</p>
+<div class="mod">
+  <h3>INMP441 <span>6 cables</span></h3>
+  <div class="par"><div class="izq"><span class="chip v33">PB1 g27</span><span class="que">VDD</span></div><div class="hilo v33"></div><div class="der"><span class="chip v33">PB1 riel +</span></div></div>
+  <div class="par"><div class="izq"><span class="chip gnd">PB1 g26</span><span class="que">GND</span></div><div class="hilo gnd"></div><div class="der"><span class="chip gnd">PB1 riel −</span></div></div>
+  <div class="par"><div class="izq"><span class="chip datos">PB1 g28</span><span class="que">SD</span></div><div class="hilo datos"></div><div class="der"><span class="que">GPIO12</span><span class="chip datos">PB1 d5</span></div></div>
+  <div class="par"><div class="izq"><span class="chip reloj">PB1 c28</span><span class="que">SCK</span></div><div class="hilo reloj"></div><div class="der"><span class="que">GPIO14</span><span class="chip reloj">PB1 c3</span></div></div>
+  <div class="par"><div class="izq"><span class="chip reloj">PB1 c27</span><span class="que">WS</span></div><div class="hilo reloj"></div><div class="der"><span class="que">GPIO13</span><span class="chip reloj">PB1 c4</span></div></div>
+  <div class="par"><div class="izq"><span class="chip gnd">PB1 c26</span><span class="que">L/R · canal izq.</span></div><div class="hilo gnd"></div><div class="der"><span class="que">GND</span><span class="chip gnd">PB1 c1</span></div></div>
+</div>
+
+<h2><span class="n">4</span>Pantalla ST7789 · 8 cables</h2>
+<p class="nota">Sus pines están en la columna <code>a</code> de PB2. Los cables salen por <code>b</code>.</p>
+<div class="mod">
+  <h3>ST7789 <span>8 cables</span></h3>
+  <div class="par"><div class="izq"><span class="chip gnd">PB2 b22</span><span class="que">GND</span></div><div class="hilo gnd"></div><div class="der"><span class="chip gnd">PB2 riel −</span></div></div>
+  <div class="par"><div class="izq"><span class="chip v33">PB2 b21</span><span class="que">VCC</span></div><div class="hilo v33"></div><div class="der"><span class="chip v33">PB2 riel +</span></div></div>
+  <div class="par"><div class="izq"><span class="chip spi">PB2 b20</span><span class="que">DC</span></div><div class="hilo spi"></div><div class="der"><span class="que">GPIO39</span><span class="chip spi">PB2 i14</span></div></div>
+  <div class="par"><div class="izq"><span class="chip spi">PB2 b19</span><span class="que">CS</span></div><div class="hilo spi"></div><div class="der"><span class="que">GPIO47</span><span class="chip spi">PB2 i6</span></div></div>
+  <div class="par"><div class="izq"><span class="chip spi">PB2 b18</span><span class="que">CLK</span></div><div class="hilo spi"></div><div class="der"><span class="que">GPIO41</span><span class="chip spi">PB2 i16</span></div></div>
+  <div class="par"><div class="izq"><span class="chip spi">PB2 b17</span><span class="que">SDA</span></div><div class="hilo spi"></div><div class="der"><span class="que">GPIO40</span><span class="chip spi">PB2 i15</span></div></div>
+  <div class="par"><div class="izq"><span class="chip gnd">PB2 b16</span><span class="que">RES</span></div><div class="hilo gnd"></div><div class="der"><span class="que">RST</span><span class="chip gnd">PB1 c20</span></div></div>
+  <div class="par"><div class="izq"><span class="chip v33">PB2 b15</span><span class="que">BLK · luz</span></div><div class="hilo v33"></div><div class="der"><span class="chip v33">PB2 riel +</span></div></div>
+</div>
+
+<h2>Revisá los rieles antes de empezar</h2>
+<ul class="lista">
+  <li><b>Mirá si la línea roja y la azul están cortadas por la mitad.</b> En muchas protoboards lo están. Si ves una interrupción, poné un cablecito corto que la cruce — si no, media protoboard queda sin corriente.</li>
+  <li>El riel de <b>PB1</b> está del lado de la columna <code>j</code>. El de <b>PB2</b>, del lado de la columna <code>a</code>.</li>
+</ul>
+
+<h2>Por qué se repiten el 13 y el 14</h2>
+<ul class="lista">
+  <li>A <b>GPIO14</b> (fila 3) llegan dos cables: <code>d3</code> desde el amplificador y <code>c3</code> desde el micrófono.</li>
+  <li>A <b>GPIO13</b> (fila 4) también dos: <code>d4</code> y <code>c4</code>.</li>
+</ul>
+<p class="nota">No es error. Es el reloj compartido del bus de audio, y como la fila tiene cinco huecos unidos, los dos cables entran sin tocarse.</p>
+
+<h2>El orden</h2>
+<ol class="pasos">
+  <li><b>Los 4 de alimentación.</b> Enchufá el USB: la placa tiene que encender.</li>
+  <li><b>Los 8 de la pantalla.</b> Avisame y flasheo una prueba: si aparece algo en pantalla, va bien.</li>
+  <li><b>Los 7 del amplificador</b> más el parlante en la bornera verde. Flasheo una prueba de tono.</li>
+  <li><b>Los 6 del micrófono.</b> Con eso está completo.</li>
+</ol>
+<p class="nota" style="margin-top:14px">Probá cada parte antes de seguir. Si algo falla, sabés exactamente qué acabás de tocar.</p>
+</div>
