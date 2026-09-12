@@ -54,6 +54,20 @@ from .favicon_b64 import B64 as FAVICON_B64
 # todo el repositorio.
 MARCA = config._v("DANTE_MARCA", "") or "Kibo"
 
+
+def _favicon(nombre: str):
+    """Los iconos viven en la raiz del repositorio, no junto al codigo.
+
+    Buscarlos solo al lado del modulo hacia reventar la ruta con un error 500
+    dentro del contenedor, donde la raiz y el paquete no son la misma carpeta.
+    """
+    from pathlib import Path as _P
+    aqui = _P(__file__).resolve().parent
+    for c in (aqui / nombre, aqui.parent / nombre):
+        if c.exists():
+            return c
+    return aqui / nombre
+
 INICIO = """<!doctype html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -1383,7 +1397,13 @@ button:active{transform:translateY(0) scale(.98)}
 
     <h2>🐾 Lo que ve Dante</h2>
 
-    <img id="video" src="/camara.mjpg" alt="cámara">
+    <img id="video" src="/camara.mjpg" alt="cámara"
+         onerror="this.style.display='none';
+                  document.getElementById('sincam').style.display='block'">
+    <div id="sincam" class="pad ayuda vacio" style="display:none">
+      Este Kibo vive en un servidor y no tiene ojos propios.<br>
+      Con el perrito conectado, o corriéndolo en tu computador, ve por su cámara.
+    </div>
 
     <div id="caras">nadie a la vista</div>
 
@@ -1455,7 +1475,12 @@ button:active{transform:translateY(0) scale(.98)}
 
     <h2>Quién está enfrente</h2>
 
-    <img id="video2" src="/camara.mjpg" alt="cámara">
+    <img id="video2" src="/camara.mjpg" alt="cámara"
+         onerror="this.style.display='none';
+                  document.getElementById('sincam2').style.display='block'">
+    <div id="sincam2" class="pad ayuda vacio" style="display:none">
+      Sin cámara: este Kibo corre en un servidor.
+    </div>
 
     <div class="pad">
 
@@ -2000,7 +2025,12 @@ function linea(cl, t){
 
 function conectar(){
 
-  ws = new WebSocket(`ws://${location.host}/ws`);
+  // wss cuando la pagina viene por https. Con ws:// a secas el navegador
+  // corta la conexion por contenido inseguro y NO la deja ni salir: en el
+  // servidor no aparece ni una peticion, asi que parece que el portal no
+  // hace nada cuando en realidad nunca llego a hablar.
+  const esquema = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${esquema}://${location.host}/ws`);
 
   ws.binaryType = 'arraybuffer';
 
@@ -3062,7 +3092,7 @@ def crear_app(sesion, bucle):
     @app.get("/favicon.png")
     def favicon_png():
 
-        return FileResponse(Path(__file__).resolve().parent / "favicon.png", media_type="image/png")
+        return FileResponse(_favicon("favicon.png"), media_type="image/png")
 
 
 
@@ -3070,7 +3100,7 @@ def crear_app(sesion, bucle):
     @app.get("/favicon.svg")
     def favicon_ico():
 
-        ico = Path(__file__).resolve().parent / "favicon.ico"
+        ico = _favicon("favicon.ico")
 
         return FileResponse(ico, media_type="image/x-icon")
 
