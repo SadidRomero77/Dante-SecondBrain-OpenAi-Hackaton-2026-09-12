@@ -422,6 +422,7 @@ static void init_wifi() {
   String ssid = prefs.getString("ssid", "");
   String clave = prefs.getString("clave", "");
   String host = prefs.getString("host", "");
+  String ficha = prefs.getString("ficha", "");
   uint16_t puerto = prefs.getUShort("puerto", 8770);
   prefs.end();
 
@@ -439,7 +440,10 @@ static void init_wifi() {
            ssid.c_str(), host.c_str(), puerto);
   log_pc(m);
 
-  wsc.begin(host.c_str(), puerto, "/");
+  // La ficha va en la ruta: el servidor rechaza a quien no la traiga, para
+  // que el puerto de WiFi no quede abierto a toda la red local.
+  String ruta = "/" + ficha;
+  wsc.begin(host.c_str(), puerto, ruta.c_str());
   wsc.onEvent(al_evento_ws);
   wsc.setReconnectInterval(3000);
   wsc.enableHeartbeat(15000, 3000, 2);
@@ -447,11 +451,12 @@ static void init_wifi() {
 
 /* Guarda credenciales que llegan por el cable y reinicia para aplicarlas. */
 static void guardar_wifi(const char *ssid, const char *clave,
-                         const char *host, uint16_t puerto) {
+                         const char *host, uint16_t puerto, const char *ficha) {
   prefs.begin("dante", false);
   prefs.putString("ssid", ssid);
   prefs.putString("clave", clave);
   prefs.putString("host", host);
+  prefs.putString("ficha", ficha);
   prefs.putUShort("puerto", puerto);
   prefs.end();
   log_pc("wifi guardado; reiniciando");
@@ -674,7 +679,7 @@ static void atender_marco(uint8_t tipo, const uint8_t *carga, uint16_t largo) {
 
   } else if (strstr(txt, "\"wifi\"")) {
     // {"t":"wifi","ssid":"...","clave":"...","host":"192.168.1.20","puerto":8770}
-    char ssid[64] = "", clave[64] = "", host[64] = "";
+    char ssid[64] = "", clave[64] = "", host[64] = "", ficha[64] = "";
     int puerto = 8770;
     char *q;
     if ((q = strstr(txt, "\"ssid\":\""))) {
@@ -686,8 +691,11 @@ static void atender_marco(uint8_t tipo, const uint8_t *carga, uint16_t largo) {
     if ((q = strstr(txt, "\"host\":\""))) {
       q += 8; int i = 0; while (*q && *q != '"' && i < 62) host[i++] = *q++; host[i] = 0;
     }
+    if ((q = strstr(txt, "\"ficha\":\""))) {
+      q += 9; int i = 0; while (*q && *q != '"' && i < 62) ficha[i++] = *q++; ficha[i] = 0;
+    }
     if ((q = strstr(txt, "\"puerto\":"))) puerto = atoi(q + 9);
-    if (ssid[0] && host[0]) guardar_wifi(ssid, clave, host, (uint16_t)puerto);
+    if (ssid[0] && host[0]) guardar_wifi(ssid, clave, host, (uint16_t)puerto, ficha);
 
   } else if (strstr(txt, "\"hola?\"")) {
     saludar(ok_dac, ok_adc, ok_i2s);

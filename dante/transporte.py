@@ -131,8 +131,13 @@ class TransporteWebSocket:
     solo si el PC se reinicia.
     """
 
-    def __init__(self, puerto: int = 8765):
+    def __init__(self, puerto: int = 8765, ficha: str = ""):
         self.puerto = puerto
+        # Sin ficha, cualquiera en la red local puede conectarse haciendose
+        # pasar por el aparato: mandarle audio al agente, oir lo que responde y
+        # recibir las ordenes de pantalla. La ficha se le escribe al aparato
+        # con "dante setup" por el cable, junto con la red.
+        self.ficha = ficha
         self.cliente = None          # el aparato, cuando llega
         self.entrada: list[Marco] = []
         self.descartados = 0
@@ -147,6 +152,12 @@ class TransporteWebSocket:
         from websockets.asyncio.server import serve
 
         async def atender(ws):
+            if self.ficha:
+                # El aparato saluda con la ficha en la ruta: ws://ip:puerto/<ficha>
+                camino = (getattr(ws, "request", None) and ws.request.path) or "/"
+                if camino.strip("/") != self.ficha:
+                    await ws.close(1008, "ficha invalida")
+                    return
             if self.cliente is not None:
                 await ws.close(1013, "ya hay un aparato conectado")
                 return

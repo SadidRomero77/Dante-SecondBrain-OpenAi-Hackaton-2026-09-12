@@ -32,7 +32,44 @@ PERMITIDOS = [c.strip().lower() for c in (os.getenv("AUTH0_CORREOS") or "").spli
 
 COOKIE = "dante_sesion"
 DURACION = 60 * 60 * 24 * 14          # dos semanas
-_FIRMA = (os.getenv("DANTE_SECRETO") or SECRETO or "dante-local").encode()
+VIDA_ESTADO = 600                     # 10 min para completar un login
+
+
+def _secreto_de_firma() -> bytes:
+    """La llave con la que se firman las galletitas de sesion.
+
+    Si el usuario no puso DANTE_SECRETO, se genera uno al azar y se guarda en
+    disco. Antes habia un valor por defecto en el codigo, y eso significa que
+    cualquiera que lea el repositorio podria falsificar una sesion en una
+    instalacion que no lo hubiera cambiado.
+
+    No se reusa el secreto de Auth0: si ese se rota, no queremos que ademas se
+    invaliden las sesiones, ni que un secreto sirva para dos cosas.
+    """
+    puesto = (os.getenv("DANTE_SECRETO") or "").strip()
+    if puesto:
+        return puesto.encode()
+
+    from pathlib import Path
+    archivo = Path(__file__).resolve().parent.parent / "data" / ".secreto"
+    try:
+        if archivo.exists():
+            return archivo.read_bytes()
+        archivo.parent.mkdir(parents=True, exist_ok=True)
+        nuevo = secrets.token_bytes(32)
+        archivo.write_bytes(nuevo)
+        try:
+            os.chmod(archivo, 0o600)
+        except Exception:
+            pass
+        return nuevo
+    except Exception:
+        # Sin disco donde escribir, uno de memoria: las sesiones no sobreviven
+        # a un reinicio, que es molesto pero no inseguro.
+        return secrets.token_bytes(32)
+
+
+_FIRMA = _secreto_de_firma()
 
 
 def activo() -> bool:
@@ -122,5 +159,34 @@ def url_de_salida(volver_a: str) -> str:
     return f"https://{DOMINIO}/v2/logout?{q}"
 
 
+# Estados de login pendientes: valor -> cuando se creo. Se limpian solos para
+# que no crezcan sin fin y para cerrar la ventana de reuso.
+_estados: dict[str, float] = {}
+
+
 def nuevo_estado() -> str:
-    return secrets.token_urlsafe(16)
+    e = secrets.token_urlsafe(24)
+    ahora = time.time()
+    for k, t in list(_estados.items()):
+        if ahora - t > VIDA_ESTADO:
+            del _estados[k]
+    _estados[e] = ahora
+    return e
+
+
+def gastar_estado(e: str) -> bool:
+    """Valida un estado y lo quema: cada uno sirve una sola vez."""
+    t = _estados.pop(e, None)
+    return t is not None and (time.time() - t) <= VIDA_ESTADO
+
+
+def avisos() -> list[str]:
+    """Lo que esta mal configurado y conviene decir al arrancar."""
+    fuera = []
+    if not activo():
+        fuera.append("el portal esta ABIERTO: sin Auth0, quien alcance el "
+                     "puerto entra sin login")
+    elif not PERMITIDOS:
+        fuera.append("AUTH0_CORREOS esta vacio: CUALQUIERA con cuenta de "
+                     "Google puede entrar")
+    return fuera

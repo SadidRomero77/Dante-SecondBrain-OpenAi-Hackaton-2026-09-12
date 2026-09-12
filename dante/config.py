@@ -31,6 +31,28 @@ OPENROUTER_API_KEY = _v("OPENROUTER_API_KEY")
 
 DB = RAIZ / _v("DANTE_DB", "data/dante.db")
 
+def ficha_aparato() -> str:
+    """Contrasena compartida con el aparato, para el transporte por WiFi.
+
+    Se genera sola la primera vez y se guarda al lado de la memoria. Sin esto
+    el puerto de WiFi queda abierto a toda la red local.
+    """
+    puesta = _v("DANTE_FICHA")
+    if puesta:
+        return puesta
+    archivo = DB.parent / ".ficha"
+    try:
+        if archivo.exists():
+            return archivo.read_text(encoding="utf-8").strip()
+        import secrets
+        nueva = secrets.token_urlsafe(18)
+        archivo.parent.mkdir(parents=True, exist_ok=True)
+        archivo.write_text(nueva, encoding="utf-8")
+        return nueva
+    except Exception:
+        return ""
+
+
 # El unico formato de audio del proyecto, de punta a punta.
 SAMPLE_RATE = 24000
 CANALES = 1

@@ -15,3 +15,5 @@ data/modelos/
 # Trigger.dev
 .trigger/
 node_modules/
+data/.secreto
+data/.ficha

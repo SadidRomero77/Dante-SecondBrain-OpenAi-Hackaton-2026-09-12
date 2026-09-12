@@ -70,7 +70,8 @@ def correr(ssid: str = "", clave: str = "", host: str = "",
 
     print(f"\n  aparato en {serie}")
     print(f"  red       {ssid}")
-    print(f"  servidor  {host}:{puerto}\n")
+    print(f"  servidor  {host}:{puerto}")
+    print(f"  ficha     {'si' if config.ficha_aparato() else 'NO (revisa data/)'}\n")
 
     try:
         t = TransporteSerie(serie)
@@ -80,8 +81,9 @@ def correr(ssid: str = "", clave: str = "", host: str = "",
         return 1
 
     with t:
+        ficha = config.ficha_aparato()
         t.enviar_control({"t": "wifi", "ssid": ssid, "clave": clave,
-                          "host": host, "puerto": puerto})
+                          "host": host, "puerto": puerto, "ficha": ficha})
         print("  enviado. El aparato se reinicia y se conecta solo.")
 
         # Escuchar un rato lo que diga al arrancar.

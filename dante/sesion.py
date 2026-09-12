@@ -620,10 +620,11 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
     else:
         print("  cable: sin aparato conectado")
 
-    red = TransporteWebSocket(config.PUERTO_WS)
+    red = TransporteWebSocket(config.PUERTO_WS, config.ficha_aparato())
     try:
         await red.escuchar()
-        print(f"  wifi: escuchando en el puerto {red.puerto}")
+        print(f"  wifi: escuchando en el puerto {red.puerto}"
+              + ("" if red.ficha else "  [ojo] SIN ficha: abierto a la red local"))
     except Exception as e:
         print(f"  wifi: no pude escuchar ({type(e).__name__})")
         red = None
@@ -663,6 +664,9 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
             else:
                 print(f"  camara: {s.ojos.motivo}\n")
             if con_panel:
+                from . import auth as _auth
+                for a in _auth.avisos():
+                    print(f"  [seguridad] {a}")
                 try:
                     url = panel.arrancar(s, con_panel)
                     print(f"  panel: {url}\n")

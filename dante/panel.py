@@ -420,7 +420,6 @@ def crear_app(sesion, bucle):
     """Arma la aplicacion web sobre una sesion que ya esta corriendo."""
     app = FastAPI(title="Dante")
     clientes: set = set()
-    estados: set = set()
 
     @app.middleware("http")
     async def puerta(peticion, siguiente):
@@ -438,15 +437,15 @@ def crear_app(sesion, bucle):
         if not auth.activo():
             return RedirectResponse("/")
         e = auth.nuevo_estado()
-        estados.add(e)
         volver = str(peticion.base_url).rstrip("/") + "/callback"
         return RedirectResponse(auth.url_de_login(volver, e))
 
     @app.get("/callback")
     def callback(peticion: Request, code: str = "", state: str = ""):
-        if state not in estados:
-            return HTMLResponse("<p>Estado invalido. Vuelve a entrar.</p>", 400)
-        estados.discard(state)
+        if not auth.gastar_estado(state):
+            return HTMLResponse(
+                "<p>El enlace de entrada vencio o ya se uso. "
+                "<a href='/login'>Vuelve a entrar</a>.</p>", 400)
         volver = str(peticion.base_url).rstrip("/") + "/callback"
         u = auth.canjear(code, volver)
         if not u:
@@ -456,8 +455,11 @@ def crear_app(sesion, bucle):
                 f"<p>La cuenta {u['rechazado']} no esta autorizada para este "
                 f"agente.</p>", 403)
         r = RedirectResponse("/")
+        # secure solo fuera de localhost: en http://127.0.0.1 el navegador
+        # descartaria una galletita marcada como segura.
+        local = peticion.url.hostname in ("127.0.0.1", "localhost")
         r.set_cookie(auth.COOKIE, auth.galleta_de(u), httponly=True,
-                     samesite="lax", max_age=auth.DURACION)
+                     samesite="lax", secure=not local, max_age=auth.DURACION)
         return r
 
     @app.get("/salir")
@@ -603,6 +605,13 @@ def crear_app(sesion, bucle):
 
     @app.websocket("/ws")
     async def canal(ws: WebSocket):
+        # En Starlette el middleware http NO corre para websockets, asi que la
+        # puerta de arriba no cubre esta ruta. Sin esto, cualquiera que alcance
+        # el puerto puede leer la conversacion, oir el audio y hablarle al
+        # agente. Comprobado explotandolo.
+        if auth.activo() and not auth.usuario_de(ws):
+            await ws.close(1008, "sin sesion")
+            return
         await ws.accept()
         clientes.add(ws)
         await ws.send_text(json.dumps({"t": "estado", "v": sesion.estado}))
@@ -610,11 +619,20 @@ def crear_app(sesion, bucle):
             while True:
                 m = await ws.receive()
                 if "bytes" in m and m["bytes"]:
+                    if len(m["bytes"]) > 64000:
+                        continue          # un trozo de audio son 960 bytes
                     # Audio del navegador: mismo camino que el del aparato.
                     asyncio.run_coroutine_threadsafe(
                         sesion.audio_del_panel(m["bytes"]), sesion.bucle)
                 elif "text" in m and m["text"]:
-                    d = json.loads(m["text"])
+                    if len(m["text"]) > 8000:
+                        continue
+                    try:
+                        d = json.loads(m["text"])
+                    except ValueError:
+                        continue
+                    if not isinstance(d, dict):
+                        continue
                     if d.get("t") == "texto":
                         asyncio.run_coroutine_threadsafe(
                             sesion.decir_texto(d.get("v", "")), sesion.bucle)
