@@ -1,0 +1,996 @@
+<title>Segundo Cerebro Dante</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --bg:        #F3F5F3;
+    --surface:   #FFFFFF;
+    --surface-2: #E9EDEA;
+    --ink:       #17222B;
+    --ink-2:     #4A5A63;
+    --ink-3:     #7B888F;
+    --line:      #D3DAD6;
+    --line-2:    #BEC7C2;
+    --accent:    #B95626;
+    --accent-2:  #8E421D;
+    --accent-sf: #F7E6DA;
+    --good:      #35705A;
+    --good-sf:   #DFEDE6;
+    --warn:      #97701F;
+    --warn-sf:   #F4EBD5;
+    --crit:      #96372E;
+    --crit-sf:   #F6E1DE;
+    --shadow:    0 1px 2px rgba(23,34,43,.05), 0 8px 24px -16px rgba(23,34,43,.28);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:#10171C; --surface:#182127; --surface-2:#1F2A31;
+      --ink:#E7EDE9; --ink-2:#A4B2B8; --ink-3:#77868D;
+      --line:#2A3740; --line-2:#3A4A54;
+      --accent:#E8945C; --accent-2:#F2B489; --accent-sf:#33231A;
+      --good:#74BC98; --good-sf:#182A24;
+      --warn:#D8AC55; --warn-sf:#2C2517;
+      --crit:#E4867A; --crit-sf:#301C1A;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:#10171C; --surface:#182127; --surface-2:#1F2A31;
+    --ink:#E7EDE9; --ink-2:#A4B2B8; --ink-3:#77868D;
+    --line:#2A3740; --line-2:#3A4A54;
+    --accent:#E8945C; --accent-2:#F2B489; --accent-sf:#33231A;
+    --good:#74BC98; --good-sf:#182A24;
+    --warn:#D8AC55; --warn-sf:#2C2517;
+    --crit:#E4867A; --crit-sf:#301C1A;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px; line-height: 1.62; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 28px 96px; }
+  .col { max-width: 68ch; }
+
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+  h1 { font-family: Fraunces, Georgia, serif; font-optical-sizing: auto; font-weight: 600;
+       font-size: clamp(2.4rem, 6vw, 3.9rem); line-height: 1.02; letter-spacing: -.02em; }
+  h2 { font-family: Fraunces, Georgia, serif; font-weight: 600;
+       font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.12; letter-spacing: -.015em; }
+  h3 { font-size: 1.02rem; font-weight: 600; letter-spacing: -.005em; }
+  p { margin: 0; }
+
+  .mono, code, .rail, th, .kicker, .chip { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+  code { font-size: .87em; background: var(--surface-2); border: 1px solid var(--line);
+         border-radius: 4px; padding: .08em .34em; word-break: break-word; }
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+  header.hero { padding: 68px 0 40px; display: flex; flex-direction: column; gap: 22px; }
+  .eyebrow { font-family: "IBM Plex Mono", monospace; font-size: .72rem; letter-spacing: .14em;
+             text-transform: uppercase; color: var(--accent); }
+  .lede { font-size: 1.16rem; color: var(--ink-2); max-width: 62ch; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: .73rem; border: 1px solid var(--line-2); background: var(--surface);
+          color: var(--ink-2); border-radius: 999px; padding: 4px 11px; }
+
+  section { padding-top: 58px; }
+  .sechead { display: flex; align-items: baseline; gap: 14px; border-top: 1px solid var(--line);
+             padding-top: 14px; margin-bottom: 22px; }
+  .sechead .num { font-family: "IBM Plex Mono", monospace; font-size: .76rem; color: var(--ink-3);
+                  padding-top: .35em; flex: none; }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+  .stack-lg { display: flex; flex-direction: column; gap: 26px; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+          padding: 20px 22px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(238px, 1fr)); gap: 14px; }
+
+  .kicker { font-size: .69rem; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-3); }
+  .card p, .card li { color: var(--ink-2); }
+  .card p.hi, li.hi { color: var(--ink); }
+
+  ul.tight { margin: 0; padding-left: 1.15em; display: flex; flex-direction: column; gap: 6px; }
+  ul.tight li::marker { color: var(--ink-3); }
+  ul.bare { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+
+  .mark { border-left: 3px solid var(--accent); padding-left: 14px; }
+  .verdict-yes { border-top: 3px solid var(--good); }
+  .verdict-no  { border-top: 3px solid var(--crit); }
+
+  .decision { display: grid; grid-template-columns: 46px 1fr; gap: 0 18px; }
+  .decision .dnum { font-family: Fraunces, Georgia, serif; font-size: 2.1rem; line-height: 1;
+                    color: var(--accent); grid-row: 1 / span 2; }
+  .dbody { display: flex; flex-direction: column; gap: 12px; }
+  .dsplit { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px;
+            padding-top: 4px; border-top: 1px dashed var(--line-2); }
+  .dsplit > div { display: flex; flex-direction: column; gap: 4px; }
+  .dsplit p { font-size: .92rem; }
+
+  figure { margin: 0; }
+  .figbox { background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+            padding: 20px 18px 14px; overflow-x: auto; box-shadow: var(--shadow); }
+  .figbox svg { display: block; min-width: 700px; max-width: 100%; height: auto; color: var(--ink); }
+  figcaption { font-size: .84rem; color: var(--ink-3); margin-top: 12px; max-width: 74ch; }
+
+  .tablebox { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px;
+              background: var(--surface); box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: .9rem; }
+  th { text-align: left; font-size: .68rem; font-weight: 500; text-transform: uppercase;
+       letter-spacing: .11em; color: var(--ink-3); padding: 12px 16px;
+       border-bottom: 1px solid var(--line); white-space: nowrap; background: var(--surface-2); }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--ink-2); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td.k { color: var(--ink); font-weight: 500; }
+
+  .pill { display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: .68rem;
+          letter-spacing: .04em; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+  .p-crit { background: var(--crit-sf); color: var(--crit); }
+  .p-warn { background: var(--warn-sf); color: var(--warn); }
+  .p-good { background: var(--good-sf); color: var(--good); }
+
+  .tl { display: flex; flex-direction: column; }
+  .row { display: grid; grid-template-columns: 92px 1fr; gap: 0 20px; padding: 14px 0;
+         border-bottom: 1px solid var(--line); align-items: start; }
+  .row:last-child { border-bottom: none; }
+  .rail { font-size: .78rem; color: var(--ink-3); padding-top: 2px;
+          font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .rbody { display: flex; flex-direction: column; gap: 5px; }
+  .rbody p { color: var(--ink-2); font-size: .94rem; }
+  .row.milestone { background: var(--accent-sf); border-radius: 8px; padding-left: 14px;
+                   padding-right: 14px; margin: 4px 0; border-bottom-color: transparent; }
+  .row.milestone .rail, .row.milestone h3 { color: var(--accent-2); }
+  .row.milestone p { color: var(--ink); }
+  .row.cut { background: var(--warn-sf); border-radius: 8px; padding-left: 14px;
+             padding-right: 14px; margin: 4px 0; border-bottom-color: transparent; }
+  .row.cut .rail, .row.cut h3 { color: var(--warn); }
+
+  .emos { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 10px; }
+  .emo { border: 1px solid var(--line); background: var(--surface); border-radius: 8px;
+         padding: 11px 13px; display: flex; flex-direction: column; gap: 5px; }
+  .emo .dots { display: flex; gap: 3px; }
+  .emo .dots i { width: 6px; height: 6px; border-radius: 1px; background: var(--line-2); display: block; }
+  .emo .dots i.on { background: var(--accent); }
+  .emo b { font-family: "IBM Plex Mono", monospace; font-size: .78rem; font-weight: 500; }
+  .emo span { font-size: .82rem; color: var(--ink-2); line-height: 1.45; }
+
+  pre { margin: 0; font-family: "IBM Plex Mono", monospace; font-size: .82rem; line-height: 1.7;
+        color: var(--ink-2); background: var(--surface); border: 1px solid var(--line);
+        border-radius: 10px; padding: 18px 20px; overflow-x: auto; box-shadow: var(--shadow); }
+  pre b { color: var(--ink); font-weight: 500; }
+  pre i { color: var(--ink-3); font-style: normal; }
+  pre em { color: var(--accent); font-style: normal; font-weight: 500; }
+
+  .callout { background: var(--accent-sf); border: 1px solid var(--line);
+             border-left: 3px solid var(--accent); border-radius: 8px; padding: 16px 20px;
+             display: flex; flex-direction: column; gap: 8px; }
+  .callout p { color: var(--ink); }
+
+  .twocode { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+
+  .beat { display: grid; grid-template-columns: 68px 1fr; gap: 0 18px; padding: 13px 0;
+          border-bottom: 1px dashed var(--line); }
+  .beat:last-child { border-bottom: none; }
+  .beat .t { font-family: "IBM Plex Mono", monospace; font-size: .78rem; color: var(--accent);
+             font-variant-numeric: tabular-nums; }
+  .beat p { color: var(--ink-2); font-size: .95rem; }
+  .beat p b { color: var(--ink); font-weight: 600; }
+  .quote { color: var(--ink); font-style: italic; }
+
+  footer { margin-top: 68px; padding-top: 22px; border-top: 1px solid var(--line);
+           font-size: .86rem; color: var(--ink-3); display: flex; flex-direction: column; gap: 10px; }
+  footer a { color: var(--ink-2); }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  @media (max-width: 560px) {
+    .wrap { padding: 0 18px 72px; }
+    .row, .beat { grid-template-columns: 1fr; gap: 6px; }
+    .decision { grid-template-columns: 1fr; }
+    .decision .dnum { grid-row: auto; }
+  }
+</style>
+
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow">Plan de trabajo · 10 horas · 3 personas</div>
+  <h1>Segundo&nbsp;Cerebro&nbsp;Dante</h1>
+  <p class="lede">Un agente que no vive en una ventana de chat: vive en la mesa de noche. Recuerda por vos, te dice quién es la persona que acaba de entrar, y tiene cara de perro.</p>
+  <div class="chips">
+    <span class="chip">Firmware propia · Arduino</span>
+    <span class="chip">Protocolo propio</span>
+    <span class="chip">USB o WiFi</span>
+    <span class="chip">OpenAI Realtime</span>
+    <span class="chip">Memoria local en SQLite</span>
+    <span class="chip">Búsqueda web</span>
+    <span class="chip">Visión opcional</span>
+    <span class="chip">Local o en la nube</span>
+  </div>
+</header>
+
+<!-- 01 HALLAZGO -->
+<section>
+  <div class="sechead"><span class="num">01</span><h2>El hallazgo que define el proyecto</h2></div>
+  <div class="col stack" style="margin-bottom:20px">
+    <p>La placa muestrea a 24 kHz. La Realtime API de OpenAI habla a 24 kHz. <strong>Es el mismo formato, byte por byte.</strong></p>
+  </div>
+  <div class="twocode" style="margin-bottom:20px">
+    <pre><i>// LAFVIN · main/boards/lafvin-aichatbot/config.h</i>
+#define AUDIO_INPUT_SAMPLE_RATE  <em>24000</em>
+#define AUDIO_OUTPUT_SAMPLE_RATE <em>24000</em></pre>
+    <pre><i># OpenAI Realtime · session.audio.input</i>
+"format": { "type": "audio/pcm",
+            "rate": <em>24000</em> }   <i># PCM16 mono</i></pre>
+  </div>
+  <div class="col stack">
+    <p>Se cae medio proyecto, y eso es una buena noticia. <strong>No hay Opus, ni resampleo, ni reconocimiento de voz, ni síntesis de voz, ni detección de fin de frase.</strong> El ESP32 lee del micrófono y manda bytes crudos; el servidor los mete al WebSocket de OpenAI; el audio que vuelve se escribe directo al parlante.</p>
+    <p>Y como <code>gpt-realtime-2</code> acepta texto, audio <em>e imagen</em> en la misma sesión, con llamadas a herramientas, la visión también entra por ahí. No hace falta un segundo modelo ni un segundo pipeline.</p>
+    <p class="hi">Esto es lo que hace realista escribir su propia firmware en un hackatón. Con Opus de por medio no lo era.</p>
+  </div>
+</section>
+
+<!-- 02 VEREDICTO -->
+<section>
+  <div class="sechead"><span class="num">02</span><h2>Veredicto sobre la idea</h2></div>
+  <div class="col stack" style="margin-bottom:22px">
+    <p>Encaja con el reto casi demasiado bien: la lista de ejemplos termina literalmente en <em>"en la sala: voz, visión, wearables, robótica e interfaces del mundo físico"</em>. Ustedes tienen las tres.</p>
+    <p>Lo más fuerte no es el hardware, es la elección de usuario. Para casi todo el mundo, que un modelo olvide es una molestia. Para alguien con deterioro de memoria, <strong>la amnesia del modelo y la amnesia de la persona son el mismo problema</strong>, y resolverla es el producto entero. Eso convierte "memoria" de feature en tesis.</p>
+  </div>
+  <div class="grid2">
+    <div class="card verdict-yes">
+      <div class="kicker" style="color:var(--good)">A favor</div>
+      <ul class="tight">
+        <li class="hi"><strong>El formato de audio coincide.</strong> Sin ese golpe de suerte, escribir firmware propia en un día era imposible.</li>
+        <li><strong>Una sola llave de API cubre todo el pipeline.</strong> Voz, visión, razonamiento, embeddings. Historia de instalación limpísima para el usuario final.</li>
+        <li><strong>La mascota no es adorno.</strong> Con este usuario, la cara es lo que hace que el aparato se use. Un cubo negro que habla se apaga; un perro que parpadea, no.</li>
+      </ul>
+    </div>
+    <div class="card verdict-no">
+      <div class="kicker" style="color:var(--crit)">Lo que hay que arreglar antes de codear</div>
+      <ul class="tight">
+        <li class="hi"><strong>Un agente que alucina recuerdos es dañino aquí.</strong> Si le inventa a alguien que su hija vino ayer, el daño es real. Regla dura: solo afirma hechos personales que salieron de la base, con fecha y fuente; si no lo tiene, dice que no lo tiene. No es una limitación, es la línea del pitch.</li>
+        <li><strong>Nada de lenguaje clínico.</strong> No es terapia, ni diagnóstico, ni dispositivo médico. Es un compañero de memoria cotidiana y una herramienta para quien cuida.</li>
+        <li><strong>Nadie del equipo ha tocado un ESP32.</strong> Eso no mata el plan, pero mueve toda la firmware a la semana previa. Ver decisión 01.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 03 DECISIONES -->
+<section>
+  <div class="sechead"><span class="num">03</span><h2>Las cuatro decisiones que sostienen todo</h2></div>
+  <p class="col" style="color:var(--ink-2); margin-bottom:22px">Con 10 horas y 3 personas, el día del evento no puede tener ni una hora de riesgo de hardware.</p>
+
+  <div class="stack-lg">
+    <div class="card decision">
+      <div class="dnum">01</div>
+      <div class="dbody">
+        <h3>Firmware en Arduino, escrita antes del evento. El día D es solo del agente.</h3>
+        <p>El sketch lo escribo yo, así que el riesgo deja de ser "aprender C++ embebido" y pasa a ser "flashear, probar y decir qué falla" — que es mucho más manejable. Arduino IDE ya está instalado, la curva desaparece, y el cliente de WiFi y WebSocket es de tres líneas en vez de treinta. La firmware es la vara más larga y es <strong>completamente independiente del agente</strong>: mueve audio y dibuja, nada más.</p>
+        <p>Meta de fase 0, y no hay más: <strong>el aparato reproduce por el parlante lo que le manda el PC, y le manda al PC lo que oye por el micrófono.</strong> Si eso funciona el viernes, el sábado son 10 horas limpias de agente.</p>
+        <div class="dsplit">
+          <div><div class="kicker">Cuánto código es</div><p>Unas 500 líneas de C++ en un sketch. Encima de <code>ESP_I2S</code> y <code>Wire</code> del core de Espressif, <code>WebSocketsClient</code> y LovyanGFX. La inicialización del ES8311 y el ES7210 la escribimos nosotros: son secuencias de registros por I2C, con los pines ya confirmados.</p></div>
+          <div><div class="kicker">Si no se termina a tiempo</div><p>El micrófono y el parlante del PC. El aparato queda solo como cara de Dante por el puerto serie, que es la parte fácil. Sigue habiendo demo físico y sigue habiendo agente.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card decision">
+      <div class="dnum">02</div>
+      <div class="dbody">
+        <h3>Los dos transportes, y una sola forma de configurarlos.</h3>
+        <p>El ancho de banda no es el problema en ninguno de los dos: PCM16 mono a 24 kHz son <strong>48 KB/s por dirección</strong>, y tanto el USB nativo del S3 como una WiFi normal lo mueven sin despeinarse. Así que la firmware trae los dos y elige en el arranque: <strong>si hay red configurada usa WebSocket; si no, usa el cable.</strong></p>
+        <p>La parte elegante es que no hace falta portal cautivo. Con el aparato conectado, <code>uv run dante setup</code> pregunta la red y la URL del servidor y se las escribe al dispositivo por el mismo puerto serie. <strong>Se configura desde la misma terminal que corre el agente</strong>, y después se puede desconectar el cable.</p>
+        <div class="dsplit">
+          <div><div class="kicker">Para qué sirve cada uno</div><p>USB para desarrollar y para el demo en vivo — no depende del WiFi del salón, que es el que se cae siempre. WiFi para el uso real: el aparato en la mesa de noche y el PC en otro cuarto, o el servidor en la nube.</p></div>
+          <div><div class="kicker">Del lado del servidor</div><p>Un módulo <code>transport.py</code> con dos implementaciones detrás de la misma interfaz. El servidor escucha por los dos a la vez y el agente ni se entera de por dónde entró el audio.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card decision">
+      <div class="dnum">03</div>
+      <div class="dbody">
+        <h3>Pulsar para hablar. Es el precio de Arduino, y sale barato.</h3>
+        <p>La placa trae cancelación de eco por hardware, pero esa función vive en <code>esp-sr</code>, que es un componente de ESP-IDF y no está disponible en Arduino. <strong>Sin ella, el micrófono oye al parlante.</strong> Con detección de turno automática eso tiene una consecuencia fea y concreta: Dante se oye a sí mismo, cree que alguien lo interrumpió, y se corta solo a mitad de frase.</p>
+        <p>La solución es apagar la detección automática y abrir el micrófono solo mientras se mantiene pulsado el botón BOOT. Se pierde poder interrumpirlo hablándole encima. <strong>Se gana que nunca falle</strong>, y con una persona mayor un botón físico grande probablemente sea mejor interfaz que un aparato que escucha siempre — que además es lo que la familia va a preguntar primero.</p>
+        <div class="dsplit">
+          <div><div class="kicker">Cómo se ve en el demo</div><p>Se apoya la mano en el aparato para hablarle. Dante pone la oreja mientras dura. Es legible desde el público, cosa que "está escuchando siempre" no es.</p></div>
+          <div><div class="kicker">Cómo se recupera después</div><p>Dos caminos: mover la firmware a ESP-IDF para usar el AEC de la placa, o cancelar el eco en el PC con <code>webrtc-audio-processing</code>, que ya tiene la señal de referencia porque él mismo la reprodujo. Post-hackatón.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card decision">
+      <div class="dnum">04</div>
+      <div class="dbody">
+        <h3>El nombre es la identidad. La cara es opcional.</h3>
+        <p>Una persona existe en la memoria con solo un nombre y una relación. La cara y la huella de voz son identificadores que se le <em>enganchan</em> después, no requisitos para crearla. El agente aprende nombres conversando —"mi hija Ana viene los martes"— y funciona completo sin cámara enchufada.</p>
+        <p>La cámara solo automatiza el "¿quién llegó?". Se activa poniendo un índice de dispositivo en el <code>.env</code>; si no hay, el agente pregunta en vez de adivinar. Cualquier webcam sirve porque va al PC, no a la placa.</p>
+        <div class="dsplit">
+          <div><div class="kicker">Por qué no al ESP32</div><p>Su USB es full speed: 12 Mbps, techo documentado de 640×480 para cámaras UVC, y la webcam de 1080p casi seguro no anuncia un modo compatible. Además el puerto ya lo usa el audio.</p></div>
+          <div><div class="kicker">Sorpresa en el <code>config.h</code></div><p>La placa <em>ya tiene pines de cámara DVP definidos</em> (XCLK 5, D0–D7, VSYNC 3, HREF 46, PCLK 7). Un módulo OV2640 sí se le puede conectar. Post-hackatón.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 ARQUITECTURA -->
+<section>
+  <div class="sechead"><span class="num">04</span><h2>Arquitectura</h2></div>
+  <figure>
+    <div class="figbox">
+      <svg viewBox="0 0 1040 552" role="img" aria-label="El audio viaja como PCM16 de 24 kHz sin convertirse en ningún punto: del micrófono del ESP32 por USB al servidor propio, y de ahí al WebSocket de OpenAI Realtime. El servidor intercepta las llamadas a herramientas para consultar la memoria y la visión.">
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+          <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#B95626"/>
+          </marker>
+        </defs>
+
+        <!-- dispositivo -->
+        <rect x="20" y="92" width="216" height="222" rx="10" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <text x="38" y="118" font-size="13.5" font-weight="600" fill="currentColor">Dispositivo LAFVIN</text>
+        <text x="38" y="136" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".6">ESP32-S3 · firmware nuestra</text>
+        <line x1="38" y1="148" x2="218" y2="148" stroke="currentColor" stroke-width="1" opacity=".3"/>
+        <text x="38" y="172" font-size="12" fill="currentColor" opacity=".85">ES7210 → 2 micrófonos</text>
+        <text x="38" y="194" font-size="12" fill="currentColor" opacity=".85">ES8311 → parlante</text>
+        <text x="38" y="216" font-size="12" fill="currentColor" opacity=".85">WiFi + puerto serie</text>
+        <text x="38" y="242" font-size="12" font-weight="600" fill="#B95626">ST7789 320×240 — Dante</text>
+        <text x="38" y="264" font-size="12" fill="currentColor" opacity=".85">BOOT = pulsar para hablar</text>
+        <text x="38" y="292" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".55">~500 líneas de Arduino</text>
+
+        <!-- flechas dispositivo <-> servidor -->
+        <line x1="236" y1="180" x2="330" y2="180" stroke="#B95626" stroke-width="1.8" marker-end="url(#a2)" marker-start="url(#a2)"/>
+        <text x="283" y="170" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#B95626">USB o WiFi</text>
+        <text x="283" y="196" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">PCM16 24 kHz</text>
+        <text x="283" y="209" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">48 KB/s por lado</text>
+
+        <line x1="330" y1="258" x2="238" y2="258" stroke="currentColor" stroke-width="1.4" marker-end="url(#a1)" opacity=".8"/>
+        <text x="284" y="249" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".65">{"emotion":"happy"}</text>
+
+        <!-- panel servidor -->
+        <rect x="334" y="46" width="344" height="428" rx="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="6 5" opacity=".45"/>
+        <text x="350" y="68" font-family="IBM Plex Mono, monospace" font-size="12" fill="currentColor" opacity=".62">TU CÓDIGO — el agente</text>
+
+        <rect x="352" y="82" width="308" height="42" rx="7" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".85"/>
+        <text x="506" y="101" text-anchor="middle" font-size="12.5" fill="currentColor">Puente de transporte</text>
+        <text x="506" y="116" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">USB hoy · WebSocket después</text>
+
+        <line x1="506" y1="124" x2="506" y2="152" stroke="currentColor" stroke-width="1.4" marker-end="url(#a1)" marker-start="url(#a1)"/>
+
+        <rect x="352" y="156" width="308" height="58" rx="8" fill="none" stroke="#B95626" stroke-width="2"/>
+        <text x="506" y="180" text-anchor="middle" font-size="13.5" font-weight="600" fill="#B95626">Sesión de voz</text>
+        <text x="506" y="199" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".6">orquesta · decide · guarda todo</text>
+
+        <line x1="428" y1="214" x2="428" y2="250" stroke="currentColor" stroke-width="1.4" marker-end="url(#a1)" marker-start="url(#a1)"/>
+        <line x1="586" y1="214" x2="586" y2="250" stroke="currentColor" stroke-width="1.4" marker-end="url(#a1)" marker-start="url(#a1)"/>
+
+        <rect x="352" y="252" width="152" height="68" rx="7" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".85"/>
+        <text x="428" y="274" text-anchor="middle" font-size="12.5" fill="currentColor">Visión</text>
+        <text x="428" y="291" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".58">webcam del PC</text>
+        <text x="428" y="306" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".58">opcional</text>
+
+        <rect x="510" y="252" width="150" height="68" rx="7" fill="none" stroke="#B95626" stroke-width="1.6"/>
+        <text x="585" y="274" text-anchor="middle" font-size="12.5" font-weight="600" fill="#B95626">Memoria</text>
+        <text x="585" y="291" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".58">SQLite + vectores</text>
+        <text x="585" y="306" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".58">personas · hechos</text>
+
+        <rect x="352" y="336" width="308" height="50" rx="7" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".85"/>
+        <text x="506" y="357" text-anchor="middle" font-size="12.5" fill="currentColor">Diario y recordatorios</text>
+        <text x="506" y="373" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">Trigger.dev</text>
+
+        <rect x="352" y="398" width="308" height="50" rx="7" fill="none" stroke="currentColor" stroke-width="1.3" opacity=".85"/>
+        <text x="506" y="419" text-anchor="middle" font-size="12.5" fill="currentColor">Panel del cuidador</text>
+        <text x="506" y="435" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">CopilotKit + Auth0</text>
+
+        <!-- OpenAI -->
+        <rect x="784" y="92" width="232" height="222" rx="10" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <text x="802" y="118" font-size="13.5" font-weight="600" fill="currentColor">OpenAI Realtime</text>
+        <text x="802" y="136" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".6">gpt-realtime-2</text>
+        <line x1="802" y1="148" x2="998" y2="148" stroke="currentColor" stroke-width="1" opacity=".3"/>
+        <text x="802" y="172" font-size="12" fill="currentColor" opacity=".85">voz → voz, sin pasos</text>
+        <text x="802" y="194" font-size="12" fill="currentColor" opacity=".85">acepta imagen</text>
+        <text x="802" y="216" font-size="12" fill="currentColor" opacity=".85">llama herramientas</text>
+        <text x="802" y="242" font-size="12" fill="currentColor" opacity=".85">turnos manuales</text>
+        <text x="802" y="270" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".55">sesión máx. 60 min</text>
+        <text x="802" y="292" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".55">$32 / $64 por M tokens</text>
+
+        <!-- flechas servidor <-> OpenAI -->
+        <line x1="680" y1="168" x2="780" y2="168" stroke="#B95626" stroke-width="1.8" marker-end="url(#a2)"/>
+        <text x="730" y="159" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#B95626">audio ↑</text>
+
+        <line x1="780" y1="204" x2="680" y2="204" stroke="#B95626" stroke-width="1.8" marker-end="url(#a2)"/>
+        <text x="730" y="195" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#B95626">audio ↓</text>
+        <text x="730" y="222" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">+ transcripción</text>
+
+        <line x1="780" y1="262" x2="680" y2="262" stroke="currentColor" stroke-width="1.4" marker-end="url(#a1)" marker-start="url(#a1)"/>
+        <text x="730" y="253" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".7">function_call</text>
+        <text x="730" y="280" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".7">↩ resultado</text>
+
+        <!-- webcam -->
+        <rect x="20" y="352" width="216" height="56" rx="10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="5 4"/>
+        <text x="38" y="376" font-size="12.5" font-weight="600" fill="currentColor">Webcam del PC</text>
+        <text x="38" y="394" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">opcional · cualquiera sirve</text>
+        <path d="M236 380 H 300 V 286 H 350" fill="none" stroke="currentColor" stroke-width="1.4" marker-end="url(#a1)" opacity=".8"/>
+
+        <!-- banner -->
+        <line x1="20" y1="500" x2="1016" y2="500" stroke="currentColor" stroke-width="1" opacity=".2"/>
+        <text x="518" y="527" text-anchor="middle" font-size="13" font-weight="600" fill="#B95626">Lo que no aparece en este diagrama: Opus, reconocimiento de voz, síntesis de voz, resampleo.</text>
+      </svg>
+    </div>
+    <figcaption>Los mismos bytes recorren todo el camino sin convertirse: del micrófono al parlante, el audio es PCM16 mono de 24 kHz de punta a punta. El servidor no procesa audio — lo reenvía, y se queda con las transcripciones y las llamadas a herramientas, que es donde vive la memoria.</figcaption>
+  </figure>
+</section>
+
+<!-- 05 QUÉ ES NUESTRO -->
+<section>
+  <div class="sechead"><span class="num">05</span><h2>Qué escribimos nosotros</h2></div>
+  <p class="col" style="color:var(--ink-2); margin-bottom:20px">Cero líneas de xiaozhi. Cero backend de terceros. Esta es la tabla para la pregunta del jurado.</p>
+  <div class="tablebox">
+    <table>
+      <thead><tr><th>Capa</th><th>Quién</th><th>Tamaño</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Drivers de I2S, ES8311, ES7210, ST7789</td><td>Componentes de Espressif</td><td>librería, como cualquier driver de sistema</td></tr>
+        <tr><td class="k">Firmware de aplicación — bucle de audio, USB, animación</td><td><strong>Nosotros</strong></td><td>~400 líneas de C++</td></tr>
+        <tr><td class="k">Protocolo dispositivo ⇄ PC</td><td><strong>Nosotros</strong></td><td>1 página de <code>PROTOCOL.md</code></td></tr>
+        <tr><td class="k">Orquestador de la sesión de voz</td><td><strong>Nosotros</strong></td><td>el corazón del agente</td></tr>
+        <tr><td class="k">Memoria: esquema, extractor, recuperación, procedencia</td><td><strong>Nosotros</strong></td><td>la tesis del proyecto</td></tr>
+        <tr><td class="k">Visión: captura, rostros, inyección de imagen</td><td><strong>Nosotros</strong></td><td>módulo opcional</td></tr>
+        <tr><td class="k">Personalidad, diario, recordatorios, panel</td><td><strong>Nosotros</strong></td><td>todo</td></tr>
+        <tr><td class="k">Modelos</td><td>OpenAI (y OpenRouter si el usuario quiere otro)</td><td>API</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 06 PRODUCTO -->
+<section>
+  <div class="sechead"><span class="num">06</span><h2>Las cuatro cosas que tiene que hacer</h2></div>
+  <p class="col" style="color:var(--ink-2); margin-bottom:22px">Nada más entra al alcance de las 10 horas.</p>
+  <div class="grid2">
+    <div class="card">
+      <div class="kicker">Feature 1 — el momento del demo</div>
+      <h3>El Diario</h3>
+      <p>La primera interacción del día no la arranca el usuario. Dante despierta, saluda por nombre y hace el resumen: qué día es, qué pasó ayer, quién vino, qué hay hoy. Es la escena de <em>Como si fuera la primera vez</em>, pero en vez de un video en VHS es un agente que se actualiza solo con lo que pasó de verdad.</p>
+    </div>
+    <div class="card">
+      <div class="kicker">Feature 2 — nombre primero, cara después</div>
+      <h3>Registro de personas</h3>
+      <p>Cada persona vive en la memoria con nombre y relación. Si hay cámara, un rostro conocido la activa sola: "Es Ana, tu hija. Vino el martes, trajo el pastel." Si no hay cámara, el usuario lo dice y funciona igual. Nunca adivina: cuando no está seguro, pregunta.</p>
+    </div>
+    <div class="card">
+      <div class="kicker">Feature 3 — la tesis</div>
+      <h3>Memoria con procedencia</h3>
+      <p>Cada hecho guardado lleva fecha, fuente y confianza. El agente puede afirmar únicamente lo que <code>recall()</code> le devolvió, y cuando no tiene el dato lo dice sin adornos. Un segundo cerebro que inventa recuerdos es peor que no tener ninguno.</p>
+    </div>
+    <div class="card">
+      <div class="kicker">Feature 4 — la cara</div>
+      <h3>Dante</h3>
+      <p>El servidor manda una emoción por el mismo cable cada vez que pasa algo: escuchando, pensando, hablando, reconoció a alguien, no sabe. La firmware la traduce en animación. La lógica está en el PC; el dibujo, en la placa.</p>
+    </div>
+  </div>
+
+  <div style="height:20px"></div>
+  <div class="kicker" style="margin-bottom:10px">Emociones → animación · las cinco primeras son el mínimo viable</div>
+  <div class="emos">
+    <div class="emo"><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></div><b>idle</b><span>Respira. Parpadeo cada 4 s.</span></div>
+    <div class="emo"><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></div><b>listening</b><span>Una oreja se levanta.</span></div>
+    <div class="emo"><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></div><b>thinking</b><span>Cabeza ladeada, ojos arriba.</span></div>
+    <div class="emo"><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></div><b>talking</b><span>Boca sincronizada al audio.</span></div>
+    <div class="emo"><div class="dots"><i class="on"></i><i class="on"></i><i class="on"></i></div><b>happy</b><span>Cola y orejas arriba.</span></div>
+    <div class="emo"><div class="dots"><i class="on"></i><i></i><i></i></div><b>sleepy</b><span>Se acuesta tras 5 min.</span></div>
+    <div class="emo"><div class="dots"><i class="on"></i><i></i><i></i></div><b>loving</b><span>Reconoció a un familiar.</span></div>
+    <div class="emo"><div class="dots"><i class="on"></i><i></i><i></i></div><b>confused</b><span>No tiene el dato.</span></div>
+    <div class="emo"><div class="dots"><i class="on"></i><i></i><i></i></div><b>alert</b><span>Recordatorio de medicación.</span></div>
+    <div class="emo"><div class="dots"><i class="on"></i><i></i><i></i></div><b>surprised</b><span>Cara nueva sin registrar.</span></div>
+  </div>
+</section>
+
+<!-- 07 HERRAMIENTAS -->
+<section>
+  <div class="sechead"><span class="num">07</span><h2>Las herramientas del agente</h2></div>
+  <div class="col stack" style="margin-bottom:22px">
+    <p>Dante no es solo memoria: también contesta. Quién pintó la Mona Lisa, qué hora es en Madrid, qué noticias hay hoy, cómo va a estar el clima. Para alguien que pasa el día solo en casa, esa es la mitad del valor.</p>
+    <p>Pero eso abre un riesgo que hay que cerrar en el prompt, porque el hábito de contestar todo se contagia.</p>
+  </div>
+
+  <div class="grid2" style="margin-bottom:20px">
+    <div class="card verdict-yes">
+      <div class="kicker" style="color:var(--good)">Sobre el mundo — puede responder</div>
+      <p class="hi">"¿Quién pintó la Mona Lisa?" · "¿Qué hora es en Tokio?" · "¿Qué pasó con el partido?"</p>
+      <p>Responde de lo que sabe, o busca. Puede decir "creo que" y equivocarse sin consecuencias. Si buscó, cita de dónde salió.</p>
+    </div>
+    <div class="card verdict-no">
+      <div class="kicker" style="color:var(--crit)">Sobre tu vida — solo desde la memoria</div>
+      <p class="hi">"¿Quién vino ayer?" · "¿Cómo se llamaba el perro?" · "¿Ya me tomé la pastilla?"</p>
+      <p>Únicamente lo que <code>recall()</code> devolvió, con fecha y fuente. Nunca de lo que le parece. Si no está, dice que no está y ofrece anotarlo.</p>
+    </div>
+  </div>
+
+  <div class="tablebox" style="margin-bottom:18px">
+    <table>
+      <thead><tr><th>Herramienta</th><th>Para qué</th><th>Cómo</th></tr></thead>
+      <tbody>
+        <tr><td class="k mono">recall</td><td>Buscar en la memoria personal</td><td>Nuestra · SQLite + vectores</td></tr>
+        <tr><td class="k mono">remember</td><td>Guardar un hecho nuevo con fecha y fuente</td><td>Nuestra · SQLite</td></tr>
+        <tr><td class="k mono">quien_esta</td><td>Quién está enfrente ahora mismo</td><td>Nuestra · rostro, o pregunta directa</td></tr>
+        <tr><td class="k mono">registrar_persona</td><td>Dar de alta a alguien con nombre y relación</td><td>Nuestra · con o sin foto</td></tr>
+        <tr><td class="k mono">agenda</td><td>Medicación, citas, qué hay hoy</td><td>Nuestra · SQLite</td></tr>
+        <tr><td class="k mono">buscar_web</td><td>Noticias, resultados, precios, cualquier cosa de hoy</td><td><strong>Exa</strong> · devuelve las fuentes</td></tr>
+        <tr><td class="k mono">hora_en</td><td>Hora en cualquier ciudad del mundo</td><td><code>zoneinfo</code> local · sin API, instantáneo</td></tr>
+        <tr><td class="k mono">clima</td><td>Clima de hoy y mañana</td><td>Open-Meteo · gratis, sin llave</td></tr>
+        <tr><td class="k mono">mirar</td><td>Ver qué hay enfrente</td><td>Nuestra · frame de la webcam al mismo socket</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout col">
+    <div class="kicker" style="color:var(--accent-2)">Dos cosas que definen si esto se siente bien o mal</div>
+    <ul class="tight">
+      <li class="hi"><strong>No todo necesita búsqueda.</strong> Quién pintó la Mona Lisa el modelo ya lo sabe. Mandar cada pregunta a la web agrega dos o tres segundos y mata la conversación. La descripción de <code>buscar_web</code> tiene que decir explícitamente que es para <em>lo de hoy</em> —noticias, clima, resultados, precios, eventos recientes— y dejar que el modelo decida el resto. En un agente de voz, <strong>la descripción de la herramienta rinde más que el prompt de sistema</strong>.</li>
+      <li class="hi"><strong>El silencio de una búsqueda se siente eterno hablando.</strong> Dos arreglos baratos: la animación <span class="mono">thinking</span> de Dante, que ya existe, y una instrucción para que diga una frase corta antes de buscar — "dame un segundo, lo miro". Con eso los tres segundos dejan de parecer una caída.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 08 MEMORIA -->
+<section>
+  <div class="sechead"><span class="num">08</span><h2>Cómo funciona la memoria</h2></div>
+  <div class="col stack" style="margin-bottom:22px">
+    <p>El truco no es guardar todo, es que <strong>escribir y leer van a ritmos distintos</strong>. Escribir es caro y se hace por lotes al cerrar la conversación. Leer pasa en cada turno y tiene que costar casi nada.</p>
+    <p>Con Realtime hay un detalle que aprovechar: la sesión ya emite la transcripción de las dos voces. Ahí está el material para la memoria, gratis, sin transcribir aparte. La tarjeta de perfil se inyecta en <code>instructions</code> al abrir la sesión, y <code>recall()</code> queda como herramienta para lo que no cabe.</p>
+  </div>
+
+  <figure style="margin-bottom:24px">
+    <div class="figbox">
+      <svg viewBox="0 0 940 268" role="img" aria-label="Las transcripciones de la sesión se guardan crudas; al cerrar, un extractor las convierte en hechos con fecha y fuente; la sesión siguiente abre con la tarjeta de perfil inyectada y consulta el resto con la herramienta recall.">
+        <defs>
+          <marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+          <marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#B95626"/>
+          </marker>
+        </defs>
+
+        <text x="20" y="24" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".55">ESCRITURA — una vez por sesión</text>
+
+        <rect x="20" y="38" width="170" height="56" rx="7" fill="none" stroke="currentColor" stroke-width="1.3"/>
+        <text x="105" y="62" text-anchor="middle" font-size="12.5" fill="currentColor">Transcripción</text>
+        <text x="105" y="79" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">la da Realtime</text>
+
+        <line x1="190" y1="66" x2="234" y2="66" stroke="currentColor" stroke-width="1.4" marker-end="url(#m1)"/>
+        <text x="212" y="57" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">al cerrar</text>
+
+        <rect x="238" y="38" width="180" height="56" rx="7" fill="none" stroke="currentColor" stroke-width="1.3"/>
+        <text x="328" y="62" text-anchor="middle" font-size="12.5" fill="currentColor">Extractor de hechos</text>
+        <text x="328" y="79" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">GPT-5.6, salida estructurada</text>
+
+        <line x1="418" y1="66" x2="462" y2="66" stroke="currentColor" stroke-width="1.4" marker-end="url(#m1)"/>
+        <text x="440" y="57" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".6">upsert</text>
+
+        <rect x="466" y="30" width="232" height="72" rx="7" fill="none" stroke="#B95626" stroke-width="1.8"/>
+        <text x="582" y="54" text-anchor="middle" font-size="12.5" font-weight="600" fill="#B95626">Hechos con procedencia</text>
+        <text x="582" y="72" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".62">facts · people · events</text>
+        <text x="582" y="88" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".62">+ fecha, fuente, confianza</text>
+
+        <line x1="698" y1="66" x2="742" y2="66" stroke="currentColor" stroke-width="1.4" marker-end="url(#m1)"/>
+        <rect x="746" y="38" width="174" height="56" rx="7" fill="none" stroke="currentColor" stroke-width="1.3"/>
+        <text x="833" y="62" text-anchor="middle" font-size="12.5" fill="currentColor">Panel del cuidador</text>
+        <text x="833" y="79" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">corrige y aprueba</text>
+
+        <text x="20" y="156" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#B95626">LECTURA</text>
+
+        <path d="M582 102 V 178 H 424" fill="none" stroke="#B95626" stroke-width="1.6" marker-end="url(#m2)"/>
+        <text x="596" y="142" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".65">tarjeta de perfil → instructions</text>
+        <text x="596" y="156" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".5">una vez, al abrir la sesión</text>
+
+        <path d="M582 102 V 226 H 424" fill="none" stroke="currentColor" stroke-width="1.4" marker-end="url(#m1)" opacity=".8"/>
+        <text x="596" y="222" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".65">recall() → herramienta</text>
+        <text x="596" y="236" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".5">cuando el modelo lo pide</text>
+
+        <rect x="228" y="176" width="196" height="60" rx="7" fill="none" stroke="currentColor" stroke-width="1.3"/>
+        <text x="326" y="200" text-anchor="middle" font-size="12.5" fill="currentColor">Sesión de voz</text>
+        <text x="326" y="218" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">gpt-realtime-2</text>
+
+        <line x1="228" y1="206" x2="190" y2="206" stroke="currentColor" stroke-width="1.4" marker-end="url(#m1)"/>
+        <rect x="20" y="178" width="170" height="56" rx="7" fill="none" stroke="currentColor" stroke-width="1.3"/>
+        <text x="105" y="202" text-anchor="middle" font-size="12.5" fill="currentColor">Dante habla</text>
+        <text x="105" y="219" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">solo lo recuperado</text>
+      </svg>
+    </div>
+    <figcaption>La misma base se escribe por lotes y se lee de dos formas: la tarjeta de perfil entra una sola vez al abrir la sesión, y el resto lo pide el modelo con una herramienta. El panel del cuidador es la única entrada humana, y existe porque una memoria mal extraída hay que poder corregirla.</figcaption>
+  </figure>
+
+  <div class="tablebox">
+    <table>
+      <thead><tr><th>Tabla</th><th>Guarda</th><th>Se escribe</th><th>Se lee</th></tr></thead>
+      <tbody>
+        <tr><td class="k mono">people</td><td><strong>Nombre y relación</strong> — lo único obligatorio. Foto, embedding facial, huella vocal y notas son opcionales</td><td>Conversando o desde el panel</td><td>Siempre en la tarjeta de perfil</td></tr>
+        <tr><td class="k mono">facts</td><td>Hechos atómicos: rutinas, gustos, historia. Con <code>fecha</code>, <code>fuente</code>, <code>confianza</code></td><td>Extractor al cerrar sesión, o a mano</td><td>Los de más confianza en la tarjeta; el resto por <code>recall()</code></td></tr>
+        <tr><td class="k mono">episodes</td><td>Transcripción por sesión + resumen + embedding</td><td>Durante y al cerrar</td><td>Búsqueda por similitud</td></tr>
+        <tr><td class="k mono">events</td><td>Medicación, citas, visitas ocurridas</td><td>Panel y conversación</td><td>Diario matutino y disparo por hora</td></tr>
+        <tr><td class="k mono">snapshots</td><td>Foto + descripción, con hora</td><td>Cuando el agente decide mirar</td><td>"¿dónde dejé las llaves?"</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 08 STACK -->
+<section>
+  <div class="sechead"><span class="num">09</span><h2>Stack y patrocinadores</h2></div>
+  <p class="col" style="color:var(--ink-2); margin-bottom:20px">Una sola llave de OpenAI cubre voz, visión, razonamiento y embeddings. Eso hace que la instalación para el usuario final sea de verdad de cinco pasos.</p>
+  <div class="tablebox" style="margin-bottom:16px">
+    <table>
+      <thead><tr><th>Pieza</th><th>Elección</th><th>Por qué</th></tr></thead>
+      <tbody>
+        <tr><td class="k">Voz completa</td><td><code>gpt-realtime-2</code> · voz <span class="mono">marin</span> o <span class="mono">cedar</span></td><td>Voz, visión y herramientas en un solo socket. Elimina ASR, TTS y VAD del proyecto. Con turnos manuales: <code>turn_detection: null</code>.</td></tr>
+        <tr><td class="k">Extractor y diario</td><td>GPT-5.6 <span class="mono">Terra</span>, o <span class="mono">Luna</span> para abaratar</td><td>No es interactivo: la calidad de extracción vale más que la latencia. Salida estructurada obligatoria.</td></tr>
+        <tr><td class="k">Búsqueda en memoria</td><td><code>text-embedding-3-small</code></td><td>$0.02 por millón de tokens. Indexar toda la memoria de una persona cuesta centavos.</td></tr>
+        <tr><td class="k">Elección de modelo</td><td><strong>OpenRouter</strong> como <code>base_url</code> alterna</td><td>Cliente compatible con OpenAI: cambiar de modelo es una variable de entorno. El socket de voz sigue directo con OpenAI.</td></tr>
+        <tr><td class="k">Trabajos en segundo plano</td><td><strong>Trigger.dev</strong></td><td>Consolidación nocturna, recordatorios de medicación, disparo del diario. Encaja natural: son tareas programadas que no viven en la conversación.</td></tr>
+        <tr><td class="k">Panel del cuidador</td><td><strong>CopilotKit</strong> + <strong>Auth0</strong></td><td>La familia le pregunta al panel "¿cómo estuvo mamá esta semana?" sobre la misma memoria, con login real. Solo si sobra tiempo.</td></tr>
+        <tr><td class="k">Ventana al mundo</td><td><strong>Exa</strong> · búsqueda para agentes</td><td>Noticias, resultados, precios, cualquier cosa posterior al entrenamiento. Devuelve contenido ya sintetizado, que es justo lo que necesita una respuesta hablada.</td></tr>
+        <tr><td class="k">Servidor y base</td><td>Python 3.12 · FastAPI · SQLite + <code>sqlite-vec</code> · <code>uv</code></td><td>Un archivo de base de datos, cero servicios, se respalda copiándolo.</td></tr>
+        <tr><td class="k">Firmware</td><td>Arduino IDE · core ESP32 3.x · <code>ESP_I2S</code>, <code>WebSocketsClient</code>, LovyanGFX, <code>Preferences</code></td><td>Ya está instalado y el WiFi es trivial. LovyanGFX en vez de TFT_eSPI porque se configura en código: la configuración vive en nuestro repo y no en la carpeta de la librería, que es lo que rompe los clones ajenos.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout col">
+    <div class="kicker" style="color:var(--accent-2)">Cuatro trampas que ahorran horas</div>
+    <ul class="tight">
+      <li class="hi"><code>whisper-1</code> y <code>gpt-4o-transcribe</code> <strong>están deprecados</strong> (apagón 26/feb/2027). Con Realtime no se necesitan; si alguien los mete por costumbre, sáquenlos.</li>
+      <li class="hi">La sesión de Realtime <strong>dura 60 minutos como máximo</strong>. Hay que reconectar y reinyectar la tarjeta de perfil. Si no lo manejan, el demo largo se cae solo.</li>
+      <li class="hi">El audio cuesta <strong>$32 / $64 por millón de tokens</strong>. Es la línea cara del proyecto: pongan un tope de gasto y cierren la sesión cuando no haya nadie hablando.</li>
+      <li class="hi">Los IDs de modelo y los precios cambian rápido. <strong>Verifíquenlos contra el dashboard el día cero</strong> antes de hardcodearlos — los de aquí salieron de documentación pública, no de su cuenta.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 09 FASE 0 -->
+<section>
+  <div class="sechead"><span class="num">10</span><h2>Fase 0 — la semana previa</h2></div>
+  <p class="col" style="color:var(--ink-2); margin-bottom:22px">Esta es la parte que decide el proyecto. <strong>Yo escribo los sketches; ustedes flashean, prueban y me dicen qué falla.</strong> El ciclo es corto y cada paso deja algo verificable. Repartido entre dos personas son dos o tres tardes.</p>
+  <div class="tl">
+    <div class="row">
+      <div class="rail">0.1 · 1 h</div>
+      <div class="rbody">
+        <h3>Dejar el Arduino IDE listo</h3>
+        <p>Core ESP32 3.x instalado, placa <span class="mono">ESP32S3 Dev Module</span>, y en las opciones: <strong>PSRAM en OPI, USB CDC On Boot activado, partición con espacio</strong>. Flashear un blink. Suena tonto, pero ahí está la mitad del dolor, incluido descubrir cuál de los dos puertos USB-C es cuál.</p>
+      </div>
+    </div>
+    <div class="row milestone">
+      <div class="rail">0.2 · 2 h</div>
+      <div class="rbody">
+        <h3>Eco de audio — el hito real</h3>
+        <p>Inicializar el ES8311 y el ES7210 por I2C y hacer un bucle: leer del micrófono, escribir al parlante. <strong>Si te escuchas con retardo, los códecs están bien y ya pasó lo difícil.</strong> Todo lo demás son bytes yendo de un lado a otro. Aquí también se despeja si el core de Arduino aguanta I2S full-duplex en este par de chips, que es el riesgo número uno.</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="rail">0.3 · 2 h</div>
+      <div class="rbody">
+        <h3>Transporte por USB</h3>
+        <p>El mismo audio, pero al PC por el puerto serie nativo, y reproducir lo que llegue de vuelta. Del lado de Python, un script que grabe un WAV y reproduzca otro. Guardar el formato exacto en <code>PROTOCOL.md</code>.</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="rail">0.4 · 2 h</div>
+      <div class="rbody">
+        <h3>Transporte por WiFi y <code>dante setup</code></h3>
+        <p>El mismo audio por WebSocket. El comando <code>dante setup</code> pregunta red, contraseña y URL del servidor, y se las escribe al aparato por serie con <code>Preferences</code>. Desconectar el cable y verificar que sigue funcionando. <strong>Con esto la firmware está terminada para el MVP.</strong></p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="rail">0.5 · 2 h</div>
+      <div class="rbody">
+        <h3>Pantalla y canal de control</h3>
+        <p>LovyanGFX encendido con Dante quieto, y mensajes del PC al aparato por el transporte que esté activo: <code>{"emotion":"happy"}</code> cambia lo que se ve. El dibujo va en el segundo núcleo para que no compita con el audio. Con el canal abierto, el día D solo hay que mapear emociones.</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="rail">0.6 · 2 h</div>
+      <div class="rbody">
+        <h3>Probar Realtime con un script suelto</h3>
+        <p>Treinta líneas de Python: abrir la sesión con <code>turn_detection: null</code>, mandar un WAV de 24 kHz, guardar lo que devuelve, y confirmar que una herramienta de prueba se dispara. <strong>Valida la mitad del día D sin escribir el agente.</strong> Confirmar aquí los IDs de modelo y poner el tope de gasto.</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="rail">0.7 · paralelo</div>
+      <div class="rbody">
+        <h3>Dibujar a Dante y sembrar datos</h3>
+        <p>Diez estados, mismo tamaño, pocos frames. Y en paralelo, escribir a mano la persona de ejemplo: nombre, tres familiares, quince hechos, dos medicamentos, tres episodios con fecha. <strong>Sin pasado sembrado no hay nada que recordar en el demo.</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 DIA D -->
+<section>
+  <div class="sechead"><span class="num">11</span><h2>Día D — 10 horas, 3 personas</h2></div>
+  <p class="col" style="color:var(--ink-2); margin-bottom:22px">Arranca con el aparato ya funcionando. Cada hito es un estado demostrable: si el reloj se acaba después del hito 1, todavía hay algo que mostrar. Las filas amarillas son cortes obligatorios — llegar sin el hito significa recortar, no apurarse.</p>
+
+  <div class="grid3" style="margin-bottom:24px">
+    <div class="card mark"><div class="kicker">Persona A</div><h3>Sesión de voz</h3><p>Puente, socket de Realtime, herramientas, prompt de personalidad, reconexión a los 60 min. Es la ruta crítica de H0 a H2.</p></div>
+    <div class="card mark"><div class="kicker">Persona B</div><h3>Memoria</h3><p>Esquema, extractor, recuperación, tarjeta de perfil. Arranca en paralelo desde H0 contra transcripciones falsas, sin esperar a A.</p></div>
+    <div class="card mark"><div class="kicker">Persona C</div><h3>Visión, panel y demo</h3><p>Rostros, panel, el diario, el guion, el video de respaldo. Es quien garantiza que haya algo que mostrar.</p></div>
+  </div>
+
+  <div class="tl">
+    <div class="row">
+      <div class="rail">H0 – H0.5</div>
+      <div class="rbody"><h3>Arranque</h3><p>Repo, <code>.env</code>, dependencias, el aparato conectado y sonando. Diez minutos de acuerdo sobre el esquema de la base para que B no se bloquee después.</p></div>
+    </div>
+    <div class="row">
+      <div class="rail">H0.5 – H2</div>
+      <div class="rbody"><h3>Voz de punta a punta</h3><p>Puente → sesión de Realtime → parlante, con el botón abriendo y cerrando el turno. Probar por USB y por WiFi. Sin memoria, sin visión, sin animación.</p></div>
+    </div>
+    <div class="row milestone">
+      <div class="rail">H2 · hito 1</div>
+      <div class="rbody"><h3>Conversa</h3><p>Mantenés el botón, le hablás, lo soltás y te contesta con voz natural. Por cable y por red. A partir de aquí siempre hay demo.</p></div>
+    </div>
+
+    <div class="row">
+      <div class="rail">H2 – H4.5</div>
+      <div class="rbody"><h3>Memoria</h3><p>Esquema en SQLite, <code>recall</code> y <code>remember</code> como herramientas de la sesión, tarjeta de perfil en <code>instructions</code>, guardado de transcripciones, extractor al cerrar. Cargar los datos sembrados en fase 0.6.</p></div>
+    </div>
+    <div class="row milestone">
+      <div class="rail">H4.5 · hito 2</div>
+      <div class="rbody"><h3>Recuerda</h3><p>Le contás algo, cerrás la sesión, volvés y lo sabe — con fecha. Y cuando no lo sabe, lo dice.</p></div>
+    </div>
+    <div class="row cut">
+      <div class="rail">H4.5 · corte</div>
+      <div class="rbody"><h3>Sin hito 2 se cae la visión</h3><p>La memoria es el producto. Los tres se mueven a memoria hasta que funcione.</p></div>
+    </div>
+
+    <div class="row">
+      <div class="rail">H4.5 – H5.5</div>
+      <div class="rbody"><h3>Herramientas del mundo <span style="color:var(--ink-3);font-weight:400">· en paralelo, persona B</span></h3><p>Búsqueda con Exa, hora con <code>zoneinfo</code>, clima con Open-Meteo. Son tres funciones cortas y le dan al demo la mitad de su gracia. Lo que cuesta no es el código: es escribir bien la descripción de <code>buscar_web</code> para que no se use de más.</p></div>
+    </div>
+    <div class="row">
+      <div class="rail">H4.5 – H6</div>
+      <div class="rbody"><h3>Dante reacciona <span style="color:var(--ink-3);font-weight:400">· personas A y C</span></h3><p>Mapear los eventos de la sesión a emociones y mandarlas por el canal de control. El ocioso: parpadeo y dormirse a los 5 min. Es visual y barato — vale más en el demo de lo que cuesta.</p></div>
+    </div>
+    <div class="row milestone">
+      <div class="rail">H6 · hito 3</div>
+      <div class="rbody"><h3>Tiene cara</h3><p>Dante escucha, piensa y se alegra en pantalla. Aquí el proyecto deja de parecer una demo técnica.</p></div>
+    </div>
+
+    <div class="row">
+      <div class="rail">H6 – H7.5</div>
+      <div class="rbody"><h3>Visión y nombres</h3><p>Webcam en el PC, rostro conocido → <code>people</code> → contexto en la sesión. Herramienta <code>mirar()</code> que inyecta un frame al mismo socket. Registrar una cara nueva desde el panel.</p></div>
+    </div>
+    <div class="row milestone">
+      <div class="rail">H7.5 · hito 4</div>
+      <div class="rbody"><h3>Te reconoce</h3><p>Alguien se para frente a la cámara y Dante dice quién es y cuándo vino la última vez.</p></div>
+    </div>
+
+    <div class="row">
+      <div class="rail">H7.5 – H8.5</div>
+      <div class="rbody"><h3>El Diario y el panel</h3><p>Briefing matutino disparado por hora o por primera detección. Panel en <code>localhost</code>: agregar persona con foto, corregir hechos, ver el día. CopilotKit y Auth0 solo si va sobrado.</p></div>
+    </div>
+    <div class="row">
+      <div class="rail">H8.5 – H9.5</div>
+      <div class="rbody"><h3>Instalación limpia y modo nube</h3><p>README con los pasos reales, <code>.env.example</code>, un comando para arrancar, Dockerfile. <strong>Probarlo en el portátil de otra persona desde cero.</strong> Es lo que los jueces miran después.</p></div>
+    </div>
+    <div class="row">
+      <div class="rail">H9.5 – H10</div>
+      <div class="rbody"><h3>Demo y respaldo</h3><p>Guion cronometrado, dos pasadas completas, <strong>y un video grabado del demo funcionando</strong>. Siempre falla algo en vivo.</p></div>
+    </div>
+  </div>
+
+  <div style="height:22px"></div>
+  <div class="card col">
+    <div class="kicker">Orden de sacrificio</div>
+    <ul class="tight">
+      <li>1. CopilotKit y Auth0 en el panel → HTML plano sin login.</li>
+      <li>2. Trigger.dev → un <code>asyncio</code> con un temporizador.</li>
+      <li>3. Panel entero → inserts a mano en SQLite.</li>
+      <li>4. Visión → se demuestra el registro de nombres por voz, que prueba lo mismo.</li>
+      <li class="hi">5. Nunca: voz y memoria. Sin esas dos no hay proyecto.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 11 DESPLIEGUE -->
+<section>
+  <div class="sechead"><span class="num">12</span><h2>Despliegue</h2></div>
+  <p class="col" style="color:var(--ink-2); margin-bottom:20px">Un solo código, dos modos. El aparato siempre se conecta por USB al PC que tenga enfrente; lo que cambia es dónde vive el cerebro.</p>
+  <div class="grid2" style="margin-bottom:18px">
+    <div class="card verdict-yes">
+      <div class="kicker" style="color:var(--good)">Modo local · por defecto</div>
+      <pre style="border:none; box-shadow:none; padding:0; background:none"><b>git clone …</b>
+<b>uv sync</b>
+cp .env.example .env   <i># pega tu API key</i>
+<b>uv run dante</b></pre>
+      <p>Puente, agente, memoria y panel en el mismo proceso. La base es un archivo en el disco del usuario. Es el modo que sostiene el argumento de privacidad y el que se demuestra en vivo.</p>
+    </div>
+    <div class="card">
+      <div class="kicker">Modo nube · opcional</div>
+      <pre style="border:none; box-shadow:none; padding:0; background:none"><i># en el PC, solo mueve bytes</i>
+<b>uv run dante bridge</b> --server wss://…
+
+<i># en el host</i>
+<b>docker run</b> dante/server</pre>
+      <p>El puente local queda de 50 líneas y el agente vive en Fly.io, Railway o donde sea. Habilita Auth0 en el panel y Trigger.dev para los trabajos programados. Los jueces pueden conectar su propio aparato.</p>
+    </div>
+  </div>
+  <div class="callout col">
+    <p><strong>Lo que hace falta para que un desconocido lo use:</strong> flashear la firmware (un <code>esptool</code> o un flasher web propio), conectar el USB, pegar una API key. Tres pasos. Escribir eso en el README el día D, no después — es lo que separa un proyecto de hackatón de uno que alguien clona.</p>
+  </div>
+</section>
+
+<!-- 12 RIESGOS -->
+<section>
+  <div class="sechead"><span class="num">13</span><h2>Riesgos</h2></div>
+  <div class="tablebox">
+    <table>
+      <thead><tr><th>Riesgo</th><th></th><th>Mitigación</th><th>Plan B</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="k">La fase 0 no termina y el aparato no mueve audio el día D</td>
+          <td><span class="pill p-crit">crítico</span></td>
+          <td>El hito de embebido es el eco de audio (0.2) y va primero. Yo escribo el sketch, así que el ciclo es flashear y reportar; si el lunes no hay eco, queda toda la semana para resolverlo</td>
+          <td>Micrófono y parlante del PC. El aparato queda solo como cara de Dante por el puerto serie — la parte fácil. Sigue habiendo demo físico</td>
+        </tr>
+        <tr>
+          <td class="k">El códec no se configura: ruido, silencio o distorsión</td>
+          <td><span class="pill p-crit">crítico</span></td>
+          <td>Pines confirmados del <code>config.h</code> de LAFVIN, y la secuencia de registros del ES8311 y el ES7210 copiada de los drivers de Espressif</td>
+          <td>Grabar a WAV desde el PC y abrirlo en Audacity: el gráfico dice de inmediato si es ganancia, formato o reloj</td>
+        </tr>
+        <tr>
+          <td class="k">El micrófono oye al parlante y Dante se interrumpe solo</td>
+          <td><span class="pill p-crit">crítico</span></td>
+          <td>Botón para hablar y <code>turn_detection: null</code>. El micrófono ni siquiera se abre mientras Dante habla</td>
+          <td>Si además hay acople físico, bajar el volumen y separar el parlante del micro unos centímetros</td>
+        </tr>
+        <tr>
+          <td class="k">La sesión de Realtime se corta a los 60 minutos</td>
+          <td><span class="pill p-warn">alto</span></td>
+          <td>Reconexión automática con reinyección de la tarjeta de perfil, escrita en H0.5–H2, no dejada para el final</td>
+          <td>Cerrar la sesión cuando no hay voz y abrir una nueva al hablar. Además baja el costo</td>
+        </tr>
+        <tr>
+          <td class="k">El costo del audio se dispara en las pruebas</td>
+          <td><span class="pill p-warn">alto</span></td>
+          <td>Tope de gasto en el dashboard desde el día cero, y cerrar la sesión en silencio</td>
+          <td>Probar la lógica de memoria con texto en vez de voz: es la parte que más iteraciones necesita y no cuesta casi nada</td>
+        </tr>
+        <tr>
+          <td class="k">Los IDs de modelo del plan ya no existen</td>
+          <td><span class="pill p-warn">alto</span></td>
+          <td>Verificarlos en el dashboard en fase 0.5 y dejarlos en el <code>.env</code>, nunca hardcodeados</td>
+          <td>Apuntar el cliente a OpenRouter y elegir cualquier modelo equivalente</td>
+        </tr>
+        <tr>
+          <td class="k">El extractor inventa o duplica hechos</td>
+          <td><span class="pill p-warn">alto</span></td>
+          <td>Salida estructurada estricta, campo de confianza obligatorio, y el agente solo afirma lo que <code>recall()</code> devolvió</td>
+          <td>Los hechos nuevos entran como "pendiente de aprobación" y el panel los confirma</td>
+        </tr>
+        <tr>
+          <td class="k">Reconocimiento facial poco confiable con la luz del salón</td>
+          <td><span class="pill p-good">medio</span></td>
+          <td>Umbral alto y solo tres personas registradas; ante duda, preguntar en vez de adivinar</td>
+          <td>El registro por nombre, que demuestra exactamente el mismo punto sin cámara</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 13 REPO -->
+<section>
+  <div class="sechead"><span class="num">14</span><h2>Estructura del repo</h2></div>
+  <pre><b>segundo-cerebro/</b>
+├── <b>README.md</b>              <i>instalación en 3 pasos + qué NO es (no es dispositivo médico)</i>
+├── <b>PROTOCOL.md</b>            <i>el contrato con el aparato, escrito por nosotros en fase 0.3</i>
+├── <b>.env.example</b>           <i>OPENAI_API_KEY, EXA_API_KEY, modelos, voz, cámara, ruta de la BD</i>
+├── <b>pyproject.toml</b>  <b>Dockerfile</b>
+├── <b>firmware/dante/</b>         <i>sketch de Arduino — nuestro, ~500 líneas</i>
+│   ├── dante.ino             <i>bucle principal, botón, máquina de estados</i>
+│   ├── codec.cpp            <i>init de ES8311 + ES7210 por I2C, pines de la placa</i>
+│   ├── transport_usb.cpp    <i>audio por el puerto serie nativo</i>
+│   ├── transport_wifi.cpp   <i>WebSocketsClient + Preferences</i>
+│   ├── pantalla.cpp         <i>LovyanGFX: animación de Dante en el ST7789</i>
+│   └── assets.h             <i>los 10 estados, como sprites en flash</i>
+├── <b>server/</b>
+│   ├── transport.py         <i>USB hoy; WebSocket detrás de la misma interfaz</i>
+│   ├── session.py           <i>socket de Realtime: audio, eventos, reconexión a 60 min</i>
+│   ├── tools_memoria.py     <i>recall, remember, quien_esta, registrar_persona, agenda</i>
+│   ├── tools_mundo.py       <i>buscar_web (Exa), hora_en, clima, mirar</i>
+│   ├── prompt.py            <i>personalidad + tarjeta de perfil + la regla de no inventar</i>
+│   └── emotions.py          <i>eventos de la sesión → emoción de Dante</i>
+├── <b>memory/</b>
+│   ├── schema.sql           <i>people, facts, episodes, events, snapshots</i>
+│   ├── store.py             <i>sqlite-vec, upserts con procedencia</i>
+│   └── consolidate.py       <i>extractor de fin de sesión + tarea nocturna</i>
+├── <b>vision/</b>               <i>opcional: captura, rostros, registro</i>
+├── <b>panel/</b>                <i>panel del cuidador</i>
+└── <b>seed/</b>                 <i>persona y familia de ejemplo — indispensable para el demo</i></pre>
+</section>
+
+<!-- 14 DEMO -->
+<section>
+  <div class="sechead"><span class="num">15</span><h2>Demo de tres minutos</h2></div>
+  <p class="col" style="color:var(--ink-2); margin-bottom:20px">Dos actores: quien hace de usuario y quien hace de familiar que llega. El aparato en la mesa, la webcam al lado. Todo lo que Dante dice sale de datos sembrados el día anterior — eso también se dice en voz alta.</p>
+  <div class="card">
+    <div class="beat"><div class="t">0:00</div><p><b>Sin hablar.</b> Dante duerme en la pantalla. Se ve el aparato completo, chiquito, en una mesa. Una frase: <span class="quote">"Esto no es una ventana de chat. Es lo primero que ve mi abuela cuando se despierta."</span></p></div>
+    <div class="beat"><div class="t">0:20</div><p><b>El diario.</b> El usuario se sienta. Dante despierta y saluda por nombre: hoy es martes, ayer hablaron del viaje a Villa de Leyva, Ana viene esta tarde, la pastilla azul a las 9. Nadie preguntó nada. <em>Aquí se gana o se pierde el demo.</em></p></div>
+    <div class="beat"><div class="t">1:00</div><p><b>La memoria funcionando.</b> "Dante, ¿cómo se llamaba el perro que tuvimos cuando los niños estaban chiquitos?" Responde con el dato y con la fecha en que se lo contaron. Enseguida, la contraparte: "¿y cuánto costó la casa?" — <span class="quote">"Eso no me lo has contado. ¿Querés que lo anote?"</span></p></div>
+    <div class="beat"><div class="t">1:25</div><p><b>Que también sirve para lo de todos los días.</b> "Dante, ¿qué hora es en Madrid? Mi nieto vive allá." Contesta al instante. "¿Y qué noticias hay hoy?" — dice una frase corta mientras busca, y resume tres. <em>Deja claro que no es un aparato de un solo truco.</em></p></div>
+    <div class="beat"><div class="t">1:40</div><p><b>La cara nueva.</b> Entra el segundo actor. Dante cambia a <span class="mono">loving</span>: "Es Ana, tu hija. La última vez vino el martes pasado y trajeron pastel." Un rostro, un registro, cero alucinación.</p></div>
+    <div class="beat"><div class="t">2:10</div><p><b>Quince segundos de panel.</b> El navegador en <code>localhost</code>: la familia agrega una persona y corrige un hecho mal extraído. Deja claro que hay un humano en el circuito y que los datos no se van a ninguna nube.</p></div>
+    <div class="beat"><div class="t">2:30</div><p><b>El cierre.</b> Terminal a la vista: <code>git clone</code>, <code>uv sync</code>, pegar la key, arrancar. <span class="quote">"El agente vive en la sala. El código vive en tu máquina. Los recuerdos también."</span></p></div>
+  </div>
+</section>
+
+<!-- 15 ETICA -->
+<section>
+  <div class="sechead"><span class="num">16</span><h2>La diapositiva que casi nadie lleva</h2></div>
+  <div class="grid3">
+    <div class="card mark">
+      <h3>No inventa</h3>
+      <p>El agente solo afirma hechos personales que salieron de la base, con su fecha. Cuando no tiene el dato dice que no lo tiene. Con este usuario, una respuesta segura y falsa es peor que ninguna respuesta.</p>
+    </div>
+    <div class="card mark">
+      <h3>No sale de la casa</h3>
+      <p>Transcripciones, rostros y hechos viven en un archivo SQLite en el PC del usuario. Solo el turno de conversación va a la API. Se apaga desconectando el cable y se respalda copiando un archivo.</p>
+    </div>
+    <div class="card mark">
+      <h3>No es un médico</h3>
+      <p>No diagnostica, no aconseja tratamientos, no reemplaza a nadie. Es un compañero de memoria cotidiana y una herramienta para quien cuida. Va escrito en el README y dicho en el pitch.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 16 VERIFICADO -->
+<section>
+  <div class="sechead"><span class="num">17</span><h2>Qué está verificado y qué no</h2></div>
+  <div class="grid2">
+    <div class="card verdict-yes">
+      <div class="kicker" style="color:var(--good)">Confirmado en el código y la documentación</div>
+      <ul class="tight">
+        <li><strong>24 kHz en ambos extremos.</strong> <code>config.h</code> de la placa y la especificación de audio de Realtime coinciden.</li>
+        <li><strong>Códec:</strong> ES8311 (parlante) + ES7210 (2 micrófonos), I2C en SDA <span class="mono">GPIO1</span> / SCL <span class="mono">GPIO2</span>. I2S: MCLK <span class="mono">38</span>, BCLK <span class="mono">14</span>, WS <span class="mono">13</span>, DIN <span class="mono">12</span>, DOUT <span class="mono">45</span>, PA_EN <span class="mono">48</span>.</li>
+        <li><strong>Pantalla:</strong> ST7789 320×240 apaisada, CS <span class="mono">47</span>, DC <span class="mono">39</span>, CLK <span class="mono">41</span>, MOSI <span class="mono">40</span>, luz <span class="mono">42</span>. Botones: BOOT <span class="mono">0</span>, shield <span class="mono">20</span> y <span class="mono">19</span>.</li>
+        <li><strong>La placa tiene AEC por hardware</strong>, pero vive en <code>esp-sr</code>, que es de ESP-IDF. En Arduino no lo tenemos — de ahí el botón para hablar.</li>
+        <li><strong>No existe ningún sketch de Arduino</strong> en el repo de LAFVIN — solo un proyecto ESP-IDF. No hay código base pequeño que reescribir.</li>
+        <li><strong>La placa ya define pines de cámara DVP.</strong> Un OV2640 es conectable más adelante; la webcam USB no.</li>
+        <li><strong>Realtime:</strong> acepta imagen, llama herramientas, tiene detección de turno semántica, y la sesión dura 60 minutos.</li>
+      </ul>
+    </div>
+    <div class="card verdict-no">
+      <div class="kicker" style="color:var(--crit)">Hay que comprobarlo en fase 0</div>
+      <ul class="tight">
+        <li class="hi"><strong>Los IDs de modelo y los precios.</strong> Salieron de documentación pública, no del dashboard de ustedes. Confírmenlos antes de escribirlos en el código.</li>
+        <li class="hi"><strong>El rendimiento real de los dos transportes</strong> con audio bidireccional continuo. En teoría sobra por ambos lados; midan USB en 0.3 y WiFi en 0.4.</li>
+        <li>Cuál de los dos puertos USB-C es el nativo y cuál el del conversor serie. Se descubre en cinco minutos en 0.1.</li>
+        <li>Si el core de Arduino maneja bien I2S full-duplex en este par de chips. Es el riesgo técnico número uno del cambio a Arduino, y se despeja en 0.2.</li>
+        <li>Si el bucle de audio deja CPU suficiente para animar el ST7789 con fluidez. Si no, bajar los cuadros por segundo de Dante — se nota poco.</li>
+        <li>La ganancia del micrófono del ES7210 a un metro de distancia, que es como se va a usar.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div><strong>Fuentes</strong></div>
+  <div>
+    <a href="https://github.com/lafvintech/LAFVIN-AI-Chatbot">Repo de LAFVIN — rama <code>src</code>, <code>config.h</code> de la placa</a> ·
+    <a href="https://lafvin-ai-chatbot.readthedocs.io/en/latest/Tutorial/tutorial.html">Tutorial y conexiones del kit</a> ·
+    <a href="https://developers.openai.com/api/docs/guides/realtime-conversations">Guía de Realtime</a> ·
+    <a href="https://developers.openai.com/api/docs/models/gpt-realtime-2">Modelo gpt-realtime-2</a> ·
+    <a href="https://docs.espressif.com/projects/esp-iot-solution/en/latest/usb/usb_host/usb_stream.html">Límites de USB en ESP32-S3</a>
+  </div>
+</footer>
+
+</div>
