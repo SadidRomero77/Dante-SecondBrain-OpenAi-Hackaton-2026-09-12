@@ -57,6 +57,23 @@ WebSocket ya delimita, así que no se usa cabecera:
 - **Trama binaria** → audio PCM16 crudo.
 - **Trama de texto** → el mismo JSON de control.
 
+**El servidor escucha y el aparato se conecta**, no al revés. Así el aparato
+necesita saber la dirección del PC una sola vez, y puede reconectar solo si el
+PC se reinicia. El puerto por defecto es el `8770`; si está ocupado, el servidor
+busca el siguiente libre — en una máquina ajena cualquier puerto puede estar
+tomado por un servicio del sistema.
+
+Solo se admite **un aparato a la vez**: el segundo recibe un cierre con el
+código 1013.
+
+### Los dos a la vez
+
+El servidor abre cable y WiFi al mismo tiempo y manda por los dos. Si solo hay
+uno conectado, el otro no hace nada. Se puede **desenchufar el cable a mitad de
+una conversación y seguir por red**, o al revés, sin reiniciar.
+
+El agente no sabe por cuál está hablando, y esa es justamente la idea.
+
 ## Mensajes de control
 
 ### Del aparato al PC

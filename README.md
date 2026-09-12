@@ -75,6 +75,18 @@ El login protege **el portal**, no los datos: la memoria sigue siendo un
 archivo en el disco del usuario. Autenticar no mueve nada a la nube, solo
 decide quien puede abrir la ventana.
 
+## Cable y WiFi
+
+El servidor abre los dos a la vez: el puerto serie y un WebSocket en el `8770`
+(o el siguiente libre). Manda por ambos, así que se puede desenchufar el cable
+a mitad de una conversación y seguir por red sin reiniciar nada.
+
+El aparato se conecta al PC, no al revés — necesita saber la dirección una sola
+vez y reconecta solo.
+
+> El firmware con WiFi todavía está por escribirse; el lado del servidor ya está
+> listo y probado contra un aparato simulado.
+
 ## Si el audio del aparato falla
 
 El panel es una salida de voz completa: captura por el microfono del computador

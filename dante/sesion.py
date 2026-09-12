@@ -18,7 +18,8 @@ import time
 import websockets
 
 from . import ajustes, config, consolidar, diario, memoria, mundo, panel, vision
-from .transporte import T_AUDIO, T_CONTROL, T_LOG, TransporteSerie
+from .transporte import (T_AUDIO, T_CONTROL, T_LOG, TransporteDoble,
+                         TransporteSerie, TransporteWebSocket)
 
 VID_ESPRESSIF = 0x303A
 TROZO = 960                 # 20 ms de PCM16 mono a 24 kHz
@@ -605,19 +606,35 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
     # Modo "solo cara": el aparato conserva pantalla y boton, pero su audio no
     # se usa. Sirve cuando el modulo de audio esta averiado: la conversacion va
     # por el navegador y el demo fisico se salva igual.
-    t = None
+    # Cable y WiFi a la vez. El agente no se entera de por cual entro el audio:
+    # se puede desenchufar el cable a mitad de una conversacion y seguir por
+    # red, o al reves, sin reiniciar nada.
+    cable = None
     if puerto:
         try:
-            t = TransporteSerie(puerto)
+            cable = TransporteSerie(puerto)
+            print(f"  cable: {puerto}")
         except Exception as e:
-            print(f"  no pude abrir {puerto}: {e}")
-    if t is None:
+            print(f"  cable: no pude abrir {puerto} ({e})")
+
+    red = TransporteWebSocket(config.PUERTO_WS)
+    try:
+        await red.escuchar()
+        print(f"  wifi: escuchando en el puerto {red.puerto}")
+    except Exception as e:
+        print(f"  wifi: no pude escuchar ({type(e).__name__})")
+        red = None
+
+    if cable is None and red is None:
         if not con_panel:
             print("No encontre el aparato. Conectalo por USB, o usa --panel "
                   "para hablarle desde el navegador.")
             return 1
-        print("  sin aparato: se puede hablar desde el panel\n")
+        print("  sin aparato: se puede hablar desde el panel")
         t = TransporteNulo()
+    else:
+        t = TransporteDoble(cable, red)
+    print()
 
     if solo_cara and not isinstance(t, TransporteNulo):
         print("  modo solo cara: el aparato pone la cara, el audio va por el panel\n")

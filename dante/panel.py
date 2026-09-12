@@ -141,6 +141,7 @@ PAGINA = """<!doctype html>
     </div>
     <div class="barra" style="border-top:none;padding-top:0">
       <button id="micro">Mantener para hablar</button>
+      <button id="altavoz" title="Oir a Dante por este computador">Altavoz: si</button>
     </div>
     <div class="pista">Manten apretado el boton, o la barra espaciadora, para hablarle por el microfono del computador.</div>
   </div>
@@ -211,12 +212,17 @@ const caras = document.getElementById('caras');
 const micro = document.getElementById('micro');
 let ws, audioCtx, stream, nodo, hablando = false;
 let salida, proximo = 0;
+/* Si el parlante del aparato funciona, oirlo tambien aqui suena doble.
+   El servidor manda el audio a los dos lados siempre; quien decide es el
+   navegador, y se acuerda de la eleccion. */
+let conAltavoz = localStorage.getItem('dante_altavoz') !== 'no';
 
 /* Reproduce el audio de Dante en el navegador, encolandolo por tiempo.
    Llega en trozos de 20 ms; si cada uno se reprodujera al llegar, los saltos
    de red se oirian como cortes. Se agenda cada trozo justo despues del
    anterior y el navegador los une. */
 function reproducir(datos){
+  if (!conAltavoz) return;
   if (!salida){
     salida = new AudioContext({sampleRate: 24000});
     proximo = 0;
@@ -386,6 +392,18 @@ document.getElementById('btn-cara').onclick = async () => {
   av.style.display = 'block';
   setTimeout(()=>av.style.display='none', 4000);
   if (r.ok) cargarGente();
+};
+
+const btnAlt = document.getElementById('altavoz');
+function pintarAltavoz(){
+  btnAlt.textContent = 'Altavoz: ' + (conAltavoz ? 'si' : 'no');
+  btnAlt.style.opacity = conAltavoz ? '1' : '.55';
+}
+pintarAltavoz();
+btnAlt.onclick = () => {
+  conAltavoz = !conAltavoz;
+  localStorage.setItem('dante_altavoz', conAltavoz ? 'si' : 'no');
+  pintarAltavoz();
 };
 
 micro.addEventListener('mousedown', empezar);
