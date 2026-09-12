@@ -697,8 +697,12 @@ def crear_app(sesion, bucle):
         # cambiamos en caliente para no tener que reiniciar nada.
         try:
             asyncio.run_coroutine_threadsafe(sesion.configurar(), sesion.bucle)
-        except Exception:
-            pass
+        except Exception as e:
+            # Si esto falla, lo guardado no llega a la conversacion en curso y
+            # Dante sigue con las instrucciones viejas. Callarlo hace parecer
+            # que el portal no guarda, que es justo la pista equivocada.
+            print(f"  aviso: guarde los ajustes pero no pude aplicarlos a la "
+                  f"conversacion en curso ({e}). Reinicia para que tomen.")
         repartir({"t": "ajustes", "ajustes": nuevos})
         return {"ok": True, "ajustes": nuevos}
 
@@ -782,8 +786,12 @@ def crear_app(sesion, bucle):
         # Que la sesion en curso se entere sin reiniciar.
         try:
             asyncio.run_coroutine_threadsafe(sesion.configurar(), sesion.bucle)
-        except Exception:
-            pass
+        except Exception as e:
+            # Si esto falla, lo guardado no llega a la conversacion en curso y
+            # Dante sigue con las instrucciones viejas. Callarlo hace parecer
+            # que el portal no guarda, que es justo la pista equivocada.
+            print(f"  aviso: guarde los ajustes pero no pude aplicarlos a la "
+                  f"conversacion en curso ({e}). Reinicia para que tomen.")
         sesion.pantalla("Mensaje nuevo", f"{de} te dejo un mensaje", 8)
         repartir({"t": "mensaje_nuevo", "de": de})
         return r

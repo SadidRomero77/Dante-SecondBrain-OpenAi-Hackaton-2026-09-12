@@ -120,6 +120,17 @@ def personalidad(c: sqlite3.Connection) -> str:
         partes += ["", "Temas que es mejor no sacar tu, aunque puedes responder "
                        f"si ella los saca: {a['temas_evitar'].strip()}"]
 
+    if duenio:
+        partes += [
+            "",
+            f"COMO SE LLAMA LA PERSONA CON LA QUE HABLAS: {duenio}.",
+            "Eso lo dijo ella misma al configurarte, asi que vale por encima "
+            "de cualquier recuerdo. Si al buscar en tu memoria aparece otro "
+            "nombre, ese recuerdo es de otra persona o quedo de una prueba: "
+            f"no se lo atribuyas. Nunca le digas a {duenio} que se llama de "
+            "otra forma.",
+        ]
+
     partes += [
         "",
         "Que puedes afirmar, en orden de importancia:",

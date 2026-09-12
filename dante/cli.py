@@ -43,6 +43,12 @@ def main(argv: list[str] | None = None) -> int:
     se.add_argument("--borrar", action="store_true", help="vaciar antes de sembrar")
     sub.add_parser("memoria", help="ver que recuerda Dante")
 
+    ol = sub.add_parser("olvidar", help="sacar de la memoria lo que quedo de "
+                                        "una prueba o de otra persona")
+    ol.add_argument("que", help="nombre o palabra. Ej: Rosa")
+    ol.add_argument("--si", action="store_true",
+                    help="borrar de verdad. Sin esto solo muestra que se iria")
+
     h = sub.add_parser("hablar", help="conversar con Dante")
     h.add_argument("--simular", type=float, default=0.0, metavar="SEG",
                    help="finge apretar el boton N segundos, para probar sin la placa")
@@ -85,6 +91,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.comando == "semilla":
         from .semilla import correr as sembrar
         return sembrar(borrar=args.borrar)
+
+    if args.comando == "olvidar":
+        from .olvidar import correr as olvidar
+        return olvidar(args.que, de_verdad=args.si)
 
     if args.comando == "memoria":
         from .semilla import mostrar
