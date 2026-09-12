@@ -88,7 +88,92 @@ def abrir() -> sqlite3.Connection:
     if "cara" not in {f[1] for f in c.execute("PRAGMA table_info(personas)")}:
         c.execute("ALTER TABLE personas ADD COLUMN cara BLOB")
         c.commit()
+    # Quien es la persona a la que acompana, entre toda la gente que conoce.
+    if "principal" not in {f[1] for f in c.execute("PRAGMA table_info(personas)")}:
+        c.execute("ALTER TABLE personas ADD COLUMN principal INTEGER NOT NULL "
+                  "DEFAULT 0")
+        c.commit()
+    # Cuando se aviso por ultima vez de un recordatorio, para no repetirlo.
+    if "avisado" not in {f[1] for f in c.execute("PRAGMA table_info(eventos)")}:
+        c.execute("ALTER TABLE eventos ADD COLUMN avisado TEXT")
+        c.commit()
     return c
+
+
+# --------------------------------------------------------- quien es quien --
+def principal(c: sqlite3.Connection) -> sqlite3.Row | None:
+    """La persona a la que Dante acompana.
+
+    Se distingue del resto a proposito: su cara es la que importa reconocer
+    al entrar, y sus recuerdos son los que Dante puede contarle a ella misma.
+    De los demas guarda quienes son, no su vida.
+    """
+    return c.execute("SELECT * FROM personas WHERE principal=1 "
+                     "ORDER BY id LIMIT 1").fetchone()
+
+
+def hacer_principal(c: sqlite3.Connection, nombre: str) -> int:
+    """Marca a alguien como la persona acompanada. Solo puede haber una."""
+    nombre = nombre.strip()
+    if not nombre:
+        return 0
+    c.execute("UPDATE personas SET principal=0")
+    f = c.execute("SELECT id FROM personas WHERE nombre=? COLLATE NOCASE",
+                  (nombre,)).fetchone()
+    if f:
+        c.execute("UPDATE personas SET principal=1 WHERE id=?", (f["id"],))
+        c.commit()
+        return f["id"]
+    cur = c.execute(
+        "INSERT INTO personas(nombre,relacion,notas,ultima_visita,creado,"
+        "principal) VALUES(?,?,?,?,?,1)",
+        (nombre, "a quien acompano", "", "", date.today().isoformat()))
+    c.commit()
+    return int(cur.lastrowid)
+
+
+# ------------------------------------------------------------ avisar solo --
+def recordatorios_vencidos(c: sqlite3.Connection) -> list[sqlite3.Row]:
+    """Recordatorios cuya hora ya paso y de los que todavia no se aviso.
+
+    Un recordatorio que nadie da no sirve de nada: la persona que lo necesita
+    es justamente la que no se va a acordar de preguntar.
+    """
+    from datetime import datetime
+    ahora = datetime.now()
+    hoy = ahora.date().isoformat()
+    fuera = []
+    for e in c.execute("SELECT * FROM eventos WHERE hecho=0").fetchall():
+        cu = (e["cuando"] or "").strip()
+        if cu.startswith("diario"):
+            hora = cu.split()[-1]
+            try:
+                h, m = (int(x) for x in hora.split(":"))
+            except ValueError:
+                continue
+            vencio = ahora.hour * 60 + ahora.minute >= h * 60 + m
+            # Los diarios se avisan una vez por dia, no una vez y nunca mas.
+            if vencio and (e["avisado"] or "")[:10] != hoy:
+                fuera.append(e)
+        else:
+            if e["avisado"]:
+                continue
+            try:
+                cuando = datetime.fromisoformat(cu)
+            except ValueError:
+                continue
+            # Solo el mismo dia: no tiene sentido avisar hoy de algo de la
+            # semana pasada que quedo sin marcar.
+            if cuando <= ahora and cuando.date() == ahora.date():
+                fuera.append(e)
+    return fuera
+
+
+def marcar_avisado(c: sqlite3.Connection, id_: int) -> None:
+    from datetime import datetime
+    c.execute("UPDATE eventos SET avisado=? WHERE id=?",
+              (datetime.now().isoformat(timespec="minutes"), id_))
+    c.commit()
 
 
 def ajuste(c: sqlite3.Connection, clave: str, defecto: str = "") -> str:

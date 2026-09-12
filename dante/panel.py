@@ -318,6 +318,35 @@ form{display:flex;flex-direction:column;gap:16px}
       <button type="submit" class="pri grande">Guardar</button>
     </form>
   </div>
+
+  <div class="caja" style="max-width:760px;margin:18px auto 0">
+    <h2>Su vida 🦴</h2>
+    <p class="pad" style="margin:0;opacity:.75;line-height:1.5">
+      Esto no se queda en un formulario: Dante <b>lo guarda en su memoria</b>,
+      con el nombre de ella, igual que lo que aprende conversando. Mientras
+      más le cuentes, menos tiene que preguntar.<br>
+      Podés dejar todo vacío y llenarlo después — o dejar que lo aprenda solo.
+    </p>
+    <form class="pad" id="cfg2">
+      <div class="dos">
+        <label>¿Cuándo y dónde nació?
+          <input name="nacio" placeholder="en 1948, en Santa Marta"></label>
+        <label>¿A qué se dedicó?
+          <input name="oficio" placeholder="fue maestra de primaria 30 años"></label>
+      </div>
+      <label>¿Con quién vive?
+        <input name="vive_con" placeholder="sola, pero su hija Ana viene los martes"></label>
+      <label>Su familia: nombres y quién es cada uno
+        <textarea name="familia" placeholder="Ana, su hija mayor. Miguel, su hijo, vive en Cali. Lucía, su nieta de 12 años."></textarea></label>
+      <label>Salud: lo que conviene que sepa
+        <textarea name="salud" placeholder="Toma pastilla para la presión en la mañana. Le duele la rodilla izquierda. Oye poco del oído derecho."></textarea></label>
+      <label>¿Cómo es su día?
+        <textarea name="rutina" placeholder="Se levanta a las 6. Desayuna viendo las noticias. Duerme siesta después del almuerzo."></textarea></label>
+      <label>Lo que le gusta contar
+        <textarea name="historia" placeholder="Cómo conoció a su esposo en un baile. Los años en que enseñaba. El viaje a Cartagena del 82."></textarea></label>
+      <button type="submit" class="pri grande">Guardar en su memoria</button>
+    </form>
+  </div>
 </main>
 
 <script>
@@ -471,22 +500,28 @@ document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
 });
 
 /* ---------- ajustes ---------- */
-const form = $('#cfg');
+const form = $('#cfg'), form2 = $('#cfg2');
 async function cargarCfg(){
   const a = await (await fetch('/api/ajustes')).json();
   for (const [k,v] of Object.entries(a.ajustes||{})){
-    const el = form.elements[k]; if (el) el.value = v; }
+    const el = form.elements[k] || form2.elements[k]; if (el) el.value = v; }
   if (a.ajustes?.nombre_mascota) $('#titulo').textContent = a.ajustes.nombre_mascota;
 }
 cargarCfg();
-form.onsubmit = async e => {
-  e.preventDefault();
-  const d = Object.fromEntries(new FormData(form).entries());
+// Los dos formularios mandan siempre los dos juegos de datos. Si mandaran
+// solo lo suyo, guardar uno borraria los recuerdos que escribio el otro.
+async function guardarTodo(aviso){
+  const d = {...Object.fromEntries(new FormData(form).entries()),
+             ...Object.fromEntries(new FormData(form2).entries())};
   await fetch('/api/ajustes',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify(d)});
-  avisar('#aviso-cfg','Guardado. Ya se lo dije a Dante.');
+  avisar('#aviso-cfg', aviso);
   if (d.nombre_mascota) $('#titulo').textContent = d.nombre_mascota;
-};
+}
+form.onsubmit  = e => { e.preventDefault(); guardarTodo('Guardado. Ya se lo dije a Dante.'); };
+form2.onsubmit = e => { e.preventDefault();
+  guardarTodo('Guardado. Dante ya lo tiene en su memoria.');
+  window.scrollTo({top:0,behavior:'smooth'}); };
 function avisar(sel, txt){ const a=$(sel); a.textContent=txt; a.style.display='block';
   setTimeout(()=>a.style.display='none', 3600); }
 

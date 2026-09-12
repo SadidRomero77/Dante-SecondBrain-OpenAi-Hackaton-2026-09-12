@@ -24,6 +24,53 @@ TABLAS = [
 ]
 
 
+TODAS = ["hechos", "episodios", "eventos", "senales", "personas"]
+
+
+def vaciar(de_verdad: bool = False) -> int:
+    """Deja la memoria en blanco, conservando la configuracion.
+
+    Hace falta porque buena parte de los datos de ejemplo no llevan el nombre
+    de nadie -"trabajo treinta anos como maestra"- y por nombre no hay forma
+    de alcanzarlos. Borrar por palabra deja justo esos, que son los que
+    despues aparecen en una conversacion sin que se entienda de donde salen.
+
+    Los ajustes se quedan, y lo que se escribio en el portal sobre la persona
+    se vuelve a grabar enseguida: eso no es un recuerdo aprendido, es lo que
+    la familia dio por bueno.
+    """
+    from . import ajustes
+    c = memoria.abrir()
+    try:
+        cuenta = {t: c.execute(f"SELECT COUNT(*) n FROM {t}").fetchone()["n"]
+                  for t in TODAS}
+        total = sum(cuenta.values())
+        print("En la memoria hay ahora:")
+        for t, n in cuenta.items():
+            print(f"  {t}: {n}")
+        if not total:
+            print("\nYa esta vacia.")
+            return 0
+        if not de_verdad:
+            print(f"\nSon {total} registros. Esto fue solo una mirada: no "
+                  f"borre nada.")
+            print("Si estas seguro:  dante olvidar --todo --si")
+            return 0
+        for t in TODAS:
+            c.execute(f"DELETE FROM {t}")
+        c.commit()
+        ajustes._a_la_memoria(c, ajustes.leer(c))
+        quedan = c.execute("SELECT COUNT(*) n FROM hechos").fetchone()["n"]
+        print(f"\nMemoria en blanco. {total} registros borrados.")
+        if quedan:
+            print(f"Se volvieron a grabar {quedan} hechos desde lo que "
+                  f"escribiste en el portal.")
+        print("Ojo: tambien se fueron las caras. Hay que volver a ensenarselas.")
+        return 0
+    finally:
+        c.close()
+
+
 def correr(que: str, de_verdad: bool = False) -> int:
     if not que.strip():
         print("Dime que olvidar. Ej: dante olvidar Rosa")

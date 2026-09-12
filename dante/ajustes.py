@@ -26,6 +26,28 @@ CAMPOS: dict[str, tuple[str, str, str]] = {
     "temas_queridos":   ("", "Temas que le gusta conversar", "parrafo"),
     "temas_evitar":     ("", "Temas que es mejor no tocar", "parrafo"),
     "contacto_familia": ("", "A quien avisar si algo preocupa", "texto"),
+    # Lo que sigue no va al prompt: se graba en la memoria, atado a su nombre.
+    # Asi el prompt queda general y la vida de cada persona vive donde debe.
+    "nacio":            ("", "Cuando y donde nacio", "texto"),
+    "oficio":           ("", "A que se dedico", "texto"),
+    "vive_con":         ("", "Con quien vive", "texto"),
+    "familia":          ("", "Su familia: nombres y quien es cada uno", "parrafo"),
+    "salud":            ("", "Salud: que conviene saber", "parrafo"),
+    "rutina":           ("", "Como es su dia", "parrafo"),
+    "historia":         ("", "Su historia: lo que le gusta contar", "parrafo"),
+}
+
+# Los campos de arriba que se graban en la memoria en vez de ir al prompt,
+# con la frase que los presenta. El nombre de la persona va delante, para
+# que el recuerdo se sostenga solo si alguien lo lee suelto.
+A_MEMORIA = {
+    "nacio":     "nacio",
+    "oficio":    "se dedico a",
+    "vive_con":  "vive con",
+    "familia":   "sobre su familia:",
+    "salud":     "sobre su salud:",
+    "rutina":    "en su dia a dia:",
+    "historia":  "de su vida:",
 }
 
 # Lo que se le dice al modelo por cada forma de tratar.
@@ -47,7 +69,36 @@ def guardar(c: sqlite3.Connection, datos: dict) -> dict[str, str]:
     for k, v in datos.items():
         if k in CAMPOS:
             memoria.poner_ajuste(c, k, str(v).strip())
-    return leer(c)
+    a = leer(c)
+    _a_la_memoria(c, a)
+    return a
+
+
+def _a_la_memoria(c: sqlite3.Connection, a: dict[str, str]) -> None:
+    """Graba en la memoria lo que se escribio sobre la persona.
+
+    Podrian ir en el prompt, pero entonces solo servirian mientras alguien
+    los tenga configurados y ocuparian sitio en cada turno. En la memoria
+    valen mas: Dante los encuentra cuando hacen falta, con su procedencia, y
+    quedan atados al nombre de la persona igual que todo lo demas que sabe
+    de ella.
+
+    Se reescriben enteros en cada guardado. Son la version que la familia
+    dio por buena, no una conversacion: si alguien corrige un dato en el
+    portal, el viejo no debe seguir ahi para que Dante lo encuentre.
+    """
+    nombre = a["nombre_usuario"].strip()
+    if not nombre:
+        return
+    memoria.hacer_principal(c, nombre)
+    c.execute("DELETE FROM hechos WHERE fuente='configuracion'")
+    c.commit()
+    for clave, presenta in A_MEMORIA.items():
+        valor = a.get(clave, "").strip()
+        if valor:
+            memoria.anotar(c, f"{nombre} {presenta} {valor}",
+                           sujeto=nombre, fuente="configuracion",
+                           confianza=0.95)
 
 
 # Como suena. El modelo de voz obedece indicaciones de estilo, asi que el
@@ -153,6 +204,30 @@ def personalidad(c: sqlite3.Connection) -> str:
         "",
         "Inventar es la unica falla grave que puedes cometer. Una respuesta "
         "segura y falsa es peor que decir que no sabes.",
+        "",
+        "Con la gente que no conoces:",
+        "",
+        f"- {duenio or 'La persona que acompanas'} es a quien acompanas, pero "
+        "no eres solo de ella. Si hay alguien mas, hablale tambien.",
+        "- Si ves a alguien que no reconoces, saludalo y preguntale como se "
+        "llama, con naturalidad, como saluda un perro a una visita. Cuando te "
+        "diga el nombre, usa registrar_persona para no volver a preguntarselo.",
+        "- De los demas guarda quienes son y poco mas. La vida que recuerdas "
+        f"en detalle es la de {duenio or 'la persona que acompanas'}, y sus "
+        "cosas no se cuentan a cualquiera que pase.",
+        "",
+        "Como conversar:",
+        "",
+        "- Habla cuando tengas algo que decir. NUNCA pidas permiso: nada de "
+        "\"puedo decirte algo\", \"te interrumpo?\" ni \"me escuchas?\". "
+        "Si tienes que avisar de algo, lo avisas.",
+        "- Puedes hablar de cualquier tema, no solo de su vida. Si te "
+        "preguntan de futbol, de cocina o de por que el cielo es azul, "
+        "responde y conversa.",
+        "- No cortes la conversacion tu. Deja una puerta abierta: una "
+        "pregunta corta, algo que te dio curiosidad.",
+        "- Si repite una pregunta que ya hizo, respondela igual de bien la "
+        "segunda vez, sin hacerselo notar. Olvidarse no da vergüenza.",
     ]
     return "\n".join(partes)
 

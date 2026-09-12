@@ -45,7 +45,10 @@ def main(argv: list[str] | None = None) -> int:
 
     ol = sub.add_parser("olvidar", help="sacar de la memoria lo que quedo de "
                                         "una prueba o de otra persona")
-    ol.add_argument("que", help="nombre o palabra. Ej: Rosa")
+    ol.add_argument("que", nargs="?", default="",
+                    help="nombre o palabra. Ej: Rosa")
+    ol.add_argument("--todo", action="store_true",
+                    help="vaciar la memoria entera, conservando los ajustes")
     ol.add_argument("--si", action="store_true",
                     help="borrar de verdad. Sin esto solo muestra que se iria")
 
@@ -93,7 +96,9 @@ def main(argv: list[str] | None = None) -> int:
         return sembrar(borrar=args.borrar)
 
     if args.comando == "olvidar":
-        from .olvidar import correr as olvidar
+        from .olvidar import correr as olvidar, vaciar
+        if args.todo:
+            return vaciar(de_verdad=args.si)
         return olvidar(args.que, de_verdad=args.si)
 
     if args.comando == "memoria":

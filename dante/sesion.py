@@ -563,6 +563,23 @@ class Sesion:
 
         elif nombre == "quien_esta":
             salida = self.ojos.quien_esta()
+            # Distinguir a quien acompana del resto. Sin esto, ve una lista de
+            # nombres y trata igual a la persona de la casa que a una visita,
+            # y son dos cosas muy distintas: a una le cuenta su vida, a la
+            # otra le pregunta como se llama.
+            if isinstance(salida, dict) and salida.get("camara"):
+                p = memoria.principal(self.db)
+                suya = p["nombre"] if p else ""
+                conocidas = salida.get("conocidas") or []
+                salida["a_quien_acompanas"] = suya
+                salida["esta_ella"] = bool(suya and suya in conocidas)
+                otras = [n for n in conocidas if n != suya]
+                if otras:
+                    salida["tambien_hay"] = otras
+                if salida.get("desconocidas"):
+                    salida["sin_reconocer"] = (
+                        "Hay alguien que no conoces. Saludalo y preguntale su "
+                        "nombre, y despues usa registrar_persona.")
             print(f"   [vision] {salida}")
 
         elif nombre == "registrar_persona":
@@ -736,6 +753,41 @@ async def _presentarse(s: "Sesion") -> None:
                  "response": {"instructions": ajustes.ONBOARDING}})
 
 
+async def _vigilar_recordatorios(s: "Sesion") -> None:
+    """Dante avisa solo cuando llega la hora. Nadie aprieta ningun boton.
+
+    Es la razon de ser de los recordatorios: la persona que los necesita es
+    justamente la que no se va a acordar de preguntar por ellos. Un
+    recordatorio que hay que ir a buscar no es un recordatorio.
+
+    Espera a que haya silencio. Interrumpir a alguien a mitad de una frase
+    para hablarle de una pastilla es peor que avisarle un minuto mas tarde.
+    """
+    await asyncio.sleep(20)
+    while True:
+        try:
+            if not s.respondiendo and not getattr(s, "hablando_usuario", False):
+                pendientes = memoria.recordatorios_vencidos(s.db)
+                if pendientes:
+                    e = pendientes[0]
+                    print(f"\n>> RECORDATORIO: {e['que']}")
+                    memoria.marcar_avisado(s.db, e["id"])
+                    s.cara("atencion")
+                    s.respondiendo = True
+                    s.t0 = time.time()
+                    await s._ev({"type": "response.create", "response": {
+                        "instructions":
+                            "Es la hora de un recordatorio y se lo dices tu, "
+                            "sin que nadie te lo pida. Dilo con naturalidad, "
+                            "en una o dos frases, como quien se acuerda en voz "
+                            "alta. No pidas permiso para hablar ni preguntes "
+                            "si te puede escuchar: simplemente dilo.\n\n"
+                            f"Lo que toca ahora: {e['que']}"}})
+        except Exception as err:
+            print(f"  aviso: no pude dar un recordatorio ({err})")
+        await asyncio.sleep(30)
+
+
 async def _dar_diario(s: "Sesion") -> None:
     """Dante arranca hablando el. Nadie le pregunto nada."""
     await asyncio.sleep(1.2)
@@ -862,6 +914,7 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
                 aparte.append(asyncio.create_task(_presentarse(s)))
             elif con_diario if con_diario is not None else diario.toca_hoy(db):
                 aparte.append(asyncio.create_task(_dar_diario(s)))
+            aparte.append(asyncio.create_task(_vigilar_recordatorios(s)))
             if simular:
                 # Fuera del grupo de espera: si estuviera dentro, terminar el
                 # turno simulado cerraria la sesion antes de oir la respuesta.
