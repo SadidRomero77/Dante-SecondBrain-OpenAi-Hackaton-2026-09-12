@@ -358,6 +358,11 @@ class Sesion:
                         print(f"  aparato listo: {m.texto}\n")
                     elif ev.get("t") == "boton":
                         await self._boton(ev.get("v") == "abajo")
+                    elif ev.get("t") == "diario":
+                        # El boton fisico del diario. Para alguien desorientado,
+                        # formular la pregunta es justamente lo dificil.
+                        print(">> EL DIARIO (a pedido)")
+                        await self.dar_diario()
 
     async def _boton(self, abajo: bool) -> None:
         if abajo:
@@ -422,6 +427,17 @@ class Sesion:
                 self.respondiendo = False
                 self.recibidos = 0
                 await self.cola.put(None)     # marca de fin
+
+    async def dar_diario(self) -> None:
+        """Cuenta como va el dia. Lo dispara la hora o el boton."""
+        self.cara("hablando")
+        self.respondiendo = True
+        self.t0 = time.time()
+        await self._ev({
+            "type": "response.create",
+            "response": {"instructions": diario.instrucciones(self.db)},
+        })
+        diario.marcar(self.db)
 
     async def _herramienta(self, nombre: str, argumentos: str, call_id: str) -> None:
         """Ejecuta una herramienta y le devuelve el resultado al modelo.
@@ -572,14 +588,7 @@ async def _dar_diario(s: "Sesion") -> None:
     """Dante arranca hablando el. Nadie le pregunto nada."""
     await asyncio.sleep(1.2)
     print(">> EL DIARIO")
-    s.t.enviar_control({"t": "emocion", "v": "hablando"})
-    s.respondiendo = True
-    s.t0 = time.time()
-    await s._ev({
-        "type": "response.create",
-        "response": {"instructions": diario.instrucciones(s.db)},
-    })
-    diario.marcar(s.db)
+    await s.dar_diario()
 
 
 async def _simular(s: "Sesion", segundos: float) -> None:

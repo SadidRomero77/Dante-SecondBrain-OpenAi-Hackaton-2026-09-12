@@ -110,6 +110,41 @@ sitio —`DIN`, `DOUT`, `PA_EN` y todo el SPI de la pantalla— van directas.
 > la protoboard hay que soldarles esa tira: 6 y 7 puntos. Si ya vienen con los
 > pines puestos, no hay nada que soldar en todo el montaje.
 
+## Los dos botones
+
+Van en la protoboard de la placa, en las columnas libres del final, montados a
+caballo del canal del medio. **Una pata al GPIO, la otra a tierra.** Sin
+resistencias: el firmware activa la interna del ESP32.
+
+| Botón | Pin | Qué hace |
+|---|---|---|
+| **HABLAR** | `GPIO21` | Mantener apretado mientras hablás. Reemplaza al BOOT. |
+| **DIARIO** | `GPIO38` | Un toque y Dante cuenta qué día es, qué pasó ayer y qué toca hoy. |
+
+### ⚠️ No usar GPIO19 ni GPIO20
+
+El kit original pone sus botones ahí, pero en el ESP32-S3 **esos dos pines son
+el USB nativo**. Usarlos como botones deja al aparato sin el puerto por el que
+viaja el audio.
+
+| Pin | Estado |
+|---|---|
+| `GPIO19` `GPIO20` | USB nativo — intocables |
+| `GPIO26`–`GPIO37` | los usa la flash y la PSRAM |
+| `GPIO1`–`9`, `15`–`18`, `46` | reservados por si se conecta la cámara DVP |
+| `GPIO0` | BOOT, es de arranque: mejor no depender de él |
+| **`GPIO21` `GPIO38`** | **libres de verdad.** El 38 era el MCLK, que ya no hace falta. |
+
+El botón de hablar y el BOOT hacen lo mismo, así que el aparato sigue siendo
+usable si todavía no cableaste el tuyo.
+
+El del diario avisa **al soltarlo** y solo si duró menos de dos segundos, para
+que no se dispare si alguien se apoya encima.
+
+> Para alguien desorientado, formular la pregunta es justamente lo difícil. Un
+> botón que significa «contame quién soy y qué día es» no necesita que se
+> acuerde de cómo pedirlo.
+
 ## Pines que quedan libres
 
 | Antes | Ahora |

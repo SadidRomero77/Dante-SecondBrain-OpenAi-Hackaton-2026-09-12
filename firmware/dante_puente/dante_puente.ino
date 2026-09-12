@@ -30,6 +30,12 @@ static const int PIN_I2C_SDA = 1,  PIN_I2C_SCL = 2;
 static const int PIN_I2S_MCLK = 38, PIN_I2S_BCLK = 14, PIN_I2S_WS = 13;
 static const int PIN_I2S_DIN = 12, PIN_I2S_DOUT = 45;
 static const int PIN_PA_EN = 48,   PIN_LUZ = 42,       PIN_BOTON = 0;
+/* Botones propios en la protoboard. No se usan GPIO19 ni GPIO20, que es donde
+   los pone el kit original, porque en el ESP32-S3 esos dos pines son el USB
+   nativo: usarlos como botones deja al aparato sin el puerto del audio.
+   El 38 era el MCLK, que con estos modulos ya no hace falta. */
+static const int PIN_HABLAR = 21;
+static const int PIN_DIARIO = 38;
 static const int PIN_LCD_CS = 47,  PIN_LCD_DC = 39,    PIN_LCD_SCK = 41,
                  PIN_LCD_MOSI = 40;
 
@@ -548,6 +554,8 @@ void setup() {
   pinMode(PIN_LUZ, OUTPUT);   digitalWrite(PIN_LUZ, HIGH);
   pinMode(PIN_PA_EN, OUTPUT); digitalWrite(PIN_PA_EN, LOW);
   pinMode(PIN_BOTON, INPUT_PULLUP);
+  pinMode(PIN_HABLAR, INPUT_PULLUP);
+  pinMode(PIN_DIARIO, INPUT_PULLUP);
 
   init_pantalla();
 
@@ -579,14 +587,35 @@ static void saludar(bool a, bool b, bool c) {
 
 // ------------------------------------------------------------------ loop ---
 void loop() {
-  // 1. boton -> avisar cambios de estado
+  // 1. botones. El de hablar y el BOOT hacen lo mismo, para que el aparato
+  //    siga siendo usable si alguien todavia no cableo el suyo.
   static int previo = HIGH;
-  int ahora = digitalRead(PIN_BOTON);
-  if (ahora != previo) {
-    previo = ahora;
-    const char *m = (ahora == LOW) ? "{\"t\":\"boton\",\"v\":\"abajo\"}"
+  static uint32_t rebote = 0;
+  int crudo = (digitalRead(PIN_HABLAR) == LOW || digitalRead(PIN_BOTON) == LOW)
+              ? LOW : HIGH;
+  if (crudo != previo && millis() > rebote) {
+    rebote = millis() + 30;          // los pulsadores mecanicos rebotan
+    previo = crudo;
+    const char *m = (crudo == LOW) ? "{\"t\":\"boton\",\"v\":\"abajo\"}"
                                    : "{\"t\":\"boton\",\"v\":\"arriba\"}";
     enviar(T_CONTROL, m, strlen(m));
+  }
+
+  // 1b. boton del diario: se avisa al SOLTARLO, para no dispararlo si alguien
+  //     se apoya encima.
+  static int diario_previo = HIGH;
+  static uint32_t diario_desde = 0, diario_rebote = 0;
+  int d = digitalRead(PIN_DIARIO);
+  if (d != diario_previo && millis() > diario_rebote) {
+    diario_rebote = millis() + 30;
+    if (d == LOW) {
+      diario_desde = millis();
+    } else if (diario_desde && millis() - diario_desde < 2000) {
+      const char *m = "{\"t\":\"diario\"}";
+      enviar(T_CONTROL, m, strlen(m));
+      mostrar_texto("Un momento", "Voy a contarte como va el dia", 4);
+    }
+    diario_previo = d;
   }
 
   // 2. microfono -> PC. Promedia los dos canales: suena mas limpio que uno solo.
