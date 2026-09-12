@@ -3022,6 +3022,16 @@ def crear_app(sesion, bucle):
         if demo.activo() and not demo.pide_login():
             return await siguiente(peticion)
 
+        # En la propia maquina no se pide cuenta. Quien corre esto en su casa,
+        # con el perrito enchufado al USB, ya demostro quien es abriendo la
+        # puerta: exigirle ademas una cuenta de Google solo consigue que el
+        # portal quede bloqueado cuando Auth0 no tiene dada de alta la
+        # direccion de vuelta, que es justo lo que pasaba. Fuera de localhost
+        # -o en cuanto hay una direccion publica- el login vuelve a mandar.
+        if (not config.PANEL_URL
+                and peticion.url.hostname in ("127.0.0.1", "localhost")):
+            return await siguiente(peticion)
+
         # Lo publico: la portada, sus imagenes y el propio login. Sin las
         # imagenes, la portada carga pero el diagrama sale roto, porque la
         # puerta lo mandaba al login como a cualquier otra ruta.
@@ -3791,8 +3801,10 @@ def crear_app(sesion, bucle):
         # puerta de arriba no cubre esta ruta. Sin esto, cualquiera que alcance
         # el puerto puede leer la conversacion, oir el audio y hablarle al
         # agente. Comprobado explotandolo.
-        if (not demo.activo() or demo.pide_login()) and auth.activo() \
-                and not auth.usuario_de(ws):
+        en_casa = (not config.PANEL_URL
+                   and ws.url.hostname in ("127.0.0.1", "localhost"))
+        if (not en_casa and (not demo.activo() or demo.pide_login())
+                and auth.activo() and not auth.usuario_de(ws)):
             await ws.close(1008, "sin sesion")
             return
 
