@@ -141,12 +141,15 @@ async def _conversar_inner(modelo: str, key: str, con_audio: bool) -> int:
                 ),
                 "output_modalities": modalidades,
                 "audio": {
-                    "input": {"format": {"type": "audio/pcm", "rate": config.SAMPLE_RATE}},
+                    "input": {
+                        "format": {"type": "audio/pcm", "rate": config.SAMPLE_RATE},
+                        # Turnos manuales: el boton decide cuando empieza y termina
+                        # de hablar. Va anidado aqui, no al nivel de la sesion.
+                        "turn_detection": None,
+                    },
                     "output": {"format": {"type": "audio/pcm", "rate": config.SAMPLE_RATE},
                                "voice": config.VOZ},
                 },
-                # Turnos manuales: nosotros decidimos cuando empieza y termina de hablar.
-                "turn_detection": None,
             },
         })
         await _enviar(ws, {

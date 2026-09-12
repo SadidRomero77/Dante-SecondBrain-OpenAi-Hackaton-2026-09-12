@@ -9,3 +9,4 @@ data/
 grabaciones/
 .uv/
 .claude/settings.local.json
+.tools/

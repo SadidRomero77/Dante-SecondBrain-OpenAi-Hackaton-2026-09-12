@@ -20,14 +20,14 @@
      Placa .......................... ESP32S3 Dev Module
      USB CDC On Boot ................ Enabled
      PSRAM .......................... OPI PSRAM
-     Flash Size ..................... 8MB (64Mb)          <-- valor seguro
-     Partition Scheme ............... 8M with spiffs (3MB APP/1.5MB SPIFFS)
+     Flash Size ..................... 16MB (128Mb)
+     Partition Scheme ............... 16M Flash (3MB APP/9.9MB FATFS)
      USB Mode ....................... Hardware CDC and JTAG
      Upload Mode .................... UART0 / Hardware CDC
      Upload Speed ................... 921600
 
-   Flash Size en 8MB es a proposito: funciona aunque el chip tenga 16MB.
-   Este sketch reporta el tamano real y despues lo ajustamos.
+   Confirmado en la placa real: 16 MB de flash y 8 MB de PSRAM OPI.
+   Ver HARDWARE.md.
    =========================================================================== */
 
 #include <Wire.h>
