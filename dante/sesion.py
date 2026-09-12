@@ -388,24 +388,34 @@ class Sesion:
             print(f"   [memoria] recordar({a.get('consulta','')!r}) -> {len(r)}")
 
         elif nombre == "anotar":
-            id_ = memoria.anotar(self.db, a.get("hecho", ""), a.get("sujeto", ""))
+            hecho = a.get("hecho", "")
+            id_ = memoria.anotar(self.db, hecho, a.get("sujeto", ""))
             salida = {"guardado": True, "id": id_}
-            print(f"   [memoria] anotado: {a.get('hecho','')}")
+            print(f"   [memoria] anotado: {hecho}")
+            # Que se vea en la pantalla que quedo guardado. Con este usuario,
+            # una confirmacion que solo se dice se olvida; una que se lee, no.
+            self.t.enviar_control({"t": "texto", "titulo": "Anotado",
+                                   "cuerpo": hecho[:150], "seg": 7})
+            self.t.enviar_control({"t": "emocion", "v": "feliz"})
 
         elif nombre == "agenda":
             e = memoria.agenda_de(self.db, "hoy")
             salida = {"hoy": e}
             print(f"   [memoria] agenda -> {len(e)}")
+            if e:
+                self.t.enviar_control({"t": "texto", "titulo": "Hoy",
+                                       "cuerpo": " · ".join(e)[:150], "seg": 9})
+
+        elif nombre == "quien_esta":
+            salida = self.ojos.quien_esta()
+            print(f"   [vision] {salida}")
 
         elif nombre == "registrar_persona":
             id_ = memoria.registrar_persona(self.db, a.get("nombre", ""),
                                             a.get("relacion", ""))
             salida = {"registrada": True, "id": id_}
             print(f"   [memoria] persona: {a.get('nombre','')}")
-
-        elif nombre == "quien_esta":
-            salida = self.ojos.quien_esta()
-            print(f"   [vision] {salida}")
+            self.t.enviar_control({"t": "emocion", "v": "atencion"})
 
         elif nombre == "recordar_cara":
             cuadro = self.ojos.camara.ultimo() if self.ojos.activa else None

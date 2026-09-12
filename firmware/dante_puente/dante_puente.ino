@@ -22,7 +22,6 @@
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7789.h>
-#include <Fonts/FreeSansBold18pt7b.h>
 
 static const int PIN_I2C_SDA = 1,  PIN_I2C_SCL = 2;
 static const int PIN_I2S_MCLK = 38, PIN_I2S_BCLK = 14, PIN_I2S_WS = 13;
@@ -46,111 +45,258 @@ static const uint8_t MAGIA = 0xA5;
 static const uint8_t T_AUDIO = 1, T_CONTROL = 2, T_LOG = 3;
 
 static i2s_chan_handle_t tx = nullptr, rx = nullptr;
+static int16_t bufI2S[CUADROS * 2];
+static int16_t bufCable[CUADROS];
 static void saludar(bool a, bool b, bool c);
 
 // ---------------------------------------------------------------- pantalla --
-/* Estados que se muestran. El PC los manda con {"t":"emocion"}; el aparato
-   no decide ninguno, solo los dibuja. */
-enum Estado { ARRANCANDO, LISTO, ESCUCHANDO, PENSANDO, HABLANDO, ERROR };
+/* La cara de Dante: dos ojos.
+
+   No es un perro dibujado. La carcasa va a ser el perro; la pantalla es solo
+   la mirada, como en un reloj o un robot de juguete. Eso ademas envejece
+   mejor: unos ojos bien animados se leen desde lejos y no dependen de que el
+   dibujo sea bonito.
+
+   El aparato no decide ningun estado. Los recibe del PC y los pinta. */
+enum Estado {
+  ARRANCANDO, LISTO, ESCUCHANDO, PENSANDO, HABLANDO,
+  FELIZ, ATENCION, INFO, ERROR
+};
 
 static SPIClass spiLCD(HSPI);
 static Adafruit_ST7789 tft(&spiLCD, PIN_LCD_CS, PIN_LCD_DC, -1);
 
+static const int ANCHO = 320, ALTO = 240;
+static const int OJO_IZQ = 104, OJO_DER = 216, OJO_Y = 118;
+
+static uint16_t COLOR, FONDO;
+
 static volatile Estado estado = ARRANCANDO;
-static volatile int nivel_mic = 0;      // 0..100, para la barra
+static volatile int nivel_mic = 0;
 static volatile bool redibujar = true;
+
+// Texto que Dante muestra: recordatorios, confirmaciones, lo que sea.
+static char txt_titulo[40] = "";
+static char txt_cuerpo[160] = "";
+static volatile uint32_t txt_hasta = 0;      // millis en que se quita
+static volatile bool txt_nuevo = false;
 
 static uint16_t color_de(Estado e) {
   switch (e) {
-    case LISTO:      return tft.color565(60, 80, 100);
-    case ESCUCHANDO: return tft.color565(40, 170, 90);
-    case PENSANDO:   return tft.color565(200, 145, 40);
-    case HABLANDO:   return tft.color565(210, 95, 45);
-    case ERROR:      return tft.color565(180, 55, 45);
-    default:         return tft.color565(50, 50, 60);
+    case ESCUCHANDO: return tft.color565(60, 220, 255);   // cian brillante
+    case PENSANDO:   return tft.color565(255, 190, 70);   // ambar
+    case HABLANDO:   return tft.color565(120, 200, 255);
+    case FELIZ:      return tft.color565(120, 255, 190);
+    case ATENCION:   return tft.color565(255, 120, 150);
+    case ERROR:      return tft.color565(255, 90, 80);
+    default:         return tft.color565(70, 170, 235);   // reposo, mas apagado
   }
 }
 
-static const char *texto_de(Estado e) {
+/* --- formas de ojo -------------------------------------------------------
+   Cada una dibuja UN ojo centrado en (cx, cy). El parpadeo se logra pasando
+   una altura menor: no hay animacion aparte, es el mismo dibujo aplastado. */
+
+static void ojo_normal(int cx, int cy, int alto) {
+  int w = 74, r = 20;
+  if (alto < 2 * r) r = alto / 2;
+  tft.fillRoundRect(cx - w / 2, cy - alto / 2, w, alto, r, COLOR);
+}
+
+static void ojo_anillo(int cx, int cy, int alto) {
+  if (alto < 20) { ojo_normal(cx, cy, alto); return; }
+  tft.fillCircle(cx, cy, 42, COLOR);
+  tft.fillCircle(cx, cy, 26, FONDO);
+}
+
+static void ojo_arriba(int cx, int cy, int alto) {
+  // Mirando hacia arriba: pensando.
+  ojo_normal(cx, cy - 14, alto * 3 / 4);
+}
+
+static void ojo_feliz(int cx, int cy, int alto) {
+  // Media luna abierta hacia arriba, que es como se ve una sonrisa con los ojos.
+  if (alto < 20) { ojo_normal(cx, cy, alto); return; }
+  tft.fillCircle(cx, cy + 6, 40, COLOR);
+  tft.fillCircle(cx, cy + 34, 44, FONDO);
+}
+
+static void ojo_corazon(int cx, int cy, int alto) {
+  if (alto < 20) { ojo_normal(cx, cy, alto); return; }
+  int r = 20;
+  tft.fillCircle(cx - r / 2 - 4, cy - 8, r, COLOR);
+  tft.fillCircle(cx + r / 2 + 4, cy - 8, r, COLOR);
+  tft.fillTriangle(cx - r - 8, cy - 2, cx + r + 8, cy - 2, cx, cy + 34, COLOR);
+}
+
+static void dibujar_ojos(Estado e, int alto) {
+  void (*forma)(int, int, int) = ojo_normal;
   switch (e) {
-    case LISTO:      return "LISTO";
-    case ESCUCHANDO: return "TE ESCUCHO";
-    case PENSANDO:   return "PENSANDO";
-    case HABLANDO:   return "HABLANDO";
-    case ERROR:      return "ERROR";
-    default:         return "ARRANCANDO";
+    case ESCUCHANDO: forma = ojo_anillo;  break;
+    case PENSANDO:   forma = ojo_arriba;  break;
+    case FELIZ:      forma = ojo_feliz;   break;
+    case ATENCION:   forma = ojo_corazon; break;
+    default:         forma = ojo_normal;  break;
+  }
+  forma(OJO_IZQ, OJO_Y, alto);
+  forma(OJO_DER, OJO_Y, alto);
+}
+
+/* Boca: solo una linea, y solo cuando habla. Da mucha vida por muy poco. */
+static void dibujar_boca(Estado e, int abertura) {
+  if (e != HABLANDO) return;
+  int w = 54, y = 196;
+  tft.fillRoundRect(ANCHO / 2 - w / 2, y - abertura / 2, w,
+                    abertura < 6 ? 6 : abertura, 3, COLOR);
+}
+
+/* Barra del microfono: la prueba visible de que la voz esta entrando. */
+static void dibujar_nivel(int n) {
+  int ancho = 240 * n / 100;
+  int x = (ANCHO - 240) / 2, y = 214;
+  tft.fillRect(x, y, ancho, 10, COLOR);
+  tft.fillRect(x + ancho, y, 240 - ancho, 10, tft.color565(22, 28, 34));
+}
+
+/* Modo texto: titulo arriba, mensaje partido en lineas. */
+static void dibujar_texto() {
+  tft.fillScreen(FONDO);
+  tft.fillRect(0, 0, ANCHO, 6, COLOR);
+
+  tft.setFont(nullptr);
+  tft.setTextSize(2);
+  tft.setTextColor(COLOR);
+  int w = strlen(txt_titulo) * 12;
+  tft.setCursor((ANCHO - w) / 2, 26);
+  tft.print(txt_titulo);
+
+  // Partir el cuerpo por palabras, 26 caracteres por linea.
+  tft.setTextSize(2);
+  tft.setTextColor(tft.color565(235, 240, 245));
+  char buf[160];
+  strncpy(buf, txt_cuerpo, sizeof(buf) - 1);
+  buf[sizeof(buf) - 1] = 0;
+
+  int y = 80;
+  char *p = buf;
+  while (*p && y < ALTO - 24) {
+    int largo = strlen(p);
+    int corte = largo > 26 ? 26 : largo;
+    if (largo > 26) {
+      int k = corte;
+      while (k > 0 && p[k] != ' ') k--;
+      if (k > 8) corte = k;
+    }
+    char guardado = p[corte];
+    p[corte] = 0;
+    int lw = strlen(p) * 12;
+    tft.setCursor((ANCHO - lw) / 2, y);
+    tft.print(p);
+    p[corte] = guardado;
+    p += corte;
+    while (*p == ' ') p++;
+    y += 28;
   }
 }
 
-static const char *pista_de(Estado e) {
-  switch (e) {
-    case LISTO:      return "manten apretado BOOT y habla";
-    case ESCUCHANDO: return "suelta BOOT cuando termines";
-    case PENSANDO:   return "esperando a Dante...";
-    case HABLANDO:   return "aprieta BOOT para interrumpir";
-    case ERROR:      return "revisa la conexion";
-    default:         return "";
-  }
-}
-
-/* Dibuja en el nucleo 0, para no robarle tiempo al audio, que corre en el 1.
-   Solo repinta cuando cambia el estado; la barra de nivel se actualiza sola. */
+/* Dibuja en el nucleo 0 para no robarle tiempo al audio, que corre en el 1. */
 static void tarea_pantalla(void *) {
   Estado ultimo = (Estado)-1;
-  int ultimo_nivel = -1;
+  int ultimo_nivel = -1, ultimo_alto = -1, ultima_boca = -1;
+  uint32_t proximo_parpadeo = millis() + 3000;
+  bool en_texto = false;
 
   for (;;) {
-    Estado e = estado;
+    uint32_t ahora = millis();
 
-    if (e != ultimo || redibujar) {
-      ultimo = e;
-      redibujar = false;
-      ultimo_nivel = -1;
-
-      tft.fillScreen(ST77XX_BLACK);
-      tft.fillRect(0, 0, 320, 8, color_de(e));
-
-      tft.setFont(&FreeSansBold18pt7b);
-      tft.setTextColor(color_de(e));
-      int16_t x1, y1; uint16_t w, h;
-      tft.getTextBounds(texto_de(e), 0, 0, &x1, &y1, &w, &h);
-      tft.setCursor((320 - w) / 2, 92);
-      tft.print(texto_de(e));
-
-      tft.setFont(nullptr);
-      tft.setTextSize(1);
-      tft.setTextColor(tft.color565(130, 140, 150));
-      const char *p = pista_de(e);
-      tft.setCursor((320 - (int)strlen(p) * 6) / 2, 210);
-      tft.print(p);
+    // --- modo texto: manda sobre todo lo demas ---
+    if (txt_nuevo) {
+      txt_nuevo = false;
+      en_texto = true;
+      COLOR = color_de(estado == LISTO ? INFO : estado);
+      if (estado == LISTO) COLOR = tft.color565(90, 190, 255);
+      dibujar_texto();
+    }
+    if (en_texto) {
+      if (ahora > txt_hasta) {
+        en_texto = false;
+        ultimo = (Estado)-1;          // forzar repintado de la cara
+      }
+      vTaskDelay(pdMS_TO_TICKS(60));
+      continue;
     }
 
-    // Barra de nivel: la prueba visible de que el microfono esta captando.
-    if (e == ESCUCHANDO) {
-      int n = nivel_mic;
-      if (n != ultimo_nivel) {
-        ultimo_nivel = n;
-        int ancho = 280 * n / 100;
-        tft.fillRect(20, 140, ancho, 26, color_de(e));
-        tft.fillRect(20 + ancho, 140, 280 - ancho, 26, tft.color565(25, 30, 35));
-        tft.drawRect(19, 139, 282, 28, tft.color565(60, 70, 80));
+    Estado e = estado;
+    COLOR = color_de(e);
+
+    // --- parpadeo: solo en reposo, y a intervalos irregulares ---
+    int alto = 62;
+    if (e == LISTO || e == HABLANDO || e == FELIZ) {
+      if (ahora > proximo_parpadeo) {
+        uint32_t t = ahora - proximo_parpadeo;
+        if (t < 90)       alto = 62 - (int)(t * 56 / 90);      // cerrando
+        else if (t < 180) alto = 6 + (int)((t - 90) * 56 / 90); // abriendo
+        else proximo_parpadeo = ahora + 2600 + (esp_random() % 3200);
       }
     }
 
-    vTaskDelay(pdMS_TO_TICKS(50));
+    bool cambio = (e != ultimo) || (alto != ultimo_alto) || redibujar;
+    if (redibujar || e != ultimo) {
+      tft.fillScreen(FONDO);
+      ultimo_nivel = -1;
+      ultima_boca = -1;
+      redibujar = false;
+    }
+
+    if (cambio) {
+      // Borrar solo la banda de los ojos, no la pantalla entera: repintar
+      // todo cada vuelta parpadearia feo y comeria SPI.
+      tft.fillRect(0, OJO_Y - 56, ANCHO, 112, FONDO);
+      dibujar_ojos(e, alto);
+      ultimo = e;
+      ultimo_alto = alto;
+    }
+
+    if (e == HABLANDO) {
+      int abertura = 6 + (int)(esp_random() % 22);   // la boca se mueve sola
+      if (abertura != ultima_boca) {
+        tft.fillRect(ANCHO / 2 - 36, 178, 72, 40, FONDO);
+        dibujar_boca(e, abertura);
+        ultima_boca = abertura;
+      }
+    }
+
+    if (e == ESCUCHANDO) {
+      int n = nivel_mic;
+      if (n != ultimo_nivel) {
+        dibujar_nivel(n);
+        ultimo_nivel = n;
+      }
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(e == HABLANDO ? 90 : 45));
   }
 }
 
 static void init_pantalla() {
   spiLCD.begin(PIN_LCD_SCK, -1, PIN_LCD_MOSI, PIN_LCD_CS);
   tft.init(240, 320);
-  tft.setRotation(3);              // apaisada, al derecho
-  tft.fillScreen(ST77XX_BLACK);
+  tft.setRotation(3);
+  FONDO = tft.color565(8, 12, 16);
+  COLOR = color_de(ARRANCANDO);
+  tft.fillScreen(FONDO);
   digitalWrite(PIN_LUZ, HIGH);
-  xTaskCreatePinnedToCore(tarea_pantalla, "pantalla", 4096, nullptr, 1, nullptr, 0);
+  xTaskCreatePinnedToCore(tarea_pantalla, "pantalla", 6144, nullptr, 1, nullptr, 0);
 }
-static int16_t bufI2S[CUADROS * 2];
-static int16_t bufCable[CUADROS];
+
+static void mostrar_texto(const char *titulo, const char *cuerpo, uint32_t seg) {
+  strncpy(txt_titulo, titulo, sizeof(txt_titulo) - 1);
+  txt_titulo[sizeof(txt_titulo) - 1] = 0;
+  strncpy(txt_cuerpo, cuerpo, sizeof(txt_cuerpo) - 1);
+  txt_cuerpo[sizeof(txt_cuerpo) - 1] = 0;
+  txt_hasta = millis() + seg * 1000;
+  txt_nuevo = true;
+}
 
 // ------------------------------------------------------------ marco serie --
 static void enviar(uint8_t tipo, const void *carga, uint16_t largo) {
@@ -385,7 +531,27 @@ void loop() {
         if (strstr(em, "escuchando"))      estado = ESCUCHANDO;
         else if (strstr(em, "pensando"))   estado = PENSANDO;
         else if (strstr(em, "hablando"))   estado = HABLANDO;
+        else if (strstr(em, "feliz"))      estado = FELIZ;
+        else if (strstr(em, "atencion"))   estado = ATENCION;
         else                               estado = LISTO;
+      } else if (strstr((char *)marco, "\"texto\"")) {
+        // {"t":"texto","titulo":"...","cuerpo":"...","seg":8}
+        char titulo[40] = "", cuerpo[160] = "";
+        int seg = 8;
+        char *q;
+        if ((q = strstr((char *)marco, "\"titulo\":\""))) {
+          q += 10; int i = 0;
+          while (*q && *q != '"' && i < 38) titulo[i++] = *q++;
+          titulo[i] = 0;
+        }
+        if ((q = strstr((char *)marco, "\"cuerpo\":\""))) {
+          q += 10; int i = 0;
+          while (*q && *q != '"' && i < 158) cuerpo[i++] = *q++;
+          cuerpo[i] = 0;
+        }
+        if ((q = strstr((char *)marco, "\"seg\":"))) seg = atoi(q + 6);
+        mostrar_texto(titulo, cuerpo, seg > 0 ? seg : 8);
+
       } else if (strstr((char *)marco, "\"hola?\"")) {
         saludar(ok_dac, ok_adc, ok_i2s);
       } else if (strstr((char *)marco, "\"parar\"")) {
