@@ -2451,6 +2451,8 @@ if (bCam) bCam.onclick = async () => {
     try {
       const r = await (await fetch('/api/quien_veo')).json();
       const c = $('#caras'); if (!c) return;
+      if (r.error){ c.textContent = 'no pude mirar: ' + r.error; return; }
+      if (!r.hay_imagen){ c.textContent = 'todavía no me llega imagen'; return; }
       if (!r.caras.length){ c.textContent = 'nadie a la vista'; return; }
       c.innerHTML = r.caras.map(x => x.nombre
         ? `<b style="color:var(--paseo)">${x.nombre}</b>`
@@ -3484,6 +3486,9 @@ def crear_app(sesion, bucle):
                                "parecido": round(c.get("parecido", 0), 2)}
                               for c in caras]}
         except Exception as e:
+            # Se imprime ademas de devolverlo: un fallo del reconocedor se veia
+            # en pantalla igual que "no hay nadie", y son cosas muy distintas.
+            print(f"   [caras] no pude reconocer: {type(e).__name__}: {e}")
             return {"hay_imagen": True, "caras": [], "error": str(e)}
 
     @app.post("/api/cara")

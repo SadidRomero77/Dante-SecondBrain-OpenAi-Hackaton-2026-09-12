@@ -32,6 +32,15 @@ RUN uv pip install --system --no-cache -e . || \
         "numpy>=1.26" "tzdata>=2024.1" "opencv-contrib-python-headless>=4.10" \
         "pillow>=10.0" "fastapi>=0.115" "uvicorn>=0.32"
 
+# Los dos modelos de caras (38 MB) se bajan aqui, no al arrancar. Bajarlos en
+# caliente falla en silencio si la red del servidor no coopera, y el sintoma
+# es "nadie a la vista" con una cara perfectamente visible en pantalla.
+RUN mkdir -p /app/data/modelos \
+ && curl -fsSL -o /app/data/modelos/yunet.onnx \
+      https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx \
+ && curl -fsSL -o /app/data/modelos/sface.onnx \
+      https://github.com/opencv/opencv_zoo/raw/main/models/face_recognition_sface/face_recognition_sface_2021dec.onnx
+
 COPY dante/ ./dante/
 COPY .env.example ./
 
