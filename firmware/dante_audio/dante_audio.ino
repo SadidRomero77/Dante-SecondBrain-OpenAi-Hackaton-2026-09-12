@@ -264,6 +264,49 @@ static int huecos(const int16_t *d, size_t muestras) {
   return cortes;
 }
 
+/* Nivel de un solo canal: 0 = izquierdo, 1 = derecho. */
+static void nivel_canal(const int16_t *d, size_t muestras, int canal,
+                        int32_t *pico, double *rms) {
+  int64_t suma = 0;
+  int32_t p = 0;
+  size_t cuenta = 0;
+  for (size_t i = canal; i < muestras; i += 2) {
+    int32_t v = d[i];
+    if (abs(v) > p) p = abs(v);
+    suma += (int64_t)v * v;
+    cuenta++;
+  }
+  *pico = p;
+  *rms = cuenta ? sqrt((double)suma / cuenta) : 0.0;
+}
+
+/* Reproduce el buffer en uno de tres modos, sin modificarlo:
+   0 = solo izquierdo, 1 = solo derecho, 2 = los dos como vinieron. */
+static void reproducir(const int16_t *src, size_t muestras, int modo) {
+  const size_t bloque = 960;            // 480 cuadros
+  static int16_t tmp[960];
+  size_t esc;
+  for (size_t i = 0; i < muestras; i += bloque) {
+    size_t n = (i + bloque <= muestras) ? bloque : (muestras - i);
+    for (size_t j = 0; j + 1 < n; j += 2) {
+      int16_t v = (modo == 0) ? src[i + j]
+                : (modo == 1) ? src[i + j + 1]
+                              : src[i + j];
+      float g = v * GANANCIA_SW;
+      if (g > 32767.0f) g = 32767.0f; else if (g < -32768.0f) g = -32768.0f;
+      int16_t w = (int16_t)g;
+      if (modo == 2) {
+        float h = src[i + j + 1] * GANANCIA_SW;
+        if (h > 32767.0f) h = 32767.0f; else if (h < -32768.0f) h = -32768.0f;
+        tmp[j] = w; tmp[j + 1] = (int16_t)h;
+      } else {
+        tmp[j] = w; tmp[j + 1] = w;
+      }
+    }
+    i2s_channel_write(tx, tmp, n * sizeof(int16_t), &esc, 2000);
+  }
+}
+
 /* Multiplica con saturacion: al pasarse se queda en el tope en vez de dar la
    vuelta y convertirse en un chasquido. */
 static void amplificar(int16_t *d, size_t muestras, float g) {
@@ -370,30 +413,29 @@ void loop() {
     return;
   }
 
-  int cortes = huecos(buffer, n);
-  solo_microfono(buffer, n);
+  int32_t pi, pd; double ri, rd;
+  nivel_canal(buffer, n, 0, &pi, &ri);
+  nivel_canal(buffer, n, 1, &pd, &rd);
+  Serial.printf("   izquierdo  pico %5ld  rms %5.0f\n", (long)pi, ri);
+  Serial.printf("   derecho    pico %5ld  rms %5.0f\n", (long)pd, rd);
+  Serial.printf("   huecos %d\n", huecos(buffer, n));
 
-  int32_t pico; double rms;
-  nivel(buffer, n, &pico, &rms);
-  Serial.printf("   captado   pico %5ld  rms %5.0f   %s\n", (long)pico, rms,
-                pico < 50    ? "<-- el microfono no capta nada"
-                : pico < 800 ? "<-- muy bajo, sube GANANCIA_MIC"
-                : pico > 30000 ? "<-- saturado, baja GANANCIA_MIC"
-                : "bien");
+  /* Reproduce los tres candidatos, anunciados con pitidos:
+       1 pitido  -> solo canal izquierdo
+       2 pitidos -> solo canal derecho
+       3 pitidos -> los dos mezclados (asi sonaba en la version que funciono)
+     El que suene a tu voz es el bueno. Deja de adivinar cual es cual. */
+  for (int modo = 0; modo < 3; modo++) {
+    for (int b = 0; b <= modo; b++) { tono(880, 120); delay(110); }
+    delay(250);
 
-  Serial.printf("   huecos    %d  %s\n", cortes,
-                cortes == 0 ? "sin cortes de DMA"
-                            : "<-- la DMA se queda sin datos: eso es lo entrecortado");
+    reproducir(buffer, n, modo);
+    Serial.printf(">> reproducido: %s\n",
+                  modo == 0 ? "IZQUIERDO (1 pitido)"
+                  : modo == 1 ? "DERECHO (2 pitidos)"
+                  : "MEZCLA (3 pitidos)");
+    delay(700);
+  }
 
-  amplificar(buffer, n, GANANCIA_SW);
-  int32_t pico2; double rms2;
-  nivel(buffer, n, &pico2, &rms2);
-  Serial.printf("   x%.1f       pico %5ld  rms %5.0f   %s\n",
-                GANANCIA_SW, (long)pico2, rms2,
-                pico2 >= 32767 ? "<-- recortando, baja GANANCIA_SW" : "sin recorte");
-
-  Serial.println(">> REPRODUCIENDO");
-  i2s_channel_write(tx, buffer, leidos, &escritos, 5000);
-
-  delay(1200);
+  delay(1500);
 }
