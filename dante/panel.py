@@ -714,7 +714,7 @@ button:active{transform:translateY(0) scale(.98)}
     .dante-avatar-box {
       position: relative; width: 72px; height: 72px; display: flex;
       align-items: center; justify-content: center; flex: none; cursor: pointer;
-      border-radius: 20px;
+      border-radius: 20px; overflow: hidden;
       background: radial-gradient(circle at 50% 35%, rgba(254, 215, 125, 0.22), transparent 70%);
       transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), background .25s, box-shadow .25s;
       user-select: none;
@@ -726,7 +726,8 @@ button:active{transform:translateY(0) scale(.98)}
     .dante-avatar-box:active { transform: scale(0.95); }
 
     .dante-avatar {
-      display: block; width: 100%; height: 100%; overflow: visible;
+      /* La silueta y sus animaciones nunca se salen del espacio del avatar. */
+      display: block; width: 100%; height: 100%; overflow: hidden;
       filter: drop-shadow(0 4px 8px rgba(80, 45, 10, 0.16));
     }
 
@@ -741,23 +742,23 @@ button:active{transform:translateY(0) scale(.98)}
       50% { transform: translateY(-2.2px) rotate(0.4deg); }
     }
 
-    /* Orejas expresivas con pivote en la base */
-    .oreja { transition: transform .32s cubic-bezier(.34, 1.56, .64, 1); }
+    /* Orejas: pivote en la sien, movimiento suave (sin rebote) */
+    .oreja { transition: transform .35s ease-in-out; }
     .oreja-izq {
-      transform-origin: 48px 48px;
-      animation: oreja-izq-idle 4s ease-in-out infinite;
+      transform-origin: 50px 50px;
+      animation: oreja-izq-idle 5.2s ease-in-out infinite;
     }
     .oreja-der {
-      transform-origin: 112px 48px;
-      animation: oreja-der-idle 4s ease-in-out infinite .3s;
+      transform-origin: 110px 50px;
+      animation: oreja-der-idle 5.2s ease-in-out infinite .4s;
     }
     @keyframes oreja-izq-idle {
       0%, 100% { transform: rotate(0deg); }
-      50% { transform: rotate(-3.5deg); }
+      50% { transform: rotate(-2deg); }
     }
     @keyframes oreja-der-idle {
       0%, 100% { transform: rotate(0deg); }
-      50% { transform: rotate(3.5deg); }
+      50% { transform: rotate(2deg); }
     }
 
     /* Mechón de pelo diminuto en la corona */
@@ -793,15 +794,15 @@ button:active{transform:translateY(0) scale(.98)}
     /* ESTADOS DE EMOCIÓN */
     /* Escuchando: orejas alertas arriba, cabeza atenta adelante, ojos despiertos */
     .emocion-escuchando .cabeza-grupo { transform: translateY(-3px) scale(1.02); animation: none; }
-    .emocion-escuchando .oreja-izq { transform: rotate(-18deg) translateY(-4px); animation: none; }
-    .emocion-escuchando .oreja-der { transform: rotate(18deg) translateY(-4px); animation: none; }
+    .emocion-escuchando .oreja-izq { transform: rotate(-9deg); animation: none; }
+    .emocion-escuchando .oreja-der { transform: rotate(9deg); animation: none; }
     .emocion-escuchando .ceja-izq { transform: translateY(-3px); }
     .emocion-escuchando .ceja-der { transform: translateY(-3px); }
 
     /* Pensando: cabeza inclinada curiosa, oreja levantada, mirada arriba a un lado */
     .emocion-pensando .cabeza-grupo { transform: rotate(7.5deg) translateY(-1.5px); animation: none; }
-    .emocion-pensando .oreja-izq { transform: rotate(-15deg) translateY(-3px); }
-    .emocion-pensando .oreja-der { transform: rotate(8deg) translateY(2px); }
+    .emocion-pensando .oreja-izq { transform: rotate(-8deg); }
+    .emocion-pensando .oreja-der { transform: rotate(4deg); }
     .emocion-pensando .ceja-izq { transform: translateY(-4px) rotate(-6deg); }
     .emocion-pensando .ceja-der { transform: translateY(1.5px) rotate(5deg); }
     .emocion-pensando .pupila { transform: translate(2.5px, -3.2px); }
@@ -816,8 +817,8 @@ button:active{transform:translateY(0) scale(.98)}
     }
     .emocion-hablando .oreja-izq { animation: oreja-habla-izq .45s ease-in-out infinite alternate; }
     .emocion-hablando .oreja-der { animation: oreja-habla-der .45s ease-in-out infinite alternate; }
-    @keyframes oreja-habla-izq { from { transform: rotate(0deg); } to { transform: rotate(-7deg); } }
-    @keyframes oreja-habla-der { from { transform: rotate(0deg); } to { transform: rotate(7deg); } }
+    @keyframes oreja-habla-izq { from { transform: rotate(0deg); } to { transform: rotate(-4deg); } }
+    @keyframes oreja-habla-der { from { transform: rotate(0deg); } to { transform: rotate(4deg); } }
 
     /* Feliz: ojos en arco sonriente (^ ^), hocico abierto con lengua fuera, orejas revoloteando felices */
     .emocion-feliz .ojo-abierto { display: none !important; }
@@ -829,25 +830,25 @@ button:active{transform:translateY(0) scale(.98)}
       from { transform: translateY(0); }
       to { transform: translateY(-4px) scale(1.02); }
     }
-    .emocion-feliz .oreja-izq { animation: oreja-feliz-izq .32s ease-in-out infinite alternate; }
-    .emocion-feliz .oreja-der { animation: oreja-feliz-der .32s ease-in-out infinite alternate; }
-    @keyframes oreja-feliz-izq { from { transform: rotate(-9deg); } to { transform: rotate(6deg); } }
-    @keyframes oreja-feliz-der { from { transform: rotate(9deg); } to { transform: rotate(-6deg); } }
+    .emocion-feliz .oreja-izq { animation: oreja-feliz-izq .55s ease-in-out infinite alternate; }
+    .emocion-feliz .oreja-der { animation: oreja-feliz-der .55s ease-in-out infinite alternate; }
+    @keyframes oreja-feliz-izq { from { transform: rotate(-4deg); } to { transform: rotate(3deg); } }
+    @keyframes oreja-feliz-der { from { transform: rotate(4deg); } to { transform: rotate(-3deg); } }
     .emocion-feliz #medalla-hueso { animation: medalla-campana .38s ease-in-out infinite alternate; }
     @keyframes medalla-campana { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
 
     /* Atento / Alerta: ojos dilatados, postura erguida, cejas arriba */
     .emocion-atencion .cabeza-grupo { transform: translateY(-4px) scale(1.04); }
-    .emocion-atencion .oreja-izq { transform: rotate(-20deg) translateY(-5px); }
-    .emocion-atencion .oreja-der { transform: rotate(20deg) translateY(-5px); }
+    .emocion-atencion .oreja-izq { transform: rotate(-10deg); }
+    .emocion-atencion .oreja-der { transform: rotate(10deg); }
     .emocion-atencion .ceja-izq, .emocion-atencion .ceja-der { transform: translateY(-3.5px); }
 
     /* Dormido: párpados cerrados, respiración lenta y tranquila, orejitas caídas */
     .emocion-dormido .parpado { transform: scaleY(1) !important; }
     .emocion-dormido .cabeza-grupo { transform: translateY(2.5px); animation: dormir-cabeza 4.8s ease-in-out infinite; }
     @keyframes dormir-cabeza { 0%, 100% { transform: translateY(2.5px); } 50% { transform: translateY(0.5px); } }
-    .emocion-dormido .oreja-izq { transform: rotate(5deg) translateY(2.5px); }
-    .emocion-dormido .oreja-der { transform: rotate(-5deg) translateY(2.5px); }
+    .emocion-dormido .oreja-izq { transform: rotate(4deg); }
+    .emocion-dormido .oreja-der { transform: rotate(-4deg); }
 </style></head><body>
 
 
@@ -901,43 +902,35 @@ button:active{transform:translateY(0) scale(.98)}
         </filter>
       </defs>
 
-      <!-- BASE: CUELLO Y COLLAR EXCLUSIVAMENTE (Sin cuerpo, como pidió el usuario) -->
+      <!-- BASE: cuello y collar a una distancia prudente, sin salirse del icono -->
       <g id="cuello-y-collar">
-        <!-- Cuello base -->
-        <path d="M 58 122 L 54 138 Q 80 148 106 138 L 102 122 Z" fill="#b96209"/>
-        <!-- Collar verde esmeralda distintivo -->
-        <path id="banda-collar" d="M 44 130 Q 80 146 116 130 L 114 142 Q 80 157 46 142 Z" fill="url(#grad-collar)" stroke="#134a33" stroke-width="1.2" filter="url(#soft-shadow)"/>
-        <!-- Remaches dorados del collar -->
-        <circle cx="56" cy="136.5" r="1.6" fill="#f8cf52"/>
-        <circle cx="104" cy="136.5" r="1.6" fill="#f8cf52"/>
-        <!-- Anillo de la medalla -->
-        <circle cx="80" cy="144" r="3.2" fill="none" stroke="#e8a817" stroke-width="1.6"/>
-        <!-- Medalla colgante en forma de hueso pulido dorado -->
-        <g id="medalla-hueso" transform="translate(80, 149)">
-          <path d="M -7 -4 C -9.5 -6.5 -12.5 -3 -10 -0.8 C -12.5 1.5 -9.5 5 -7 2.5 L 7 2.5 C 9.5 5 12.5 1.5 10 -0.8 C 12.5 -3 9.5 -6.5 7 -4 Z" fill="url(#grad-oro)" stroke="#b57404" stroke-width="0.8"/>
-          <circle cx="0" cy="-0.5" r="1" fill="#fff" opacity="0.85"/>
+        <path d="M 62 116 L 58 132 Q 80 140 102 132 L 98 116 Z" fill="#dc851d"/>
+        <path d="M 60 128 L 58 134 Q 80 140 102 134 L 100 128 Z" fill="#c97312"/>
+        <path id="banda-collar" d="M 52 126 Q 80 138 108 126 L 106 136 Q 80 146 54 136 Z" fill="url(#grad-collar)" stroke="#134a33" stroke-width="1.1"/>
+        <circle cx="64" cy="132" r="1.5" fill="#f8cf52"/>
+        <circle cx="96" cy="132" r="1.5" fill="#f8cf52"/>
+        <circle cx="80" cy="138" r="2.7" fill="none" stroke="#e8a817" stroke-width="1.45"/>
+        <g id="medalla-hueso" transform="translate(80, 142)">
+          <path d="M -5.4 -2.8 C -7.2 -4.7 -9.4 -2.2 -7.6 -0.6 C -9.4 1.1 -7.2 3.6 -5.4 1.8 L 5.4 1.8 C 7.2 3.6 9.4 1.1 7.6 -0.6 C 9.4 -2.2 7.2 -4.7 5.4 -2.8 Z" fill="url(#grad-oro)" stroke="#b57404" stroke-width="0.7"/>
+          <circle cx="0" cy="-0.35" r="0.75" fill="#fff" opacity="0.85"/>
         </g>
-      </g>
-
-      <!-- OREJAS EXPRESIVAS (Animadas con movimiento) -->
-      <!-- Oreja Izquierda -->
-      <g id="oreja-izq" class="oreja oreja-izq">
-        <path d="M 46 48 C 26 46 10 66 14 92 C 17 104 31 101 39 85 C 45 74 51 59 51 49 Z" fill="#9e4e04"/>
-        <path d="M 48 48 C 29 46 14 65 17 89 C 19 99 32 96 39 82 C 45 71 52 58 52 48 Z" fill="url(#grad-oreja-izq)"/>
-        <path d="M 41 53 C 30 53 23 66 25 81 C 29 87 34 83 38 73 Z" fill="#883e02" opacity="0.75"/>
-        <path d="M 44 49 C 32 49 22 62 23 75" fill="none" stroke="#fcd484" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
-      </g>
-
-      <!-- Oreja Derecha -->
-      <g id="oreja-der" class="oreja oreja-der">
-        <path d="M 114 48 C 134 46 150 66 146 92 C 143 104 129 101 121 85 C 115 74 109 59 109 49 Z" fill="#924602"/>
-        <path d="M 112 48 C 131 46 146 65 143 89 C 141 99 128 96 121 82 C 115 71 108 58 108 48 Z" fill="url(#grad-oreja-der)"/>
-        <path d="M 119 53 C 130 53 137 66 135 81 C 131 87 126 83 122 73 Z" fill="#7d3701" opacity="0.75"/>
-        <path d="M 116 49 C 128 49 138 62 137 75" fill="none" stroke="#fcd484" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
       </g>
 
       <!-- CABEZA CON ESTRUCTURA BIEN MOLDEADA EN PLANOS POLIGONALES -->
       <g id="cabeza-grupo" class="cabeza-grupo">
+        <!-- Orejas dentro de la cabeza para que se muevan con ella -->
+        <g id="oreja-izq" class="oreja oreja-izq">
+          <path d="M 46 48 C 26 46 10 66 14 92 C 17 104 31 101 39 85 C 45 74 51 59 51 49 Z" fill="#9e4e04"/>
+          <path d="M 48 48 C 29 46 14 65 17 89 C 19 99 32 96 39 82 C 45 71 52 58 52 48 Z" fill="url(#grad-oreja-izq)"/>
+          <path d="M 41 53 C 30 53 23 66 25 81 C 29 87 34 83 38 73 Z" fill="#883e02" opacity="0.75"/>
+          <path d="M 44 49 C 32 49 22 62 23 75" fill="none" stroke="#fcd484" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+        </g>
+        <g id="oreja-der" class="oreja oreja-der">
+          <path d="M 114 48 C 134 46 150 66 146 92 C 143 104 129 101 121 85 C 115 74 109 59 109 49 Z" fill="#924602"/>
+          <path d="M 112 48 C 131 46 146 65 143 89 C 141 99 128 96 121 82 C 115 71 108 58 108 48 Z" fill="url(#grad-oreja-der)"/>
+          <path d="M 119 53 C 130 53 137 66 135 81 C 131 87 126 83 122 73 Z" fill="#7d3701" opacity="0.75"/>
+          <path d="M 116 49 C 128 49 138 62 137 75" fill="none" stroke="#fcd484" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+        </g>
         <!-- Facetas geométricas / polígonos esculpidos de la cabeza -->
         <g id="poligonos-cabeza">
           <!-- 1. Plano Frente Superior / Corona -->
