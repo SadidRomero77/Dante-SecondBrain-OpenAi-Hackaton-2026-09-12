@@ -1,4 +1,4 @@
-# Kobi — Tu compañero, Tu memoria
+# Kibo — tu compañero, tu memoria
 
 Un agente de voz con memoria que vive en un aparato físico sobre la mesa.
 Escucha, recuerda, ve, y tiene cara.
@@ -7,7 +7,7 @@ Pensado para personas mayores y para quien empieza a olvidar: recuerda quién es
 cada quien, qué pasó ayer y qué toca hoy — y **dice cuando no sabe**, en vez de
 inventar.
 
-> Dante no es un dispositivo médico. No diagnostica, no aconseja tratamientos y
+> Kibo no es un dispositivo médico. No diagnostica, no aconseja tratamientos y
 > no reemplaza a nadie. Es un compañero de memoria cotidiana y una herramienta
 > para quien cuida.
 
@@ -32,7 +32,7 @@ inventar.
 | **Avisa a la familia** | Una nota semanal por Trigger.dev, con lo que pasó y **lo que cambió** respecto de las semanas anteriores. |
 | **Llega con algo que contar** | El tiempo, algo del mundo relacionado con lo que a ella le gusta, o un recuerdo suyo para retomarlo. |
 | **Nota lo que preocupa** | Marca menciones de dolor, caídas o confusión. Sin diagnosticar: repite lo que ella dijo y cuántas veces. |
-| **Lleva recados** | La familia graba o escribe, y Dante lo entrega **al abrir la conversación**. Los grabados suenan con la voz de quien los dejó. |
+| **Lleva recados** | La familia graba o escribe, y Kibo lo entrega **al abrir la conversación**. Los grabados suenan con la voz de quien los dejó. |
 | **Se presenta solo** | La primera vez conoce a la persona conversando, no con un formulario. |
 | **El botón de «no me acuerdo»** | Pulsación larga: le cuenta quién es, dónde está y qué día es. |
 
@@ -62,7 +62,7 @@ Abrí el `.env` y pegá al menos `OPENAI_API_KEY`. Todo lo demás es opcional.
 Verificá que quedó bien:
 
 ```bash
-uv run dante doctor
+uv run kibo doctor
 ```
 
 Te dice qué falta y qué integraciones están activas. No gasta créditos.
@@ -90,7 +90,7 @@ y ponete un tope de gasto.
 completa: captura por el micrófono del computador y reproduce por sus parlantes.
 
 ```bash
-uv run dante hablar --panel
+uv run kibo hablar --panel
 ```
 
 Abrí **http://127.0.0.1:8800**. Ahí tenés:
@@ -106,9 +106,9 @@ pantalla física.
 Probá con datos de ejemplo:
 
 ```bash
-uv run dante semilla       # carga una persona con su familia y su pasado
-uv run dante memoria       # mira qué recuerda
-uv run dante hablar --panel --diario
+uv run kibo semilla       # carga una persona con su familia y su pasado
+uv run kibo memoria       # mira qué recuerda
+uv run kibo hablar --panel --diario
 ```
 
 ---
@@ -129,7 +129,7 @@ placa están en el encabezado del archivo; los dos que no podés equivocar son
 ### 2. Conectar
 
 ```bash
-uv run dante hablar --panel
+uv run kibo hablar --panel
 ```
 
 El aparato aparece solo. Mantené **BOOT** apretado para hablar.
@@ -139,7 +139,7 @@ El aparato aparece solo. Mantené **BOOT** apretado para hablar.
 Con el cable puesto:
 
 ```bash
-uv run dante setup
+uv run kibo setup
 ```
 
 Pregunta la red, la contraseña, y detecta sola la IP de este PC. Se la escribe
@@ -154,7 +154,7 @@ desenchufar el cable a mitad de una conversación y seguir por red.
 ### Si el audio del aparato falla
 
 ```bash
-uv run dante hablar --panel --solo-cara
+uv run kibo hablar --panel --solo-cara
 ```
 
 El aparato conserva pantalla y botón pero su audio no se usa: la voz va por el
@@ -165,31 +165,31 @@ computador. Sigue habiendo demo físico sin depender del módulo de audio.
 ## Comandos
 
 ```
-dante doctor           Revisa el entorno y las integraciones. No gasta créditos.
-dante smoke            Prueba la Realtime API con una conversación de texto.
-dante semilla          Carga una persona de ejemplo con su pasado.
-dante memoria          Muestra qué recuerda Dante ahora mismo.
-dante resumen          La nota semanal para la familia.
+kibo doctor           Revisa el entorno y las integraciones. No gasta créditos.
+kibo smoke            Prueba la Realtime API con una conversación de texto.
+kibo semilla          Carga una persona de ejemplo con su pasado.
+kibo memoria          Muestra qué recuerda Kibo ahora mismo.
+kibo resumen          La nota semanal para la familia.
        --enviar        ...y se la manda de verdad, por Trigger.dev
-dante olvidar Rosa     Saca de la memoria lo que mencione esa palabra.
+kibo olvidar Rosa     Saca de la memoria lo que mencione esa palabra.
        --si            ...borrando de verdad. Sin esto solo muestra qué se iría
-dante olvidar --todo   Vacía la memoria entera, conservando los ajustes.
+kibo olvidar --todo   Vacía la memoria entera, conservando los ajustes.
 
-dante hablar           Conversar.
+kibo hablar           Conversar.
        --panel         ...y abrir el portal en el 8800
        --solo-cara     ...ignorando el audio del aparato
        --diario        ...forzando el saludo del día
 
-dante setup            Le pasa al aparato la red WiFi y la IP del PC.
-dante monitor          Lee el puerto serie del aparato.
-dante puente           Micrófono → PC → parlante, sin modelo de por medio.
+kibo setup            Le pasa al aparato la red WiFi y la IP del PC.
+kibo monitor          Lee el puerto serie del aparato.
+kibo puente           Micrófono → PC → parlante, sin modelo de por medio.
 ```
 
 ---
 
 ## El portal
 
-`--panel` abre una página con cinco pestañas. Arriba, la carita de Dante
+`--panel` abre una página con cinco pestañas. Arriba, la carita de Kibo
 cambia con su estado y la cola menea más rápido cuando está contento.
 
 **Conversar** — el video con las caras marcadas, la charla en vivo, chat por
@@ -197,15 +197,15 @@ texto y micrófono. Encima, cuatro números: qué hay pendiente hoy, cuánto
 recuerda, a cuánta gente conoce y cuántas conversaciones lleva.
 
 **Personas** — poné a alguien frente a la cámara, escribí "Ana / hija", un
-botón. Dante la reconoce y la nombra en voz alta la próxima vez. Debajo, dónde
+botón. Kibo la reconoce y la nombra en voz alta la próxima vez. Debajo, dónde
 quedaron las cosas que tiene anotadas.
 
-**Mensajes** — dejale un recado. Grabado, y Dante se lo reproduce **con tu
+**Mensajes** — dejale un recado. Grabado, y Kibo se lo reproduce **con tu
 voz**; o escrito, si estás en el trabajo y no te sale grabarte. Se lo entrega
 apenas hablen, sin que ella tenga que preguntar.
 
 **Recordatorios** — medicamentos, citas, visitas y cumpleaños. Se anotan, se
-corrigen y se quitan. Dante los dice **solo, cuando llega la hora**.
+corrigen y se quitan. Kibo los dice **solo, cuando llega la hora**.
 
 **Cómo está** — lo que mencionó esta semana: dolor, caídas, confusión, ánimo.
 Con sus palabras y cuántas veces. Debajo, **qué cambió** respecto de las
@@ -250,7 +250,7 @@ agente. La división es deliberada:
 
 | | |
 |---|---|
-| **El PC de la casa** | lo que Dante **dice**: la pastilla, la cita, el diario |
+| **El PC de la casa** | lo que Kibo **dice**: la pastilla, la cita, el diario |
 | **Trigger.dev** | lo que **sale** hacia la familia: el resumen semanal, el aviso de que algo no se confirmó |
 
 Un temporizador local no sobrevive a que el PC se duerma, no reintenta si falla

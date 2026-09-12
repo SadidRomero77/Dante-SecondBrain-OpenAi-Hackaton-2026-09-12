@@ -935,7 +935,7 @@ async def _presentarse(s: "Sesion") -> None:
     s.cara("atencion")
     s.respondiendo = True
     s.t0 = time.time()
-    quien = ajustes.leer(s.db)["nombre_mascota"] or "Dante"
+    quien = ajustes.leer(s.db)["nombre_mascota"] or "Kibo"
     await s._ev({"type": "response.create", "response": {
         "instructions": ajustes.ONBOARDING.replace("%%QUIEN%%", quien)}})
 

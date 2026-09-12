@@ -1,6 +1,6 @@
-# Dante
+# Kibo
 
-Un agente de voz que acompana a una persona mayor en su casa y **recuerda su
+Kibo es un agente de voz que acompana a una persona mayor en su casa y **recuerda su
 vida**: quien la visito, que le preocupa, que le gusta. Vive en un perrito de
 juguete con ojos en la pantalla y una oreja que se mueve.
 
@@ -63,14 +63,14 @@ acuerdo"**.
 ## Comandos
 
 ```
-uv run dante doctor            # revisa entorno y llaves
-uv run dante hablar --panel    # lo de siempre: conversar, con portal
-uv run dante puente            # prueba el camino de audio por USB
-uv run dante monitor           # lee el puerto serie crudo
-uv run dante memoria           # ver que recuerda
-uv run dante resumen           # la nota semanal para la familia (--enviar)
-uv run dante olvidar Rosa      # sacar algo de la memoria (--si para borrar)
-uv run dante olvidar --todo    # vaciarla entera, conservando los ajustes
+uv run kibo doctor            # revisa entorno y llaves
+uv run kibo hablar --panel    # lo de siempre: conversar, con portal
+uv run kibo puente            # prueba el camino de audio por USB
+uv run kibo monitor           # lee el puerto serie crudo
+uv run kibo memoria           # ver que recuerda
+uv run kibo resumen           # la nota semanal para la familia (--enviar)
+uv run kibo olvidar Rosa      # sacar algo de la memoria (--si para borrar)
+uv run kibo olvidar --todo    # vaciarla entera, conservando los ajustes
 ```
 
 Para grabar la placa, siempre con esta configuracion:

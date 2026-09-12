@@ -21,7 +21,7 @@ Comandos de Dante:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(prog="dante", description="Segundo cerebro Dante",
+    p = argparse.ArgumentParser(prog="kibo", description="Kibo: un segundo cerebro con voz",
                                 formatter_class=argparse.RawDescriptionHelpFormatter,
                                 epilog=AYUDA)
     sub = p.add_subparsers(dest="comando")

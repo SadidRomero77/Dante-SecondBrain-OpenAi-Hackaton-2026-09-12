@@ -21,6 +21,10 @@ dependencies = [
 ]
 
 [project.scripts]
+# El producto se llama Kibo; el paquete sigue siendo dante. Renombrarlo
+# entero tocaria todos los imports, asi que por ahora conviven: los dos
+# comandos hacen exactamente lo mismo.
+kibo = "dante.cli:main"
 dante = "dante.cli:main"
 
 [build-system]

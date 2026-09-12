@@ -17,7 +17,7 @@ from . import memoria
 CAMPOS: dict[str, tuple[str, str, str]] = {
     "nombre_usuario":   ("", "Nombre del propietario", "texto"),
     "trato":            ("tu", "Como tratarlo", "opciones:tu|usted"),
-    "nombre_mascota":   ("Dante", "Nombre de la mascota", "texto"),
+    "nombre_mascota":   ("Kibo", "Nombre de la mascota", "texto"),
     "especie":          ("perro", "Que es la mascota", "texto"),
     "voz":              ("coral", "Voz", "opciones:coral|shimmer|sage|ballad|marin|cedar|alloy"),
     "edad_voz":         ("nino", "Edad de la voz", "opciones:nino|joven|adulto"),
@@ -137,7 +137,7 @@ def personalidad(c: sqlite3.Connection) -> str:
     nombre y los temas.
     """
     a = leer(c)
-    nombre = a["nombre_mascota"] or "Dante"
+    nombre = a["nombre_mascota"] or "Kibo"
     especie = a["especie"] or "perro"
     duenio = a["nombre_usuario"]
 
