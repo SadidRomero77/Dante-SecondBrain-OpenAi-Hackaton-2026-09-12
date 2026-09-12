@@ -179,6 +179,47 @@ HERRAMIENTAS = [
     },
     {
         "type": "function",
+        "name": "guardar_objeto",
+        "description": (
+            "Anota donde quedo una cosa: los lentes, las llaves, el control. "
+            "Usala cuando te digan donde la dejaron, y tambien despues de "
+            "mirar por la camara si la ves en algun sitio."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "que": {"type": "string",
+                        "description": "La cosa. Ej: los lentes"},
+                "donde": {"type": "string",
+                          "description": "El sitio, en pocas palabras. "
+                                         "Ej: sobre la mesa de la cocina"},
+                "lo_viste": {
+                    "type": "boolean",
+                    "description": "true SOLO si acabas de verlo por la camara "
+                                   "con la herramienta mirar. false si te lo "
+                                   "contaron.",
+                },
+            },
+            "required": ["que", "donde"],
+        },
+    },
+    {
+        "type": "function",
+        "name": "donde_esta",
+        "description": (
+            "Donde quedo una cosa la ultima vez. Usala siempre que pregunten "
+            "por algo perdido: los lentes, las llaves, el control, el bolso."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "que": {"type": "string", "description": "La cosa que busca"},
+            },
+            "required": ["que"],
+        },
+    },
+    {
+        "type": "function",
         "name": "quien_esta",
         "description": (
             "Mira por la camara y dice quien esta enfrente. Usala cuando "
@@ -270,6 +311,17 @@ HERRAMIENTAS = [
                                   "description": "el id que devolvio mensajes_de_voz"}},
             "required": ["id"],
         },
+    },
+    {
+        "type": "function",
+        "name": "de_que_hablar",
+        "description": (
+            "Te da temas para arrancar o para retomar: que tiempo hace, algo "
+            "del mundo relacionado con lo que a ella le gusta, y cosas que "
+            "ella misma te conto. Usala al empezar el dia, o cuando la "
+            "conversacion se apague y no sepas por donde seguir."
+        ),
+        "parameters": {"type": "object", "properties": {}},
     },
     {
         "type": "function",
@@ -658,6 +710,27 @@ class Sesion:
                 salida = {"borrado": hallados[0]["que"]}
                 print(f"   [agenda] - {hallados[0]['que']}")
 
+        elif nombre == "guardar_objeto":
+            id_ = memoria.guardar_objeto(
+                self.db, a.get("que", ""), a.get("donde", ""),
+                "lo_vi" if a.get("lo_viste") else "me_lo_dijo")
+            salida = ({"anotado": a.get("que"), "donde": a.get("donde")}
+                      if id_ else {"error": "falta que cosa o donde"})
+            if id_:
+                print(f"   [objetos] {a.get('que')} -> {a.get('donde')}")
+
+        elif nombre == "donde_esta":
+            salida = memoria.donde_esta_objeto(self.db, a.get("que", ""))
+            if not salida:
+                salida = {
+                    "no_lo_se": True,
+                    "_nota": "No lo tienes anotado. Dilo, ofrece mirar por la "
+                             "camara con mirar, y si lo encuentras usa "
+                             "guardar_objeto. NO adivines un sitio.",
+                }
+            print(f"   [objetos] donde_esta({a.get('que')}) -> "
+                  f"{salida.get('donde', 'no lo se')}")
+
         elif nombre == "quien_esta":
             salida = self.ojos.quien_esta()
             # Distinguir a quien acompana del resto. Sin esto, ve una lista de
@@ -738,6 +811,11 @@ class Sesion:
 
         elif nombre == "reproducir_mensaje":
             salida = await self._reproducir_mensaje(int(a.get("id", 0)))
+
+        elif nombre == "de_que_hablar":
+            from .conversar import semillas
+            salida = semillas(self.db)
+            print(f"   [conversar] {[k for k in salida if not k.startswith('_')]}")
 
         elif nombre == "buscar_web":
             q = a.get("consulta", "")

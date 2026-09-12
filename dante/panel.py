@@ -257,7 +257,18 @@ form{display:flex;flex-direction:column;gap:16px}
 </div></main>
 
 <!-- ============ PERSONAS ============ -->
-<main id="v-gente"><div class="cols">
+<main id="v-gente">
+<div class="caja" style="margin-bottom:18px">
+  <h2>Dónde quedaron las cosas <small id="n-obj"></small></h2>
+  <div class="pad" style="padding-bottom:6px">
+    <p class="ayuda">Lo que Dante tiene anotado. Si ella le dice dónde dejó
+    algo, o si lo ve por la cámara, queda acá. Cuando pregunte «¿dónde están
+    mis lentes?», responde con esto — y si no lo sabe, <b>lo dice</b> en vez
+    de inventar un sitio.</p>
+  </div>
+  <div id="objetos"></div>
+</div>
+<div class="cols">
   <div class="caja">
     <h2>Quién está enfrente</h2>
     <img id="video2" src="/camara.mjpg" alt="cámara">
@@ -593,7 +604,7 @@ document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
   document.querySelectorAll('main').forEach(x=>x.classList.remove('on'));
   b.classList.add('on'); $('#v-'+b.dataset.v).classList.add('on');
-  if (b.dataset.v==='gente') cargarGente();
+  if (b.dataset.v==='gente'){ cargarGente(); cargarObjetos(); }
   if (b.dataset.v==='senales') cargarSenales();
   if (b.dataset.v==='agenda') cargarAgenda();
   if (b.dataset.v==='voz') cargarVoces();
@@ -637,6 +648,23 @@ $('#b-recado').onclick = async () => {
   avisar('#aviso-voz','Listo. Dante se lo dice apenas hablen.');
   cargarVoces();
 };
+
+async function cargarObjetos(){
+  const g = $('#objetos'), r = await (await fetch('/api/objetos')).json();
+  const l = r.objetos || [];
+  $('#n-obj').textContent = l.length ? l.length+' cosas' : '';
+  if (!l.length){
+    g.innerHTML = '<div class="pad ayuda">Todavía no tiene ninguna anotada.</div>';
+    return; }
+  g.innerHTML = '';
+  l.forEach(o => {
+    const d = document.createElement('div'); d.className = 'ficha';
+    d.innerHTML = `<div style="flex:1"><b>${o.visto?'👁️':'🦴'} ${o.nombre}</b>
+      <div class="ayuda">${o.donde} · ${o.fecha.replace('T',' a las ')}
+      ${o.visto?'<b style="color:var(--paseo)">· lo vio</b>':''}</div></div>`;
+    g.appendChild(d);
+  });
+}
 
 /* ---------- recordatorios ---------- */
 const fNuevo = $('#ag-nuevo');
@@ -1044,6 +1072,14 @@ def crear_app(sesion, bucle):
                 "hechos": n("SELECT COUNT(*) n FROM hechos"),
                 "charlas": n("SELECT COUNT(*) n FROM episodios"),
             }
+        finally:
+            c.close()
+
+    @app.get("/api/objetos")
+    def ver_objetos():
+        c = memoria.abrir()
+        try:
+            return {"objetos": memoria.objetos_todos(c)}
         finally:
             c.close()
 

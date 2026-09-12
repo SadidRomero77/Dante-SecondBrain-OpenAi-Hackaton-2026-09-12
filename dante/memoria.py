@@ -72,6 +72,14 @@ CREATE TABLE IF NOT EXISTS mensajes (
     escuchado     TEXT             -- cuando se reprodujo, o vacio
 );
 
+CREATE TABLE IF NOT EXISTS objetos (
+    id     INTEGER PRIMARY KEY,
+    nombre TEXT NOT NULL,          -- los lentes, el control, las llaves
+    donde  TEXT NOT NULL,          -- en sus palabras o en las de Dante
+    fecha  TEXT NOT NULL,
+    como   TEXT NOT NULL           -- me_lo_dijo | lo_vi
+);
+
 CREATE TABLE IF NOT EXISTS ajustes (
     clave TEXT PRIMARY KEY,
     valor TEXT
@@ -593,6 +601,55 @@ def cambios(c: sqlite3.Connection, semanas: int = 4) -> list[dict]:
                  f"Habló de {corto} menos veces que de costumbre",
                  " veces")
     return fuera
+
+
+# -------------------------------------------------------------- objetos ---
+def guardar_objeto(c: sqlite3.Connection, nombre: str, donde: str,
+                   como: str = "me_lo_dijo") -> int:
+    """Anota donde quedo algo.
+
+    Se guarda el historial en vez de pisar el anterior. Cuando algo no esta
+    donde deberia, el sitio de antes es la mejor pista que hay: "ayer estaban
+    en la mesita" resuelve mas busquedas que un dato unico que quedo viejo.
+    """
+    nombre, donde = nombre.strip().lower(), donde.strip()
+    if not nombre or not donde:
+        return 0
+    cur = c.execute(
+        "INSERT INTO objetos(nombre,donde,fecha,como) VALUES(?,?,?,?)",
+        (nombre, donde, datetime.now().isoformat(timespec="minutes"), como))
+    c.commit()
+    return int(cur.lastrowid)
+
+
+def donde_esta_objeto(c: sqlite3.Connection, nombre: str) -> dict:
+    nombre = nombre.strip().lower()
+    if not nombre:
+        return {}
+    filas = c.execute(
+        "SELECT * FROM objetos WHERE nombre LIKE ? ORDER BY id DESC LIMIT 4",
+        (f"%{nombre}%",)).fetchall()
+    if not filas:
+        return {}
+    ult = filas[0]
+    salida = {
+        "que": ult["nombre"], "donde": ult["donde"], "cuando": ult["fecha"],
+        "como_lo_sabes": ("lo viste por la camara" if ult["como"] == "lo_vi"
+                          else "te lo dijo ella"),
+    }
+    antes = [f"{f['donde']} ({f['fecha'][:10]})" for f in filas[1:]]
+    if antes:
+        salida["antes_estuvo"] = antes
+    return salida
+
+
+def objetos_todos(c: sqlite3.Connection) -> list[dict]:
+    """Para el portal: el ultimo sitio conocido de cada cosa."""
+    filas = c.execute(
+        "SELECT nombre, donde, fecha, como, MAX(id) FROM objetos "
+        "GROUP BY nombre ORDER BY MAX(id) DESC").fetchall()
+    return [{"nombre": f["nombre"], "donde": f["donde"], "fecha": f["fecha"],
+             "visto": f["como"] == "lo_vi"} for f in filas]
 
 
 # ------------------------------------------------------------- mensajes ---
