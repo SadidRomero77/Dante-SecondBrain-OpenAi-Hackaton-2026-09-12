@@ -1409,9 +1409,15 @@ button:active{transform:translateY(0) scale(.98)}
          onerror="this.style.display='none';
                   document.getElementById('sincam').style.display='block'">
     <div id="sincam" class="pad ayuda vacio" style="display:none">
-      Este Kibo vive en un servidor y no tiene ojos propios.<br>
-      Con el perrito conectado, o corriéndolo en tu computador, ve por su cámara.
+      Este @@MARCA@@ vive en un servidor y no tiene ojos propios.<br>
+      Prestale los tuyos: dale tu cámara y verá lo que vos veas.
+      <div style="margin-top:14px">
+        <button id="b-camara" class="pri">🎥 Prestarle mi cámara</button>
+      </div>
     </div>
+    <video id="micam" autoplay playsinline muted
+           style="display:none;width:100%;border-radius:12px"></video>
+    <canvas id="lienzo" style="display:none"></canvas>
 
     <div id="caras">nadie a la vista</div>
 
@@ -2363,6 +2369,45 @@ async function cargarObjetos(){
 }
 
 
+
+/* ---------- prestarle la camara ---------- */
+// El servidor no tiene ojos: se los presta el visitante. Se manda un cuadro
+// cada segundo y medio, no un video. Alcanza de sobra para reconocer una cara
+// o describir una habitacion, y no satura la conexion ni la factura.
+let camaraViva = null, relojCam = null;
+const bCam = $('#b-camara');
+if (bCam) bCam.onclick = async () => {
+  if (camaraViva){
+    camaraViva.getTracks().forEach(t => t.stop());
+    camaraViva = null; clearInterval(relojCam);
+    $('#micam').style.display = 'none';
+    bCam.textContent = '🎥 Prestarle mi cámara';
+    return;
+  }
+  try {
+    camaraViva = await navigator.mediaDevices.getUserMedia(
+      {video:{width:{ideal:1280},height:{ideal:720}}, audio:false});
+  } catch (e) {
+    bCam.textContent = '🚫 No me diste permiso';
+    setTimeout(()=>bCam.textContent='🎥 Prestarle mi cámara', 3000);
+    return;
+  }
+  const v = $('#micam');
+  v.srcObject = camaraViva;
+  v.style.display = 'block';
+  bCam.textContent = '⏹️ Dejar de prestársela';
+  const lienzo = $('#lienzo'), ctx = lienzo.getContext('2d');
+  const mandar = () => {
+    if (!camaraViva || !ws || ws.readyState !== 1 || !v.videoWidth) return;
+    lienzo.width = 640;
+    lienzo.height = Math.round(640 * v.videoHeight / v.videoWidth);
+    ctx.drawImage(v, 0, 0, lienzo.width, lienzo.height);
+    ws.send(JSON.stringify({t:'camara',
+      v: lienzo.toDataURL('image/jpeg', 0.65).split(',')[1]}));
+  };
+  relojCam = setInterval(mandar, 1500);
+  setTimeout(mandar, 400);
+};
 
 /* ---------- recordatorios ---------- */
 
@@ -3723,7 +3768,12 @@ def crear_app(sesion, bucle):
                         continue
                     if not isinstance(d, dict):
                         continue
-                    if d.get("t") == "texto":
+                    if d.get("t") == "camara":
+                        # Los ojos los presta el visitante. Se guarda el
+                        # ultimo cuadro y nada mas: no hay historial ni nada
+                        # que toque el disco, porque es la camara de su casa.
+                        propio.cuadro_navegador = (d.get("v") or "")[:900000]
+                    elif d.get("t") == "texto":
                         asyncio.run_coroutine_threadsafe(
                             propio.decir_texto(d.get("v", "")), propio.bucle)
                     elif d.get("t") == "boton":

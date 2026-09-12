@@ -437,6 +437,9 @@ class Sesion:
         self.recibidos = 0
         self.t0 = 0.0
         self.respondiendo = False
+        # Ultimo cuadro que mando el navegador del visitante. En un servidor
+        # no hay camara propia: los ojos los pone quien esta del otro lado.
+        self.cuadro_navegador = ""
 
     # ------------------------------------------------------------ enviar --
     def avisar_audio(self, pcm: bytes) -> None:
@@ -733,6 +736,8 @@ class Sesion:
 
         elif nombre == "quien_esta":
             salida = self.ojos.quien_esta()
+            if not salida.get("camara") and self.cuadro_navegador:
+                salida = self._quien_en_el_navegador()
             # Distinguir a quien acompana del resto. Sin esto, ve una lista de
             # nombres y trata igual a la persona de la casa que a una visita,
             # y son dos cosas muy distintas: a una le cuenta su vida, a la
@@ -768,9 +773,11 @@ class Sesion:
             print(f"   [vision] registrar cara -> {salida}")
 
         elif nombre == "mirar":
-            b64 = self.ojos.cuadro_base64()
+            b64 = self.ojos.cuadro_base64() or self.cuadro_navegador
             if not b64:
-                salida = {"veo": False, "motivo": self.ojos.motivo or "sin camara"}
+                salida = {"veo": False, "motivo": (
+                    self.ojos.motivo or "sin camara") + ". Si quieres ver, "
+                    "pidele que active la camara con el boton del portal."}
             else:
                 # La imagen entra como un mensaje mas de la conversacion: el
                 # modelo de voz acepta imagenes en el mismo socket, asi que no
@@ -847,6 +854,40 @@ class Sesion:
                      "output": json.dumps(salida, ensure_ascii=False)},
         })
         await self._ev({"type": "response.create", "response": {}})
+
+    def _quien_en_el_navegador(self) -> dict:
+        """Reconoce caras sobre el cuadro que mando el navegador.
+
+        Es el mismo reconocedor que usa la camara local: lo unico distinto es
+        de donde viene la imagen. Asi un visitante sin aparato tiene la misma
+        funcion que uno con perrito, sin dos caminos de codigo que mantener.
+        """
+        import base64 as _b64
+        try:
+            import cv2
+            import numpy as np
+            crudo = _b64.b64decode(self.cuadro_navegador)
+            img = cv2.imdecode(np.frombuffer(crudo, np.uint8), cv2.IMREAD_COLOR)
+            if img is None:
+                return {"camara": False, "motivo": "el cuadro llego roto"}
+            if self.ojos.rostros is None:
+                from .vision import Rostros
+                self.ojos.rostros = Rostros()
+            caras = self.ojos.rostros.quien(img)
+            conocidas = [c["nombre"] for c in caras if c["nombre"]]
+            fuera = {"camara": True, "por_el_navegador": True,
+                     "caras_detectadas": len(caras), "conocidas": conocidas,
+                     "desconocidas": len(caras) - len(conocidas)}
+            p = memoria.principal(self.db)
+            if p:
+                fuera["a_quien_acompanas"] = p["nombre"]
+                fuera["esta_ella"] = p["nombre"] in conocidas
+            if fuera["desconocidas"]:
+                fuera["sin_reconocer"] = ("Hay alguien que no conoces. Saludalo "
+                                          "y preguntale su nombre.")
+            return fuera
+        except Exception as e:
+            return {"camara": False, "motivo": f"no pude mirar el cuadro: {e}"}
 
     async def _reproducir_mensaje(self, id_: int) -> dict:
         """Mete el mensaje en la misma cola que la voz de Dante.
