@@ -231,6 +231,8 @@ class Sesion:
         # El panel se cuelga de aqui: cada cosa que pasa se le avisa. Si no hay
         # panel, la lista esta vacia y no cuesta nada.
         self.oyentes: list = []
+        self.oyentes_audio: list = []
+        self.solo_cara = False
         self.estado = "idle"
         self.bucle = None
         self.dialogo: list[str] = []
@@ -242,6 +244,19 @@ class Sesion:
         self.respondiendo = False
 
     # ------------------------------------------------------------ enviar --
+    def avisar_audio(self, pcm: bytes) -> None:
+        """Le manda el audio de Dante al navegador, ademas de al aparato.
+
+        Con esto el panel es una salida de voz completa: si el parlante del
+        aparato no sirve, la conversacion sigue por el computador y el aparato
+        se queda de cara. El demo no depende del audio del hardware.
+        """
+        for f in list(self.oyentes_audio):
+            try:
+                f(pcm)
+            except Exception:
+                pass
+
     def avisar(self, tipo: str, **datos) -> None:
         """Le cuenta al panel lo que esta pasando. Nunca revienta la sesion."""
         if tipo == "estado":
@@ -283,6 +298,7 @@ class Sesion:
         await self._ev({"type": "response.create", "response": {}})
 
     async def audio_del_panel(self, pcm: bytes) -> None:
+        """Audio que entra desde el navegador. Mismo camino que el del aparato."""
         if self.hablando_usuario and pcm:
             self.enviados += 1
             await self._ev({"type": "input_audio_buffer.append",
@@ -323,6 +339,8 @@ class Sesion:
             marcos = await loop.run_in_executor(None, self.t.leer)
             for m in marcos:
                 if m.tipo == T_AUDIO:
+                    if self.solo_cara:
+                        continue          # su microfono no sirve; manda el panel
                     if self.hablando_usuario:
                         self.enviados += 1
                         await self._ev({
@@ -539,6 +557,7 @@ class Sesion:
                 proximo = time.perf_counter()
 
             self.t.enviar_audio(trozo)
+            self.avisar_audio(trozo)
 
             proximo += RITMO
             falta = proximo - time.perf_counter()
@@ -573,7 +592,8 @@ async def _simular(s: "Sesion", segundos: float) -> None:
 
 
 async def _correr(simular: float = 0.0, limite: float = 0.0,
-                  con_diario: bool | None = None, con_panel: int = 0) -> int:
+                  con_diario: bool | None = None, con_panel: int = 0,
+                  solo_cara: bool = False) -> int:
     if not config.API_KEY:
         print("Falta OPENAI_API_KEY en .env. Corre 'dante doctor'.")
         return 1
@@ -582,6 +602,9 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
     donde = puerto or "sin aparato"
     print(f"\n=== dante hablar ===  ({donde}, {config.MODELO_VOZ})\n")
 
+    # Modo "solo cara": el aparato conserva pantalla y boton, pero su audio no
+    # se usa. Sirve cuando el modulo de audio esta averiado: la conversacion va
+    # por el navegador y el demo fisico se salva igual.
     t = None
     if puerto:
         try:
@@ -595,6 +618,9 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
             return 1
         print("  sin aparato: se puede hablar desde el panel\n")
         t = TransporteNulo()
+
+    if solo_cara and not isinstance(t, TransporteNulo):
+        print("  modo solo cara: el aparato pone la cara, el audio va por el panel\n")
 
     with t:
         try:
@@ -610,6 +636,7 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
 
         async with ws:
             s = Sesion(t, ws, db)
+            s.solo_cara = solo_cara
             if s.ojos.arrancar():
                 n = len(s.ojos.rostros.conocidas)
                 print(f"  camara: activa, {n} cara(s) registrada(s)\n")
@@ -672,10 +699,11 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
 
 
 def correr(simular: float = 0.0, limite: float = 0.0,
-           con_diario: bool | None = None, con_panel: int = 0) -> int:
+           con_diario: bool | None = None, con_panel: int = 0,
+           solo_cara: bool = False) -> int:
     _reloj_fino()
     try:
-        return asyncio.run(_correr(simular, limite, con_diario, con_panel))
+        return asyncio.run(_correr(simular, limite, con_diario, con_panel, solo_cara))
     except KeyboardInterrupt:
         print("\nhasta luego")
         return 0

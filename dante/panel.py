@@ -210,6 +210,31 @@ const etiqueta = document.getElementById('etiqueta');
 const caras = document.getElementById('caras');
 const micro = document.getElementById('micro');
 let ws, audioCtx, stream, nodo, hablando = false;
+let salida, proximo = 0;
+
+/* Reproduce el audio de Dante en el navegador, encolandolo por tiempo.
+   Llega en trozos de 20 ms; si cada uno se reprodujera al llegar, los saltos
+   de red se oirian como cortes. Se agenda cada trozo justo despues del
+   anterior y el navegador los une. */
+function reproducir(datos){
+  if (!salida){
+    salida = new AudioContext({sampleRate: 24000});
+    proximo = 0;
+  }
+  if (salida.state === 'suspended') salida.resume();
+  const pcm = new Int16Array(datos);
+  if (!pcm.length) return;
+  const buf = salida.createBuffer(1, pcm.length, 24000);
+  const canal = buf.getChannelData(0);
+  for (let i = 0; i < pcm.length; i++) canal[i] = pcm[i] / 32768;
+  const nodo = salida.createBufferSource();
+  nodo.buffer = buf;
+  nodo.connect(salida.destination);
+  const ahora = salida.currentTime;
+  if (proximo < ahora + 0.06) proximo = ahora + 0.06;   // colchon
+  nodo.start(proximo);
+  proximo += buf.duration;
+}
 
 function linea(clase, texto){
   const d = document.createElement('div');
@@ -225,7 +250,7 @@ function conectar(){
   ws.onopen = () => { etiqueta.textContent = 'listo'; };
   ws.onclose = () => { etiqueta.textContent = 'desconectado'; setTimeout(conectar, 1500); };
   ws.onmessage = (e) => {
-    if (typeof e.data !== 'string') return;
+    if (typeof e.data !== 'string'){ reproducir(e.data); return; }
     const m = JSON.parse(e.data);
     if (m.t === 'estado'){
       punto.className = 'punto ' + m.v;
@@ -439,6 +464,15 @@ def crear_app(sesion, bucle):
                 pass
 
     sesion.oyentes.append(repartir)
+
+    def repartir_audio(pcm: bytes) -> None:
+        for ws in list(clientes):
+            try:
+                asyncio.run_coroutine_threadsafe(ws.send_bytes(pcm), bucle)
+            except Exception:
+                pass
+
+    sesion.oyentes_audio.append(repartir_audio)
 
     @app.get("/", response_class=HTMLResponse)
     def inicio():

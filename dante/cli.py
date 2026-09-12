@@ -43,6 +43,8 @@ def main(argv: list[str] | None = None) -> int:
     h.add_argument("--panel", nargs="?", type=int, const=8800, default=0,
                    metavar="PUERTO",
                    help="abrir el panel web (por defecto en el 8800)")
+    h.add_argument("--solo-cara", action="store_true",
+                   help="el aparato solo pone la cara; el audio va por el panel")
     h.add_argument("--diario", dest="diario", action="store_true", default=None,
                    help="forzar el saludo del dia aunque ya lo haya dado")
     h.add_argument("--sin-diario", dest="diario", action="store_false",
@@ -78,7 +80,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.comando == "hablar":
         from .sesion import correr as hablar
         return hablar(simular=args.simular, limite=args.limite,
-                      con_diario=args.diario, con_panel=args.panel)
+                      con_diario=args.diario, con_panel=args.panel,
+                      solo_cara=args.solo_cara)
 
     if args.comando == "puente":
         from .puente import correr as puentear

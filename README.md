@@ -75,6 +75,19 @@ El login protege **el portal**, no los datos: la memoria sigue siendo un
 archivo en el disco del usuario. Autenticar no mueve nada a la nube, solo
 decide quien puede abrir la ventana.
 
+## Si el audio del aparato falla
+
+El panel es una salida de voz completa: captura por el microfono del computador
+y reproduce la respuesta en el navegador. Con `--solo-cara`, el aparato conserva
+la pantalla y el boton pero su audio no se usa.
+
+```
+uv run dante hablar --panel --solo-cara
+```
+
+Sigue habiendo demo fisico —ojos, texto, boton— sin depender del modulo de
+audio ni de que llegue ningun repuesto.
+
 ## El panel
 
 `dante hablar --panel` abre una página donde se ve **lo que Dante está
