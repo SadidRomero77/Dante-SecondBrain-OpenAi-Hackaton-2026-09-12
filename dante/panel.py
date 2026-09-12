@@ -3091,23 +3091,16 @@ def crear_app(sesion, bucle):
 
 
     @app.get("/favicon.png")
-    def favicon_png():
-
-        return FileResponse(_favicon("favicon.png"), media_type="image/png")
-
-
-
     @app.get("/favicon.ico")
     @app.get("/favicon.svg")
-    def favicon_ico():
+    def favicon():
+        """El icono ya viaja incrustado en la pagina, asi que se sirve de ahi.
 
-        ico = _favicon("favicon.ico")
-
-        return FileResponse(ico, media_type="image/x-icon")
-
-
-
-    # ------------------------------------------------------------- API ----
+        Antes se leia de un archivo que el contenedor no lleva: respondia 500
+        en produccion y en local no, que es la clase de fallo que solo
+        aparece una vez desplegado.
+        """
+        return Response(base64.b64decode(FAVICON_B64), media_type="image/png")
 
     @app.get("/api/ajustes")
 
