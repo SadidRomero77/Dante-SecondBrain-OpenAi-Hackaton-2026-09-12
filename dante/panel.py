@@ -69,6 +69,209 @@ def _favicon(nombre: str):
             return c
     return aqui / nombre
 
+# El perro ilustrado. Vive en una sola constante para que la portada y el
+# portal ensenen exactamente el mismo, y no se separen en cuanto alguien
+# toque uno de los dos.
+PERRO_SVG = """<svg id="dante-svg" class="dante-avatar" viewBox="0 0 160 160" width="72" height="72" aria-label="Dante el perro compañero">
+      <defs>
+        <!-- Degradados cálidos y sombreados para las facetas poligonales del pelaje -->
+        <linearGradient id="grad-frente" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fed77d"/>
+          <stop offset="100%" stop-color="#f5b84e"/>
+        </linearGradient>
+        <linearGradient id="grad-mejilla-izq" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e38e24"/>
+          <stop offset="100%" stop-color="#cb7414"/>
+        </linearGradient>
+        <linearGradient id="grad-mejilla-der" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#d67f1b"/>
+          <stop offset="100%" stop-color="#be670c"/>
+        </linearGradient>
+        <linearGradient id="grad-hocico" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fff5e6"/>
+          <stop offset="100%" stop-color="#f7ddba"/>
+        </linearGradient>
+        <linearGradient id="grad-oreja-izq" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e29427"/>
+          <stop offset="100%" stop-color="#be670c"/>
+        </linearGradient>
+        <linearGradient id="grad-oreja-der" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#d6841e"/>
+          <stop offset="100%" stop-color="#b15907"/>
+        </linearGradient>
+        <linearGradient id="grad-collar" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#1b724e"/>
+          <stop offset="50%" stop-color="#2ca16e"/>
+          <stop offset="100%" stop-color="#165c3e"/>
+        </linearGradient>
+        <linearGradient id="grad-oro" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffe678"/>
+          <stop offset="50%" stop-color="#f8be22"/>
+          <stop offset="100%" stop-color="#cf8904"/>
+        </linearGradient>
+        <radialGradient id="grad-ojo" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#4e3120"/>
+          <stop offset="65%" stop-color="#24170f"/>
+          <stop offset="100%" stop-color="#140c07"/>
+        </radialGradient>
+        <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="130%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#552200" flood-opacity="0.16"/>
+        </filter>
+      </defs>
+
+      <!-- BASE: cuello y collar a una distancia prudente, sin salirse del icono -->
+      <g id="cuello-y-collar">
+        <path d="M 62 116 L 58 132 Q 80 140 102 132 L 98 116 Z" fill="#dc851d"/>
+        <path d="M 60 128 L 58 134 Q 80 140 102 134 L 100 128 Z" fill="#c97312"/>
+        <path id="banda-collar" d="M 52 126 Q 80 138 108 126 L 106 136 Q 80 146 54 136 Z" fill="url(#grad-collar)" stroke="#134a33" stroke-width="1.1"/>
+        <circle cx="64" cy="132" r="1.5" fill="#f8cf52"/>
+        <circle cx="96" cy="132" r="1.5" fill="#f8cf52"/>
+        <circle cx="80" cy="138" r="2.7" fill="none" stroke="#e8a817" stroke-width="1.45"/>
+        <g id="medalla-hueso" transform="translate(80, 142)">
+          <path d="M -5.4 -2.8 C -7.2 -4.7 -9.4 -2.2 -7.6 -0.6 C -9.4 1.1 -7.2 3.6 -5.4 1.8 L 5.4 1.8 C 7.2 3.6 9.4 1.1 7.6 -0.6 C 9.4 -2.2 7.2 -4.7 5.4 -2.8 Z" fill="url(#grad-oro)" stroke="#b57404" stroke-width="0.7"/>
+          <circle cx="0" cy="-0.35" r="0.75" fill="#fff" opacity="0.85"/>
+        </g>
+      </g>
+
+      <!-- CABEZA CON ESTRUCTURA BIEN MOLDEADA EN PLANOS POLIGONALES -->
+      <g id="cabeza-grupo" class="cabeza-grupo">
+        <!-- Orejas dentro de la cabeza para que se muevan con ella -->
+        <g id="oreja-izq" class="oreja oreja-izq">
+          <path d="M 46 48 C 26 46 10 66 14 92 C 17 104 31 101 39 85 C 45 74 51 59 51 49 Z" fill="#9e4e04"/>
+          <path d="M 48 48 C 29 46 14 65 17 89 C 19 99 32 96 39 82 C 45 71 52 58 52 48 Z" fill="url(#grad-oreja-izq)"/>
+          <path d="M 41 53 C 30 53 23 66 25 81 C 29 87 34 83 38 73 Z" fill="#883e02" opacity="0.75"/>
+          <path d="M 44 49 C 32 49 22 62 23 75" fill="none" stroke="#fcd484" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+        </g>
+        <g id="oreja-der" class="oreja oreja-der">
+          <path d="M 114 48 C 134 46 150 66 146 92 C 143 104 129 101 121 85 C 115 74 109 59 109 49 Z" fill="#924602"/>
+          <path d="M 112 48 C 131 46 146 65 143 89 C 141 99 128 96 121 82 C 115 71 108 58 108 48 Z" fill="url(#grad-oreja-der)"/>
+          <path d="M 119 53 C 130 53 137 66 135 81 C 131 87 126 83 122 73 Z" fill="#7d3701" opacity="0.75"/>
+          <path d="M 116 49 C 128 49 138 62 137 75" fill="none" stroke="#fcd484" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+        </g>
+        <!-- Facetas geométricas / polígonos esculpidos de la cabeza -->
+        <g id="poligonos-cabeza">
+          <!-- 1. Plano Frente Superior / Corona -->
+          <polygon points="62,38 98,38 104,54 56,54" fill="#fed679"/>
+
+          <!-- 2. Plano Diamante Central de la Frente -->
+          <polygon points="56,54 104,54 100,72 80,78 60,72" fill="#f8bf53"/>
+
+          <!-- 3. Faceta Lateral Izquierda (Sien superior) -->
+          <polygon points="62,38 56,54 44,52" fill="#e8982c"/>
+
+          <!-- 4. Faceta Lateral Derecha (Sien superior) -->
+          <polygon points="98,38 104,54 116,52" fill="#df8e22"/>
+
+          <!-- 5. Mejilla Izquierda Superior (Polígono angular que ensancha la cara) -->
+          <polygon points="44,52 56,54 60,72 40,78 34,64" fill="url(#grad-mejilla-izq)"/>
+
+          <!-- 6. Mejilla Derecha Superior (Polígono angular simétrico) -->
+          <polygon points="116,52 104,54 100,72 120,78 126,64" fill="url(#grad-mejilla-der)"/>
+
+          <!-- 7. Mejilla Izquierda Inferior (Mandíbula) -->
+          <polygon points="34,64 40,78 54,98 44,106 32,84" fill="#c97312"/>
+
+          <!-- 8. Mejilla Derecha Inferior (Mandíbula) -->
+          <polygon points="126,64 120,78 106,98 116,106 128,84" fill="#be670c"/>
+
+          <!-- 9. Quijada y Barbilla (Planos inferiores) -->
+          <polygon points="44,106 54,98 80,110 66,126 50,120" fill="#dc851d"/>
+          <polygon points="116,106 106,98 80,110 94,126 110,120" fill="#ce7714"/>
+          <polygon points="66,126 80,110 94,126 80,128" fill="#e8952b"/>
+
+          <!-- Líneas de estructura sutiles entre facetas -->
+          <path d="M 62 38 L 98 38 L 104 54 L 120 78 L 116 106 L 94 126 L 66 126 L 44 106 L 40 78 L 56 54 Z" fill="none" stroke="#ad5b07" stroke-width="1.2" opacity="0.32"/>
+        </g>
+
+        <!-- PELITO DIMINUTO EN LA CORONA (Para que no se vea calvo) -->
+        <g id="pelito-cabeza" class="pelito-tuft">
+          <path d="M 76 38 C 77 30 79 25 82 26 C 84 27 83 33 85 38 C 87 31 91 30 90 38 Z" fill="#fed679" stroke="#ad5b07" stroke-width="1" stroke-linejoin="round"/>
+          <path d="M 79 34 C 80 29 81 28 82 28" fill="none" stroke="#fff1bd" stroke-width="1.2" stroke-linecap="round"/>
+        </g>
+
+        <!-- CEJAS EXPRESIVAS -->
+        <g id="cejas">
+          <path id="ceja-izq" class="ceja ceja-izq" d="M 48 50 Q 58 45 66 49" fill="none" stroke="#7a3f0f" stroke-width="3" stroke-linecap="round"/>
+          <path id="ceja-der" class="ceja ceja-der" d="M 94 49 Q 102 45 112 50" fill="none" stroke="#7a3f0f" stroke-width="3" stroke-linecap="round"/>
+        </g>
+
+        <!-- OJOS (Animados con párpados, reflejos y estado feliz) -->
+        <!-- Ojo Izquierdo -->
+        <g id="ojo-izq-cont" class="ojo-contenedor" transform="translate(58, 63)">
+          <g id="ojo-izq-abierto" class="ojo-abierto">
+            <ellipse cx="0" cy="0" rx="10" ry="12" fill="#ffffff" stroke="#ecd7c4" stroke-width="0.8"/>
+            <path d="M -9.5 -2 C -9 -9 9 -9 9.5 -2 C 6 -4 -6 -4 -9.5 -2 Z" fill="#d9c5b2" opacity="0.45"/>
+            <g id="pupila-izq" class="pupila">
+              <ellipse cx="0.5" cy="0.5" rx="7.5" ry="9" fill="url(#grad-ojo)"/>
+              <circle cx="0.5" cy="0.5" r="7.5" fill="none" stroke="#a2571b" stroke-width="1"/>
+              <circle cx="-2.5" cy="-3.5" r="3" fill="#ffffff"/>
+              <circle cx="3" cy="3.5" r="1.3" fill="#ffffff" opacity="0.9"/>
+            </g>
+            <path id="parpado-izq" class="parpado" d="M -11 -13 L 11 -13 L 11 0 Q 0 4 -11 0 Z" fill="#e8982c" style="transform-origin: 0px -12px; transform: scaleY(0); transition: transform 0.12s ease;"/>
+          </g>
+          <path id="ojo-izq-feliz" class="ojo-feliz" d="M -9 3 Q 0 -8 9 3" fill="none" stroke="#2c1a0e" stroke-width="3.6" stroke-linecap="round" style="display: none;"/>
+        </g>
+
+        <!-- Ojo Derecho -->
+        <g id="ojo-der-cont" class="ojo-contenedor" transform="translate(102, 63)">
+          <g id="ojo-der-abierto" class="ojo-abierto">
+            <ellipse cx="0" cy="0" rx="10" ry="12" fill="#ffffff" stroke="#ecd7c4" stroke-width="0.8"/>
+            <path d="M -9.5 -2 C -9 -9 9 -9 9.5 -2 C 6 -4 -6 -4 -9.5 -2 Z" fill="#d9c5b2" opacity="0.45"/>
+            <g id="pupila-der" class="pupila">
+              <ellipse cx="-0.5" cy="0.5" rx="7.5" ry="9" fill="url(#grad-ojo)"/>
+              <circle cx="-0.5" cy="0.5" r="7.5" fill="none" stroke="#a2571b" stroke-width="1"/>
+              <circle cx="-3.5" cy="-3.5" r="3" fill="#ffffff"/>
+              <circle cx="2" cy="3.5" r="1.3" fill="#ffffff" opacity="0.9"/>
+            </g>
+            <path id="parpado-der" class="parpado" d="M -11 -13 L 11 -13 L 11 0 Q 0 4 -11 0 Z" fill="#df8e22" style="transform-origin: 0px -12px; transform: scaleY(0); transition: transform 0.12s ease;"/>
+          </g>
+          <path id="ojo-der-feliz" class="ojo-feliz" d="M -9 3 Q 0 -8 9 3" fill="none" stroke="#2c1a0e" stroke-width="3.6" stroke-linecap="round" style="display: none;"/>
+        </g>
+
+        <!-- Mejillas con rubor sutil -->
+        <ellipse cx="42" cy="79" rx="7" ry="4" fill="#f87a55" opacity="0.28"/>
+        <ellipse cx="118" cy="79" rx="7" ry="4" fill="#f87a55" opacity="0.28"/>
+
+        <!-- HOCICO (Estructura poligonal-redondeada con trufa, boca y lengua) -->
+        <g id="hocico-grupo" class="hocico-grupo" filter="url(#soft-shadow)">
+          <!-- Base crema del hocico -->
+          <path d="M 64 74 C 70 71, 90 71, 96 74 C 105 78, 107 90, 103 99 C 97 108, 89 113, 80 113 C 71 113, 63 108, 57 99 C 53 90, 55 78, 64 74 Z" fill="url(#grad-hocico)" stroke="#e4cbab" stroke-width="1.2"/>
+          <ellipse cx="80" cy="85" rx="14" ry="7" fill="#ebd2b2" opacity="0.5"/>
+
+          <!-- Puntos de bigote caricaturizados -->
+          <circle cx="68" cy="94" r="1" fill="#c49f76"/>
+          <circle cx="72" cy="97" r="1" fill="#c49f76"/>
+          <circle cx="88" cy="97" r="1" fill="#c49f76"/>
+          <circle cx="92" cy="94" r="1" fill="#c49f76"/>
+
+          <!-- Boca y lengua -->
+          <g id="boca-grupo">
+            <!-- Boca cerrada / sonrisa amigable -->
+            <path id="boca-cerrada" d="M 69 98 Q 75 102 80 98 Q 85 102 91 98" fill="none" stroke="#52321c" stroke-width="2.2" stroke-linecap="round"/>
+
+            <!-- Boca abierta con lengua alegre (en feliz o hablando) -->
+            <g id="boca-abierta" style="display: none;">
+              <path d="M 72 98 Q 80 99 88 98 Q 89 110 80 113 Q 71 110 72 98 Z" fill="#631722"/>
+              <g id="lengua-animada" class="lengua-animada">
+                <path d="M 73 104 Q 80 101 87 104 C 88 116 86 122 80 123 C 74 122 72 116 73 104 Z" fill="#f86284" stroke="#d43f62" stroke-width="0.8"/>
+                <path d="M 80 106 L 80 118" fill="none" stroke="#de4366" stroke-width="1.2" stroke-linecap="round"/>
+                <ellipse cx="77" cy="112" rx="1.8" ry="3" fill="#ff9cb4" opacity="0.65"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- Trufa de la nariz -->
+          <g id="trufa-nariz">
+            <path d="M 72 79 C 75 76, 85 76, 88 79 C 90 82, 87 87, 80 89 C 73 87, 70 82, 72 79 Z" fill="#291b12" stroke="#1d120a" stroke-width="1"/>
+            <ellipse cx="76" cy="83.5" rx="1.6" ry="1.2" fill="#150c06"/>
+            <ellipse cx="84" cy="83.5" rx="1.6" ry="1.2" fill="#150c06"/>
+            <ellipse cx="77.5" cy="80" rx="3.5" ry="1.5" fill="#ffffff" opacity="0.5" transform="rotate(-8, 77.5, 80)"/>
+            <line x1="80" y1="89" x2="80" y2="98" stroke="#52321c" stroke-width="2.2" stroke-linecap="round"/>
+          </g>
+        </g>
+      </g>
+    </svg>"""
+
 INICIO = """<!doctype html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -83,7 +286,8 @@ INICIO = """<!doctype html>
   --tinta:#33281f; --tinta2:#7d6b58; --tinta3:#a89684;
   --miel:#e8952f; --miel-suave:#fdf0dc; --paseo:#3f9c73; --paseo-suave:#e3f3ec;
   --hocico:#5b4636;
-  --sombra:0 1px 2px rgba(91,70,54,.06), 0 12px 34px -20px rgba(91,70,54,.34);
+  --alerta:#d1614a; --alerta-suave:#fbe8e4;
+  --sombra:0 1px 2px rgba(91,70,54,.06), 0 10px 30px -18px rgba(91,70,54,.3);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --fondo:#1b1712; --tarjeta:#241e18; --borde:#3a3129; --hueso:#2c251e;
@@ -109,8 +313,9 @@ a{color:inherit}
 nav{display:flex;align-items:center;gap:12px;padding:18px 0}
 .logo{display:flex;align-items:center;gap:11px;font-weight:800;font-size:19px;
   font-family:Fraunces,Georgia,serif}
-.hocico{width:40px;height:40px;border-radius:13px;background:var(--hocico);
-  display:grid;place-items:center;flex:none;box-shadow:var(--sombra)}
+.hocico{width:44px;height:44px;flex:none;display:grid;place-items:center}
+.hocico svg,.grande svg{width:100%;height:100%;display:block}
+.grande{width:150px;height:150px;margin:0 auto}
 .boton{display:inline-block;border:none;border-radius:13px;cursor:pointer;
   font:700 16px Nunito,sans-serif;padding:13px 24px;text-decoration:none;
   transition:transform .16s,box-shadow .16s}
@@ -184,12 +389,7 @@ footer{border-top:1px solid var(--borde);padding:26px 0;color:var(--tinta3);
 <div class="envoltura">
   <nav>
     <span class="logo">
-      <span class="hocico">
-        <svg width="26" height="17" viewBox="0 0 46 30">
-          <rect x="4" y="5" width="16" height="20" rx="7" fill="#7fd4f5"/>
-          <rect x="26" y="5" width="16" height="20" rx="7" fill="#7fd4f5"/>
-        </svg>
-      </span>@@MARCA@@</span>
+      <span class="hocico">@@PERROCHICO@@</span>@@MARCA@@</span>
     <a class="boton pri" href="/portal">Entrar</a>
   </nav>
 
@@ -205,7 +405,7 @@ footer{border-top:1px solid var(--borde);padding:26px 0;color:var(--tinta3);
       </div>
     </div>
     <div class="retrato">
-      <div class="grande" style="font-size:66px;line-height:1">🐕</div>
+      <div class="grande">@@PERROGRANDE@@</div>
       <div class="globo">
         <b>@@MARCA@@:</b> «Hoy toca la pastilla azul, a las nueve.
         Y su hija Ana dejó un recado: mañana viene a las cuatro.»
@@ -603,6 +803,9 @@ main.on{display:block}
 
 .tab{position:relative}
 
+a.tab{text-decoration:none;display:inline-block}
+.tab.salir{color:var(--alerta)}
+.tab.salir:hover{background:var(--alerta-suave)}
 .tab.on::after{content:"";position:absolute;left:50%;bottom:2px;width:16px;
 
   height:2px;border-radius:2px;background:var(--miel);transform:translateX(-50%)}
@@ -1005,7 +1208,7 @@ button:active{transform:translateY(0) scale(.98)}
 
 @media(prefers-reduced-motion:reduce){button:hover,.ficha:hover,.dato:hover{transform:none}}
 
-    /* Avatar Esculpido de Dante */
+    /* Avatar Esculpido de @@MARCA@@ */
     .dante-avatar-box {
       position: relative; width: 72px; height: 72px; display: flex;
       align-items: center; justify-content: center; flex: none; cursor: pointer;
@@ -1149,206 +1352,8 @@ button:active{transform:translateY(0) scale(.98)}
 
 
 <header>
-  <div class="dante-avatar-box" id="dante-avatar-box" title="Acariciá a Dante para ver su reacción alegre 🐾">
-    <svg id="dante-svg" class="dante-avatar" viewBox="0 0 160 160" width="72" height="72" aria-label="Dante el perro compañero">
-      <defs>
-        <!-- Degradados cálidos y sombreados para las facetas poligonales del pelaje -->
-        <linearGradient id="grad-frente" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#fed77d"/>
-          <stop offset="100%" stop-color="#f5b84e"/>
-        </linearGradient>
-        <linearGradient id="grad-mejilla-izq" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#e38e24"/>
-          <stop offset="100%" stop-color="#cb7414"/>
-        </linearGradient>
-        <linearGradient id="grad-mejilla-der" x1="100%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#d67f1b"/>
-          <stop offset="100%" stop-color="#be670c"/>
-        </linearGradient>
-        <linearGradient id="grad-hocico" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#fff5e6"/>
-          <stop offset="100%" stop-color="#f7ddba"/>
-        </linearGradient>
-        <linearGradient id="grad-oreja-izq" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#e29427"/>
-          <stop offset="100%" stop-color="#be670c"/>
-        </linearGradient>
-        <linearGradient id="grad-oreja-der" x1="100%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#d6841e"/>
-          <stop offset="100%" stop-color="#b15907"/>
-        </linearGradient>
-        <linearGradient id="grad-collar" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#1b724e"/>
-          <stop offset="50%" stop-color="#2ca16e"/>
-          <stop offset="100%" stop-color="#165c3e"/>
-        </linearGradient>
-        <linearGradient id="grad-oro" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#ffe678"/>
-          <stop offset="50%" stop-color="#f8be22"/>
-          <stop offset="100%" stop-color="#cf8904"/>
-        </linearGradient>
-        <radialGradient id="grad-ojo" cx="35%" cy="35%" r="65%">
-          <stop offset="0%" stop-color="#4e3120"/>
-          <stop offset="65%" stop-color="#24170f"/>
-          <stop offset="100%" stop-color="#140c07"/>
-        </radialGradient>
-        <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="130%">
-          <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#552200" flood-opacity="0.16"/>
-        </filter>
-      </defs>
-
-      <!-- BASE: cuello y collar a una distancia prudente, sin salirse del icono -->
-      <g id="cuello-y-collar">
-        <path d="M 62 116 L 58 132 Q 80 140 102 132 L 98 116 Z" fill="#dc851d"/>
-        <path d="M 60 128 L 58 134 Q 80 140 102 134 L 100 128 Z" fill="#c97312"/>
-        <path id="banda-collar" d="M 52 126 Q 80 138 108 126 L 106 136 Q 80 146 54 136 Z" fill="url(#grad-collar)" stroke="#134a33" stroke-width="1.1"/>
-        <circle cx="64" cy="132" r="1.5" fill="#f8cf52"/>
-        <circle cx="96" cy="132" r="1.5" fill="#f8cf52"/>
-        <circle cx="80" cy="138" r="2.7" fill="none" stroke="#e8a817" stroke-width="1.45"/>
-        <g id="medalla-hueso" transform="translate(80, 142)">
-          <path d="M -5.4 -2.8 C -7.2 -4.7 -9.4 -2.2 -7.6 -0.6 C -9.4 1.1 -7.2 3.6 -5.4 1.8 L 5.4 1.8 C 7.2 3.6 9.4 1.1 7.6 -0.6 C 9.4 -2.2 7.2 -4.7 5.4 -2.8 Z" fill="url(#grad-oro)" stroke="#b57404" stroke-width="0.7"/>
-          <circle cx="0" cy="-0.35" r="0.75" fill="#fff" opacity="0.85"/>
-        </g>
-      </g>
-
-      <!-- CABEZA CON ESTRUCTURA BIEN MOLDEADA EN PLANOS POLIGONALES -->
-      <g id="cabeza-grupo" class="cabeza-grupo">
-        <!-- Orejas dentro de la cabeza para que se muevan con ella -->
-        <g id="oreja-izq" class="oreja oreja-izq">
-          <path d="M 46 48 C 26 46 10 66 14 92 C 17 104 31 101 39 85 C 45 74 51 59 51 49 Z" fill="#9e4e04"/>
-          <path d="M 48 48 C 29 46 14 65 17 89 C 19 99 32 96 39 82 C 45 71 52 58 52 48 Z" fill="url(#grad-oreja-izq)"/>
-          <path d="M 41 53 C 30 53 23 66 25 81 C 29 87 34 83 38 73 Z" fill="#883e02" opacity="0.75"/>
-          <path d="M 44 49 C 32 49 22 62 23 75" fill="none" stroke="#fcd484" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
-        </g>
-        <g id="oreja-der" class="oreja oreja-der">
-          <path d="M 114 48 C 134 46 150 66 146 92 C 143 104 129 101 121 85 C 115 74 109 59 109 49 Z" fill="#924602"/>
-          <path d="M 112 48 C 131 46 146 65 143 89 C 141 99 128 96 121 82 C 115 71 108 58 108 48 Z" fill="url(#grad-oreja-der)"/>
-          <path d="M 119 53 C 130 53 137 66 135 81 C 131 87 126 83 122 73 Z" fill="#7d3701" opacity="0.75"/>
-          <path d="M 116 49 C 128 49 138 62 137 75" fill="none" stroke="#fcd484" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
-        </g>
-        <!-- Facetas geométricas / polígonos esculpidos de la cabeza -->
-        <g id="poligonos-cabeza">
-          <!-- 1. Plano Frente Superior / Corona -->
-          <polygon points="62,38 98,38 104,54 56,54" fill="#fed679"/>
-
-          <!-- 2. Plano Diamante Central de la Frente -->
-          <polygon points="56,54 104,54 100,72 80,78 60,72" fill="#f8bf53"/>
-
-          <!-- 3. Faceta Lateral Izquierda (Sien superior) -->
-          <polygon points="62,38 56,54 44,52" fill="#e8982c"/>
-
-          <!-- 4. Faceta Lateral Derecha (Sien superior) -->
-          <polygon points="98,38 104,54 116,52" fill="#df8e22"/>
-
-          <!-- 5. Mejilla Izquierda Superior (Polígono angular que ensancha la cara) -->
-          <polygon points="44,52 56,54 60,72 40,78 34,64" fill="url(#grad-mejilla-izq)"/>
-
-          <!-- 6. Mejilla Derecha Superior (Polígono angular simétrico) -->
-          <polygon points="116,52 104,54 100,72 120,78 126,64" fill="url(#grad-mejilla-der)"/>
-
-          <!-- 7. Mejilla Izquierda Inferior (Mandíbula) -->
-          <polygon points="34,64 40,78 54,98 44,106 32,84" fill="#c97312"/>
-
-          <!-- 8. Mejilla Derecha Inferior (Mandíbula) -->
-          <polygon points="126,64 120,78 106,98 116,106 128,84" fill="#be670c"/>
-
-          <!-- 9. Quijada y Barbilla (Planos inferiores) -->
-          <polygon points="44,106 54,98 80,110 66,126 50,120" fill="#dc851d"/>
-          <polygon points="116,106 106,98 80,110 94,126 110,120" fill="#ce7714"/>
-          <polygon points="66,126 80,110 94,126 80,128" fill="#e8952b"/>
-
-          <!-- Líneas de estructura sutiles entre facetas -->
-          <path d="M 62 38 L 98 38 L 104 54 L 120 78 L 116 106 L 94 126 L 66 126 L 44 106 L 40 78 L 56 54 Z" fill="none" stroke="#ad5b07" stroke-width="1.2" opacity="0.32"/>
-        </g>
-
-        <!-- PELITO DIMINUTO EN LA CORONA (Para que no se vea calvo) -->
-        <g id="pelito-cabeza" class="pelito-tuft">
-          <path d="M 76 38 C 77 30 79 25 82 26 C 84 27 83 33 85 38 C 87 31 91 30 90 38 Z" fill="#fed679" stroke="#ad5b07" stroke-width="1" stroke-linejoin="round"/>
-          <path d="M 79 34 C 80 29 81 28 82 28" fill="none" stroke="#fff1bd" stroke-width="1.2" stroke-linecap="round"/>
-        </g>
-
-        <!-- CEJAS EXPRESIVAS -->
-        <g id="cejas">
-          <path id="ceja-izq" class="ceja ceja-izq" d="M 48 50 Q 58 45 66 49" fill="none" stroke="#7a3f0f" stroke-width="3" stroke-linecap="round"/>
-          <path id="ceja-der" class="ceja ceja-der" d="M 94 49 Q 102 45 112 50" fill="none" stroke="#7a3f0f" stroke-width="3" stroke-linecap="round"/>
-        </g>
-
-        <!-- OJOS (Animados con párpados, reflejos y estado feliz) -->
-        <!-- Ojo Izquierdo -->
-        <g id="ojo-izq-cont" class="ojo-contenedor" transform="translate(58, 63)">
-          <g id="ojo-izq-abierto" class="ojo-abierto">
-            <ellipse cx="0" cy="0" rx="10" ry="12" fill="#ffffff" stroke="#ecd7c4" stroke-width="0.8"/>
-            <path d="M -9.5 -2 C -9 -9 9 -9 9.5 -2 C 6 -4 -6 -4 -9.5 -2 Z" fill="#d9c5b2" opacity="0.45"/>
-            <g id="pupila-izq" class="pupila">
-              <ellipse cx="0.5" cy="0.5" rx="7.5" ry="9" fill="url(#grad-ojo)"/>
-              <circle cx="0.5" cy="0.5" r="7.5" fill="none" stroke="#a2571b" stroke-width="1"/>
-              <circle cx="-2.5" cy="-3.5" r="3" fill="#ffffff"/>
-              <circle cx="3" cy="3.5" r="1.3" fill="#ffffff" opacity="0.9"/>
-            </g>
-            <path id="parpado-izq" class="parpado" d="M -11 -13 L 11 -13 L 11 0 Q 0 4 -11 0 Z" fill="#e8982c" style="transform-origin: 0px -12px; transform: scaleY(0); transition: transform 0.12s ease;"/>
-          </g>
-          <path id="ojo-izq-feliz" class="ojo-feliz" d="M -9 3 Q 0 -8 9 3" fill="none" stroke="#2c1a0e" stroke-width="3.6" stroke-linecap="round" style="display: none;"/>
-        </g>
-
-        <!-- Ojo Derecho -->
-        <g id="ojo-der-cont" class="ojo-contenedor" transform="translate(102, 63)">
-          <g id="ojo-der-abierto" class="ojo-abierto">
-            <ellipse cx="0" cy="0" rx="10" ry="12" fill="#ffffff" stroke="#ecd7c4" stroke-width="0.8"/>
-            <path d="M -9.5 -2 C -9 -9 9 -9 9.5 -2 C 6 -4 -6 -4 -9.5 -2 Z" fill="#d9c5b2" opacity="0.45"/>
-            <g id="pupila-der" class="pupila">
-              <ellipse cx="-0.5" cy="0.5" rx="7.5" ry="9" fill="url(#grad-ojo)"/>
-              <circle cx="-0.5" cy="0.5" r="7.5" fill="none" stroke="#a2571b" stroke-width="1"/>
-              <circle cx="-3.5" cy="-3.5" r="3" fill="#ffffff"/>
-              <circle cx="2" cy="3.5" r="1.3" fill="#ffffff" opacity="0.9"/>
-            </g>
-            <path id="parpado-der" class="parpado" d="M -11 -13 L 11 -13 L 11 0 Q 0 4 -11 0 Z" fill="#df8e22" style="transform-origin: 0px -12px; transform: scaleY(0); transition: transform 0.12s ease;"/>
-          </g>
-          <path id="ojo-der-feliz" class="ojo-feliz" d="M -9 3 Q 0 -8 9 3" fill="none" stroke="#2c1a0e" stroke-width="3.6" stroke-linecap="round" style="display: none;"/>
-        </g>
-
-        <!-- Mejillas con rubor sutil -->
-        <ellipse cx="42" cy="79" rx="7" ry="4" fill="#f87a55" opacity="0.28"/>
-        <ellipse cx="118" cy="79" rx="7" ry="4" fill="#f87a55" opacity="0.28"/>
-
-        <!-- HOCICO (Estructura poligonal-redondeada con trufa, boca y lengua) -->
-        <g id="hocico-grupo" class="hocico-grupo" filter="url(#soft-shadow)">
-          <!-- Base crema del hocico -->
-          <path d="M 64 74 C 70 71, 90 71, 96 74 C 105 78, 107 90, 103 99 C 97 108, 89 113, 80 113 C 71 113, 63 108, 57 99 C 53 90, 55 78, 64 74 Z" fill="url(#grad-hocico)" stroke="#e4cbab" stroke-width="1.2"/>
-          <ellipse cx="80" cy="85" rx="14" ry="7" fill="#ebd2b2" opacity="0.5"/>
-
-          <!-- Puntos de bigote caricaturizados -->
-          <circle cx="68" cy="94" r="1" fill="#c49f76"/>
-          <circle cx="72" cy="97" r="1" fill="#c49f76"/>
-          <circle cx="88" cy="97" r="1" fill="#c49f76"/>
-          <circle cx="92" cy="94" r="1" fill="#c49f76"/>
-
-          <!-- Boca y lengua -->
-          <g id="boca-grupo">
-            <!-- Boca cerrada / sonrisa amigable -->
-            <path id="boca-cerrada" d="M 69 98 Q 75 102 80 98 Q 85 102 91 98" fill="none" stroke="#52321c" stroke-width="2.2" stroke-linecap="round"/>
-
-            <!-- Boca abierta con lengua alegre (en feliz o hablando) -->
-            <g id="boca-abierta" style="display: none;">
-              <path d="M 72 98 Q 80 99 88 98 Q 89 110 80 113 Q 71 110 72 98 Z" fill="#631722"/>
-              <g id="lengua-animada" class="lengua-animada">
-                <path d="M 73 104 Q 80 101 87 104 C 88 116 86 122 80 123 C 74 122 72 116 73 104 Z" fill="#f86284" stroke="#d43f62" stroke-width="0.8"/>
-                <path d="M 80 106 L 80 118" fill="none" stroke="#de4366" stroke-width="1.2" stroke-linecap="round"/>
-                <ellipse cx="77" cy="112" rx="1.8" ry="3" fill="#ff9cb4" opacity="0.65"/>
-              </g>
-            </g>
-          </g>
-
-          <!-- Trufa de la nariz -->
-          <g id="trufa-nariz">
-            <path d="M 72 79 C 75 76, 85 76, 88 79 C 90 82, 87 87, 80 89 C 73 87, 70 82, 72 79 Z" fill="#291b12" stroke="#1d120a" stroke-width="1"/>
-            <ellipse cx="76" cy="83.5" rx="1.6" ry="1.2" fill="#150c06"/>
-            <ellipse cx="84" cy="83.5" rx="1.6" ry="1.2" fill="#150c06"/>
-            <ellipse cx="77.5" cy="80" rx="3.5" ry="1.5" fill="#ffffff" opacity="0.5" transform="rotate(-8, 77.5, 80)"/>
-            <line x1="80" y1="89" x2="80" y2="98" stroke="#52321c" stroke-width="2.2" stroke-linecap="round"/>
-          </g>
-        </g>
-      </g>
-    </svg>
+  <div class="dante-avatar-box" id="dante-avatar-box" title="Acariciá a @@MARCA@@ para ver su reacción alegre 🐾">
+    @@PERRO@@
   </div>
   <div class="marca-kibo">
     <div class="kibo-word" aria-label="Kibo">
@@ -1379,6 +1384,8 @@ button:active{transform:translateY(0) scale(.98)}
     <button class="tab" data-v="senales">Cómo está</button>
 
     <button class="tab" data-v="cfg">Ajustes</button>
+    <a class="tab" href="/" title="Volver a la portada">Inicio</a>
+    <a class="tab salir" href="/salir">Salir</a>
 
   </nav>
 
@@ -1396,7 +1403,7 @@ button:active{transform:translateY(0) scale(.98)}
 
   <div class="caja">
 
-    <h2>🐾 Lo que ve Dante</h2>
+    <h2>🐾 Lo que ve @@MARCA@@</h2>
 
     <img id="video" src="/camara.mjpg" alt="cámara"
          onerror="this.style.display='none';
@@ -1418,7 +1425,7 @@ button:active{transform:translateY(0) scale(.98)}
 
     <div class="barra">
 
-      <input type="text" id="entrada" placeholder="Escribile a Dante…" autocomplete="off">
+      <input type="text" id="entrada" placeholder="Escribile a @@MARCA@@…" autocomplete="off">
 
       <button id="enviar" class="pri">Enviar</button>
 
@@ -1456,7 +1463,7 @@ button:active{transform:translateY(0) scale(.98)}
 
   <div class="pad" style="padding-bottom:6px">
 
-    <p class="ayuda">Lo que Dante tiene anotado. Si ella le dice dónde dejó
+    <p class="ayuda">Lo que @@MARCA@@ tiene anotado. Si ella le dice dónde dejó
 
     algo, o si lo ve por la cámara, queda acá. Cuando pregunte «¿dónde están
 
@@ -1485,7 +1492,7 @@ button:active{transform:translateY(0) scale(.98)}
 
     <div class="pad">
 
-      <p class="ayuda">Poné a la persona de frente, con buena luz y que quede sola en el cuadro. Dante va a reconocerla la próxima vez y va a decir su nombre en voz alta.</p>
+      <p class="ayuda">Poné a la persona de frente, con buena luz y que quede sola en el cuadro. @@MARCA@@ va a reconocerla la próxima vez y va a decir su nombre en voz alta.</p>
 
       <div class="dos" style="margin-bottom:14px">
 
@@ -1525,7 +1532,7 @@ button:active{transform:translateY(0) scale(.98)}
 
     <div class="pad">
 
-      <p class="ayuda">Grabá con tu voz. Cuando pregunte por vos, Dante se lo reproduce — <b>con tu voz, no con la suya</b>. Para alguien que se olvida de las caras, oír a su hija vale más que oír a un asistente contándole que llamó.</p>
+      <p class="ayuda">Grabá con tu voz. Cuando pregunte por vos, @@MARCA@@ se lo reproduce — <b>con tu voz, no con la suya</b>. Para alguien que se olvida de las caras, oír a su hija vale más que oír a un asistente contándole que llamó.</p>
 
       <label style="margin-bottom:14px">De parte de quién
 
@@ -1551,7 +1558,7 @@ button:active{transform:translateY(0) scale(.98)}
 
       <p class="ayuda" style="margin-top:0">Si estás en el trabajo o no te
 
-      sale grabarte, escribilo. Dante se lo lee con su voz. Un recado que
+      sale grabarte, escribilo. @@MARCA@@ se lo lee con su voz. Un recado que
 
       llega vale más que uno hablado que nunca mandaste.</p>
 
@@ -1587,11 +1594,11 @@ button:active{transform:translateY(0) scale(.98)}
 
     <h2>Recordatorios y fechas 🐕</h2>
 
-    <div class="aviso" id="aviso-ag">Anotado. Dante ya lo sabe.</div>
+    <div class="aviso" id="aviso-ag">Anotado. @@MARCA@@ ya lo sabe.</div>
 
     <div class="pad" style="padding-bottom:6px">
 
-      <p class="ayuda">Dante los dice <b>solo, cuando llega la hora</b> — nadie
+      <p class="ayuda">@@MARCA@@ los dice <b>solo, cuando llega la hora</b> — nadie
 
       tiene que preguntarle. Y si ella pregunta «¿qué tengo hoy?», se los cuenta.</p>
 
@@ -1657,7 +1664,7 @@ button:active{transform:translateY(0) scale(.98)}
 
     <div class="pad" style="padding-bottom:6px">
 
-      <p class="ayuda">Cosas que mencionó en sus conversaciones. <b>Esto no es un diagnóstico</b> y Dante no interpreta nada: solo repite lo que ella dijo, y cuántas veces. Si algo se repite, quizás valga la pena preguntarle.</p>
+      <p class="ayuda">Cosas que mencionó en sus conversaciones. <b>Esto no es un diagnóstico</b> y @@MARCA@@ no interpreta nada: solo repite lo que ella dijo, y cuántas veces. Si algo se repite, quizás valga la pena preguntarle.</p>
 
     </div>
 
@@ -1673,7 +1680,7 @@ button:active{transform:translateY(0) scale(.98)}
 
     <div class="pad" style="padding-bottom:6px">
 
-      <p class="ayuda">Comparado con las semanas anteriores. <b>Dante no saca
+      <p class="ayuda">Comparado con las semanas anteriores. <b>@@MARCA@@ no saca
 
       conclusiones</b>: te da el número para que decidas tú. Y se calla cuando
 
@@ -1693,7 +1700,7 @@ button:active{transform:translateY(0) scale(.98)}
 
     <div class="pad">
 
-      <p class="ayuda">Esto es lo que reciben sus hijos. Lo escribe Dante con
+      <p class="ayuda">Esto es lo que reciben sus hijos. Lo escribe @@MARCA@@ con
 
       lo de arriba, sin copiar sus conversaciones.</p>
 
@@ -1717,7 +1724,7 @@ button:active{transform:translateY(0) scale(.98)}
 
     <h2>Cómo es y cómo se comporta</h2>
 
-    <div class="aviso" id="aviso-cfg">Guardado. Ya se lo dije a Dante.</div>
+    <div class="aviso" id="aviso-cfg">Guardado. Ya se lo dije a @@MARCA@@.</div>
 
     <form class="pad" id="cfg">
 
@@ -1733,7 +1740,7 @@ button:active{transform:translateY(0) scale(.98)}
 
       <div class="dos">
 
-        <label>Nombre de la mascota<input name="nombre_mascota" placeholder="Dante"></label>
+        <label>Nombre de la mascota<input name="nombre_mascota" placeholder="@@MARCA@@"></label>
 
         <label>¿Qué es?<input name="especie" placeholder="perro"></label>
 
@@ -1803,7 +1810,7 @@ button:active{transform:translateY(0) scale(.98)}
 
     <p class="pad" style="margin:0;opacity:.75;line-height:1.5">
 
-      Esto no se queda en un formulario: Dante <b>lo guarda en su memoria</b>,
+      Esto no se queda en un formulario: @@MARCA@@ <b>lo guarda en su memoria</b>,
 
       con el nombre de ella, igual que lo que aprende conversando. Mientras
 
@@ -1871,7 +1878,7 @@ let altavozOn = localStorage.getItem('dante_altavoz') !== 'no';
 let estadoActual = 'idle';
 let parpadeando = false;
 
-/* ---------- Nombres y descripciones de las emociones de Dante ---------- */
+/* ---------- Nombres y descripciones de las emociones de @@MARCA@@ ---------- */
 const NOMBRES_EMOCION = {
   idle:       'listo',
   escuchando: 'te escucha',
@@ -1964,7 +1971,7 @@ window.addEventListener('mousemove', (e) => {
   pupilaDer.style.transform = `translate(${dx * 2.5}px, ${dy * 2.2}px)`;
 });
 
-/* Ladrido sintético tierno con Web Audio al acariciar a Dante */
+/* Ladrido sintético tierno con Web Audio al acariciar a @@MARCA@@ */
 function ladrarCachorro() {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1986,7 +1993,7 @@ function ladrarCachorro() {
   }
 }
 
-/* Interacción táctil / clic sobre Dante */
+/* Interacción táctil / clic sobre @@MARCA@@ */
 if (danteBox) {
   danteBox.addEventListener('click', (ev) => {
     ladrarCachorro();
@@ -2283,11 +2290,11 @@ async function guardarTodo(aviso){
 
 }
 
-form.onsubmit  = e => { e.preventDefault(); guardarTodo('Guardado. Ya se lo dije a Dante.'); };
+form.onsubmit  = e => { e.preventDefault(); guardarTodo('Guardado. Ya se lo dije a @@MARCA@@.'); };
 
 form2.onsubmit = e => { e.preventDefault();
 
-  guardarTodo('Guardado. Dante ya lo tiene en su memoria.');
+  guardarTodo('Guardado. @@MARCA@@ ya lo tiene en su memoria.');
 
   window.scrollTo({top:0,behavior:'smooth'}); };
 
@@ -2315,7 +2322,7 @@ $('#b-recado').onclick = async () => {
 
   $('#recado').value = '';
 
-  avisar('#aviso-voz','Listo. Dante se lo dice apenas hablen.');
+  avisar('#aviso-voz','Listo. @@MARCA@@ se lo dice apenas hablen.');
 
   cargarVoces();
 
@@ -2391,7 +2398,7 @@ function pintarAgenda(lista){
 
     g.innerHTML = '<div class="pad ayuda vacio">Todavía no hay ninguno. '
 
-                + 'Dante también los anota si se lo pedís hablando.</div>'; return; }
+                + '@@MARCA@@ también los anota si se lo pedís hablando.</div>'; return; }
 
   g.innerHTML = '';
 
@@ -2537,7 +2544,7 @@ function editarFicha(fila, e){
 
     pintarAgenda(r.recordatorios||[]);
 
-    avisar('#aviso-ag','Cambiado. Dante ya lo sabe.');
+    avisar('#aviso-ag','Cambiado. @@MARCA@@ ya lo sabe.');
 
   };
 
@@ -2615,7 +2622,7 @@ fNuevo.onsubmit = async ev => {
 
   $('#l-fecha').style.display='none';
 
-  avisar('#aviso-ag','Anotado. Dante ya lo sabe.');
+  avisar('#aviso-ag','Anotado. @@MARCA@@ ya lo sabe.');
 
 };
 
@@ -2659,7 +2666,7 @@ $('#btn-cara').onclick = async () => {
 
     headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre,relacion})})).json();
 
-  avisar('#aviso-cara', r.ok ? `Listo. Dante ya reconoce a ${nombre}.` : 'No pude: '+r.motivo);
+  avisar('#aviso-cara', r.ok ? `Listo. @@MARCA@@ ya reconoce a ${nombre}.` : 'No pude: '+r.motivo);
 
   if (r.ok){ $('#nom').value=''; $('#rel').value=''; cargarGente(); }
 
@@ -2739,7 +2746,7 @@ $('#b-resumen').onclick = async () => {
 
   const caja = $('#resumen');
 
-  caja.innerHTML = '<span class="ayuda cargando">Dante lo está escribiendo…</span>';
+  caja.innerHTML = '<span class="ayuda cargando">@@MARCA@@ lo está escribiendo…</span>';
 
   const r = await (await fetch('/api/resumen')).json();
 
@@ -2809,7 +2816,7 @@ async function grabarNo(){
 
   $('#tiempo').textContent='hasta 60 segundos';
 
-  avisar('#aviso-voz', r.ok ? `Listo, ${r.segundos}s. Dante se lo va a reproducir.` : 'No pude: '+r.motivo);
+  avisar('#aviso-voz', r.ok ? `Listo, ${r.segundos}s. @@MARCA@@ se lo va a reproducir.` : 'No pude: '+r.motivo);
 
   if (r.ok) cargarVoces();
 
@@ -2895,7 +2902,7 @@ def crear_app(sesion, bucle):
         respuesta = await siguiente(peticion)
         if not id_:
             # Se entrega ya, para que el websocket la traiga puesta y sepamos
-            # que visita es antes de abrirle un Dante propio.
+            # que visita es antes de abrirle un @@MARCA@@ propio.
             respuesta.set_cookie(demo.GALLETA, demo.nueva_id(), httponly=True,
                                  samesite="lax", max_age=3600)
         return respuesta
@@ -3080,12 +3087,16 @@ def crear_app(sesion, bucle):
         que se registre antes de contarle que es pierde a casi todos en la
         primera pantalla.
         """
+        chico = PERRO_SVG.replace('width="72" height="72"', 'width="44" height="44"')
         return (INICIO.replace("@@FAVICON@@", FAVICON_B64)
+                      .replace("@@PERROCHICO@@", chico)
+                      .replace("@@PERROGRANDE@@", PERRO_SVG)
                       .replace("@@MARCA@@", MARCA))
 
     @app.get("/portal", response_class=HTMLResponse)
     def portal():
         return (PAGINA.replace("@@FAVICON@@", FAVICON_B64)
+                      .replace("@@PERRO@@", PERRO_SVG)
                       .replace("@@MARCA@@", MARCA))
 
 
@@ -3184,7 +3195,7 @@ def crear_app(sesion, bucle):
 
     def ver_hoy():
 
-        """Un vistazo de como esta Dante ahora mismo.
+        """Un vistazo de como esta @@MARCA@@ ahora mismo.
 
 
 
@@ -3635,7 +3646,7 @@ def crear_app(sesion, bucle):
             await ws.close(1008, "sin sesion")
             return
 
-        # En el demo publico cada navegador tiene su propio Dante. Sin esto,
+        # En el demo publico cada navegador tiene su propio @@MARCA@@. Sin esto,
         # diez jueces comparten una sola sesion: se pisan al hablar y el
         # segundo lee la conversacion del primero.
         visita, propio = None, sesion
@@ -3647,7 +3658,7 @@ def crear_app(sesion, bucle):
                     await ws.accept()
                     await ws.send_text(json.dumps({"t": "lleno", "v":
                         f"Ahora mismo hay {demo.cuantas()} personas hablando "
-                        f"con Dante, que es el maximo. Probá en un par de "
+                        f"con @@MARCA@@, que es el maximo. Probá en un par de "
                         f"minutos."}))
                     await ws.close(1013, "lleno")
                     return
@@ -3666,7 +3677,7 @@ def crear_app(sesion, bucle):
         if visita is None:
             clientes.add(ws)
         else:
-            # No entra en 'clientes': lo que diga su Dante va solo a sus
+            # No entra en 'clientes': lo que diga su @@MARCA@@ va solo a sus
             # pestanas. Mezclarlo con el bus general le mandaria a un juez
             # la conversacion de otro, que es justo lo que vinimos a evitar.
             visita.clientes.add(ws)
