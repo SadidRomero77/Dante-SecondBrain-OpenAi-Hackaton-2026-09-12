@@ -3860,7 +3860,11 @@ def crear_app(sesion, bucle):
                     asyncio.run_coroutine_threadsafe(
                         propio.audio_del_panel(m["bytes"]), propio.bucle)
                 elif "text" in m and m["text"]:
-                    if len(m["text"]) > 8000:
+                    # Un cuadro de camara en base64 pesa unos 60.000
+                    # caracteres. El tope de 8.000 -puesto contra abusos- los
+                    # tiraba antes de leerlos, y Kibo decia "no te veo" con la
+                    # camara encendida y la imagen en pantalla.
+                    if len(m["text"]) > 900000:
                         continue
                     try:
                         d = json.loads(m["text"])
