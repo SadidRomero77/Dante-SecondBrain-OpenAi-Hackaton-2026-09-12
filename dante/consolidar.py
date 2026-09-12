@@ -14,7 +14,7 @@ import sqlite3
 
 import numpy as np
 
-from . import config, memoria
+from . import config, memoria, proveedor
 
 INSTRUCCION = """\
 Hoy es %%HOY%% (%%DIA%%).
@@ -67,8 +67,7 @@ def de_transcripcion(c: sqlite3.Connection, transcripcion: str,
         return {"hechos": 0, "resumen": "", "motivo": "conversacion muy corta"}
 
     try:
-        from openai import OpenAI
-        cli = OpenAI(api_key=config.API_KEY)
+        cli = proveedor.texto()
         from datetime import date as _d
         from .mundo import DIAS
         hoy = _d.today()
@@ -77,7 +76,7 @@ def de_transcripcion(c: sqlite3.Connection, transcripcion: str,
         sistema = (INSTRUCCION.replace("%%HOY%%", hoy.isoformat())
                               .replace("%%DIA%%", DIAS[hoy.weekday()]))
         r = cli.chat.completions.create(
-            model=config.MODELO_TEXTO,
+            model=proveedor.modelo_texto(),
             response_format={"type": "json_object"},
             messages=[{"role": "system", "content": sistema},
                       {"role": "user", "content": transcripcion[:12000]}],

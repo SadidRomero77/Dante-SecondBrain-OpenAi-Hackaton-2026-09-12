@@ -83,17 +83,6 @@ def poner_ajuste(c: sqlite3.Connection, clave: str, valor: str) -> None:
 
 
 # ------------------------------------------------------------- embeddings --
-_cliente = None
-
-
-def _openai():
-    global _cliente
-    if _cliente is None:
-        from openai import OpenAI
-        _cliente = OpenAI(api_key=config.API_KEY)
-    return _cliente
-
-
 def _vector(texto: str) -> bytes | None:
     """Vector del texto, para poder buscar por significado y no por palabra.
 
@@ -101,7 +90,9 @@ def _vector(texto: str) -> bytes | None:
     memoria sigue funcionando. Nunca se pierde un hecho por un problema de red.
     """
     try:
-        r = _openai().embeddings.create(model=config.MODELO_EMBEDDINGS, input=texto)
+        from . import proveedor
+        r = proveedor.openai().embeddings.create(
+            model=config.MODELO_EMBEDDINGS, input=texto)
         return np.asarray(r.data[0].embedding, dtype="float32").tobytes()
     except Exception:
         return None

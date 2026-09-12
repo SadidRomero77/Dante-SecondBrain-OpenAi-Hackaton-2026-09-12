@@ -57,6 +57,34 @@ def revisar() -> int:
            f"voz={config.MODELO_VOZ}  texto={config.MODELO_TEXTO}  "
            f"embeddings={config.MODELO_EMBEDDINGS}  voz_tts={config.VOZ}")
 
+    # --- claves que el .env no tiene y el ejemplo si ---
+    ejemplo = config.RAIZ / ".env.example"
+    if env.exists() and ejemplo.exists():
+        import re
+
+        def _claves(t):
+            return {m.group(1) for m in re.finditer(r"^\s*([A-Z0-9_]+)\s*=", t,
+                                                    re.MULTILINE)}
+        faltan = _claves(ejemplo.read_text(encoding="utf-8")) - \
+                 _claves(env.read_text(encoding="utf-8"))
+        if faltan:
+            _linea(AVISO, f"Al .env le faltan {len(faltan)} clave(s) nuevas",
+                   ", ".join(sorted(faltan)) +
+                   "\n         Copialas de .env.example. Sin ellas esas "
+                   "funciones quedan apagadas, no rotas.")
+        else:
+            _linea(OK, "El .env tiene todas las claves del ejemplo")
+
+    # --- integraciones opcionales ---
+    from . import auth, proveedor
+    partes = [
+        f"modelos de texto: {proveedor.por_donde()}",
+        f"busqueda: {'exa' if config.EXA_API_KEY else 'openai (mas lenta)'}",
+        f"portal: {'con login de Auth0' if auth.activo() else 'abierto (solo local)'}",
+        f"camara: {'activa' if config.CAMARA else 'apagada'}",
+    ]
+    _linea(OK, "Integraciones", "  ·  ".join(partes))
+
     # --- carpeta de datos ---
     try:
         config.DB.parent.mkdir(parents=True, exist_ok=True)

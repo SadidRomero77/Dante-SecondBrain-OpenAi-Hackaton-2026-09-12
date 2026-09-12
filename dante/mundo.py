@@ -182,9 +182,11 @@ def _exa(consulta: str) -> dict:
 
 
 def _openai_busca(consulta: str) -> dict:
-    from openai import OpenAI
+    # La herramienta web_search vive en la Responses API de OpenAI, asi que
+    # esta llamada no pasa por OpenRouter aunque este configurado.
+    from . import proveedor
 
-    c = OpenAI(api_key=config.API_KEY)
+    c = proveedor.openai()
     r = c.responses.create(
         model=config.MODELO_TEXTO,
         tools=[{"type": "web_search"}],
