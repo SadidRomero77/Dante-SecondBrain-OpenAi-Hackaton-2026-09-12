@@ -96,6 +96,22 @@ encabezado de cada uno y en `HARDWARE.md`.
 | `dante_scan` | Prueba de vida: luz, PSRAM, escaneo del bus I2C |
 | `dante_audio` | Audio en la placa: tono, grabar y reproducir |
 | `dante_puente` | **El de verdad**: audio por USB, botón, y la cara |
+| `dante_regs` | Diagnóstico: lee de vuelta los registros del ES7210 |
+
+### Si el micrófono deja de captar
+
+Sirve para distinguir un chip dañado de un cable flojo, que se ven igual desde
+afuera:
+
+1. `dante_scan` — ¿responden `0x18` y `0x41` por I2C? Si sí, los chips viven.
+2. `dante_regs` — ¿los registros quedan escritos? Si sí, el chip está bien
+   configurado.
+3. `dante_audio` — ¿el nivel del micrófono es cero?
+
+Si los tres dan eso —chips vivos, registros bien, nivel en cero— el problema
+**no es electrónico**. El control (I2C, GPIO 1 y 2) y los datos (I2S, GPIO 38,
+14, 13 y 12) van por conectores distintos del mismo módulo: uno puede hacer
+contacto mientras el otro no. **Reasentar el módulo de audio.**
 
 ## Estructura
 
