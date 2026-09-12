@@ -43,8 +43,8 @@ inventar.
 Hace falta **Python 3.11 o más nuevo** y [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/SadidRomero77/Dante-SecondBrain-OpenAi-Hackaton.git
-cd Dante-SecondBrain-OpenAi-Hackaton
+git clone https://github.com/SadidRomero77/Dante-SecondBrain-OpenAi-Hackaton-2026-09-12.git
+cd Dante-SecondBrain-OpenAi-Hackaton-2026-09-12
 uv sync
 ```
 
