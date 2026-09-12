@@ -710,82 +710,358 @@ button:active{transform:translateY(0) scale(.98)}
 
 @media(prefers-reduced-motion:reduce){button:hover,.ficha:hover,.dato:hover{transform:none}}
 
+    /* Avatar Esculpido de Dante */
+    .dante-avatar-box {
+      position: relative; width: 72px; height: 72px; display: flex;
+      align-items: center; justify-content: center; flex: none; cursor: pointer;
+      border-radius: 20px;
+      background: radial-gradient(circle at 50% 35%, rgba(254, 215, 125, 0.22), transparent 70%);
+      transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), background .25s, box-shadow .25s;
+      user-select: none;
+    }
+    .dante-avatar-box:hover {
+      transform: scale(1.08);
+      background: radial-gradient(circle at 50% 35%, rgba(254, 215, 125, 0.45), transparent 75%);
+    }
+    .dante-avatar-box:active { transform: scale(0.95); }
+
+    .dante-avatar {
+      display: block; width: 100%; height: 100%; overflow: visible;
+      filter: drop-shadow(0 4px 8px rgba(80, 45, 10, 0.16));
+    }
+
+    /* Respiración y balanceo del cráneo esculpido */
+    .cabeza-grupo {
+      transform-origin: 80px 110px;
+      transition: transform .32s cubic-bezier(.34, 1.4, .64, 1);
+      animation: respirar-cabeza 3.6s ease-in-out infinite;
+    }
+    @keyframes respirar-cabeza {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-2.2px) rotate(0.4deg); }
+    }
+
+    /* Orejas expresivas con pivote en la base */
+    .oreja { transition: transform .32s cubic-bezier(.34, 1.56, .64, 1); }
+    .oreja-izq {
+      transform-origin: 48px 48px;
+      animation: oreja-izq-idle 4s ease-in-out infinite;
+    }
+    .oreja-der {
+      transform-origin: 112px 48px;
+      animation: oreja-der-idle 4s ease-in-out infinite .3s;
+    }
+    @keyframes oreja-izq-idle {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(-3.5deg); }
+    }
+    @keyframes oreja-der-idle {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(3.5deg); }
+    }
+
+    /* Mechón de pelo diminuto en la corona */
+    .pelito-tuft {
+      transform-origin: 80px 38px;
+      animation: pelito-bounce 3.6s ease-in-out infinite;
+    }
+    @keyframes pelito-bounce {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(-4deg); }
+    }
+
+    /* Medalla hueso en el collar */
+    #medalla-hueso {
+      transform-origin: 0px -5px;
+      transition: transform .28s ease;
+    }
+
+    /* Movimiento de pupilas y cejas */
+    .pupila { transition: transform .18s ease-out; }
+    .ceja { transition: transform .28s ease; }
+
+    /* Partículas de cariño (click) */
+    .particula-amor {
+      position: absolute; pointer-events: none; font-size: 20px;
+      animation: subir-particula .85s ease-out forwards; z-index: 30;
+    }
+    @keyframes subir-particula {
+      0% { opacity: 1; transform: translate(-50%, 0) scale(.6); }
+      100% { opacity: 0; transform: translate(-50%, -46px) scale(1.3); }
+    }
+
+    /* ESTADOS DE EMOCIÓN */
+    /* Escuchando: orejas alertas arriba, cabeza atenta adelante, ojos despiertos */
+    .emocion-escuchando .cabeza-grupo { transform: translateY(-3px) scale(1.02); animation: none; }
+    .emocion-escuchando .oreja-izq { transform: rotate(-18deg) translateY(-4px); animation: none; }
+    .emocion-escuchando .oreja-der { transform: rotate(18deg) translateY(-4px); animation: none; }
+    .emocion-escuchando .ceja-izq { transform: translateY(-3px); }
+    .emocion-escuchando .ceja-der { transform: translateY(-3px); }
+
+    /* Pensando: cabeza inclinada curiosa, oreja levantada, mirada arriba a un lado */
+    .emocion-pensando .cabeza-grupo { transform: rotate(7.5deg) translateY(-1.5px); animation: none; }
+    .emocion-pensando .oreja-izq { transform: rotate(-15deg) translateY(-3px); }
+    .emocion-pensando .oreja-der { transform: rotate(8deg) translateY(2px); }
+    .emocion-pensando .ceja-izq { transform: translateY(-4px) rotate(-6deg); }
+    .emocion-pensando .ceja-der { transform: translateY(1.5px) rotate(5deg); }
+    .emocion-pensando .pupila { transform: translate(2.5px, -3.2px); }
+
+    /* Hablando: boca abierta gesticulando, lengua viva, orejas acompasadas */
+    .emocion-hablando #boca-cerrada { display: none; }
+    .emocion-hablando #boca-abierta { display: block; }
+    .emocion-hablando .lengua-animada { animation: lengua-hablar .26s ease-in-out infinite alternate; }
+    @keyframes lengua-hablar {
+      from { transform: translateY(0); }
+      to { transform: translateY(-3.5px) scale(.94); }
+    }
+    .emocion-hablando .oreja-izq { animation: oreja-habla-izq .45s ease-in-out infinite alternate; }
+    .emocion-hablando .oreja-der { animation: oreja-habla-der .45s ease-in-out infinite alternate; }
+    @keyframes oreja-habla-izq { from { transform: rotate(0deg); } to { transform: rotate(-7deg); } }
+    @keyframes oreja-habla-der { from { transform: rotate(0deg); } to { transform: rotate(7deg); } }
+
+    /* Feliz: ojos en arco sonriente (^ ^), hocico abierto con lengua fuera, orejas revoloteando felices */
+    .emocion-feliz .ojo-abierto { display: none !important; }
+    .emocion-feliz .ojo-feliz { display: block !important; }
+    .emocion-feliz #boca-cerrada { display: none; }
+    .emocion-feliz #boca-abierta { display: block; }
+    .emocion-feliz .cabeza-grupo { animation: saltito-feliz .48s ease-in-out infinite alternate; }
+    @keyframes saltito-feliz {
+      from { transform: translateY(0); }
+      to { transform: translateY(-4px) scale(1.02); }
+    }
+    .emocion-feliz .oreja-izq { animation: oreja-feliz-izq .32s ease-in-out infinite alternate; }
+    .emocion-feliz .oreja-der { animation: oreja-feliz-der .32s ease-in-out infinite alternate; }
+    @keyframes oreja-feliz-izq { from { transform: rotate(-9deg); } to { transform: rotate(6deg); } }
+    @keyframes oreja-feliz-der { from { transform: rotate(9deg); } to { transform: rotate(-6deg); } }
+    .emocion-feliz #medalla-hueso { animation: medalla-campana .38s ease-in-out infinite alternate; }
+    @keyframes medalla-campana { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+
+    /* Atento / Alerta: ojos dilatados, postura erguida, cejas arriba */
+    .emocion-atencion .cabeza-grupo { transform: translateY(-4px) scale(1.04); }
+    .emocion-atencion .oreja-izq { transform: rotate(-20deg) translateY(-5px); }
+    .emocion-atencion .oreja-der { transform: rotate(20deg) translateY(-5px); }
+    .emocion-atencion .ceja-izq, .emocion-atencion .ceja-der { transform: translateY(-3.5px); }
+
+    /* Dormido: párpados cerrados, respiración lenta y tranquila, orejitas caídas */
+    .emocion-dormido .parpado { transform: scaleY(1) !important; }
+    .emocion-dormido .cabeza-grupo { transform: translateY(2.5px); animation: dormir-cabeza 4.8s ease-in-out infinite; }
+    @keyframes dormir-cabeza { 0%, 100% { transform: translateY(2.5px); } 50% { transform: translateY(0.5px); } }
+    .emocion-dormido .oreja-izq { transform: rotate(5deg) translateY(2.5px); }
+    .emocion-dormido .oreja-der { transform: rotate(-5deg) translateY(2.5px); }
 </style></head><body>
 
 
 
 <header>
-
-  <div class="perro" id="perro">
-
-    <div class="cola"></div>
-
-  <div class="carita" id="carita">
-
-    <svg width="72" height="58" viewBox="0 0 72 58" aria-label="Rocky, el perro">
-
+  <div class="dante-avatar-box" id="dante-avatar-box" title="Acariciá a Dante para ver su reacción alegre 🐾">
+    <svg id="dante-svg" class="dante-avatar" viewBox="0 0 160 160" width="72" height="72" aria-label="Dante el perro compañero">
       <defs>
-
-        <linearGradient id="piel" x1="0" y1="0" x2="0" y2="1">
-
-          <stop offset="0" stop-color="#fff8e9"/><stop offset="1" stop-color="#ead5b4"/>
-
+        <!-- Degradados cálidos y sombreados para las facetas poligonales del pelaje -->
+        <linearGradient id="grad-frente" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fed77d"/>
+          <stop offset="100%" stop-color="#f5b84e"/>
         </linearGradient>
-
-        <radialGradient id="miel" cx="38%" cy="30%">
-
-          <stop offset="0" stop-color="#f4c45c"/><stop offset="1" stop-color="#9b5d1f"/>
-
+        <linearGradient id="grad-mejilla-izq" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e38e24"/>
+          <stop offset="100%" stop-color="#cb7414"/>
+        </linearGradient>
+        <linearGradient id="grad-mejilla-der" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#d67f1b"/>
+          <stop offset="100%" stop-color="#be670c"/>
+        </linearGradient>
+        <linearGradient id="grad-hocico" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fff5e6"/>
+          <stop offset="100%" stop-color="#f7ddba"/>
+        </linearGradient>
+        <linearGradient id="grad-oreja-izq" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e29427"/>
+          <stop offset="100%" stop-color="#be670c"/>
+        </linearGradient>
+        <linearGradient id="grad-oreja-der" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#d6841e"/>
+          <stop offset="100%" stop-color="#b15907"/>
+        </linearGradient>
+        <linearGradient id="grad-collar" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#1b724e"/>
+          <stop offset="50%" stop-color="#2ca16e"/>
+          <stop offset="100%" stop-color="#165c3e"/>
+        </linearGradient>
+        <linearGradient id="grad-oro" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffe678"/>
+          <stop offset="50%" stop-color="#f8be22"/>
+          <stop offset="100%" stop-color="#cf8904"/>
+        </linearGradient>
+        <radialGradient id="grad-ojo" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#4e3120"/>
+          <stop offset="65%" stop-color="#24170f"/>
+          <stop offset="100%" stop-color="#140c07"/>
         </radialGradient>
-
+        <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="130%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#552200" flood-opacity="0.16"/>
+        </filter>
       </defs>
 
-      <!-- orejas grandes y caidas, como las de un perro mestizo -->
+      <!-- BASE: CUELLO Y COLLAR EXCLUSIVAMENTE (Sin cuerpo, como pidió el usuario) -->
+      <g id="cuello-y-collar">
+        <!-- Cuello base -->
+        <path d="M 58 122 L 54 138 Q 80 148 106 138 L 102 122 Z" fill="#b96209"/>
+        <!-- Collar verde esmeralda distintivo -->
+        <path id="banda-collar" d="M 44 130 Q 80 146 116 130 L 114 142 Q 80 157 46 142 Z" fill="url(#grad-collar)" stroke="#134a33" stroke-width="1.2" filter="url(#soft-shadow)"/>
+        <!-- Remaches dorados del collar -->
+        <circle cx="56" cy="136.5" r="1.6" fill="#f8cf52"/>
+        <circle cx="104" cy="136.5" r="1.6" fill="#f8cf52"/>
+        <!-- Anillo de la medalla -->
+        <circle cx="80" cy="144" r="3.2" fill="none" stroke="#e8a817" stroke-width="1.6"/>
+        <!-- Medalla colgante en forma de hueso pulido dorado -->
+        <g id="medalla-hueso" transform="translate(80, 149)">
+          <path d="M -7 -4 C -9.5 -6.5 -12.5 -3 -10 -0.8 C -12.5 1.5 -9.5 5 -7 2.5 L 7 2.5 C 9.5 5 12.5 1.5 10 -0.8 C 12.5 -3 9.5 -6.5 7 -4 Z" fill="url(#grad-oro)" stroke="#b57404" stroke-width="0.8"/>
+          <circle cx="0" cy="-0.5" r="1" fill="#fff" opacity="0.85"/>
+        </g>
+      </g>
 
-      <path class="oreja izq" d="M19 13C12 5 3 8 3 19c0 12 7 21 15 18 6-2 9-10 7-17z" fill="#b77843"/>
+      <!-- OREJAS EXPRESIVAS (Animadas con movimiento) -->
+      <!-- Oreja Izquierda -->
+      <g id="oreja-izq" class="oreja oreja-izq">
+        <path d="M 46 48 C 26 46 10 66 14 92 C 17 104 31 101 39 85 C 45 74 51 59 51 49 Z" fill="#9e4e04"/>
+        <path d="M 48 48 C 29 46 14 65 17 89 C 19 99 32 96 39 82 C 45 71 52 58 52 48 Z" fill="url(#grad-oreja-izq)"/>
+        <path d="M 41 53 C 30 53 23 66 25 81 C 29 87 34 83 38 73 Z" fill="#883e02" opacity="0.75"/>
+        <path d="M 44 49 C 32 49 22 62 23 75" fill="none" stroke="#fcd484" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+      </g>
 
-      <path class="oreja der" d="M53 13c7-8 16-5 16 6 0 12-7 21-15 18-6-2-9-10-7-17z" fill="#b77843"/>
+      <!-- Oreja Derecha -->
+      <g id="oreja-der" class="oreja oreja-der">
+        <path d="M 114 48 C 134 46 150 66 146 92 C 143 104 129 101 121 85 C 115 74 109 59 109 49 Z" fill="#924602"/>
+        <path d="M 112 48 C 131 46 146 65 143 89 C 141 99 128 96 121 82 C 115 71 108 58 108 48 Z" fill="url(#grad-oreja-der)"/>
+        <path d="M 119 53 C 130 53 137 66 135 81 C 131 87 126 83 122 73 Z" fill="#7d3701" opacity="0.75"/>
+        <path d="M 116 49 C 128 49 138 62 137 75" fill="none" stroke="#fcd484" stroke-width="1.6" stroke-linecap="round" opacity="0.6"/>
+      </g>
 
-      <path d="M18 14C19 6 26 2 36 2s17 4 18 12l-1 23c-1 11-7 17-17 18-10-1-16-7-17-18z" fill="url(#piel)" stroke="#d7bd96" stroke-width=".8"/>
+      <!-- CABEZA CON ESTRUCTURA BIEN MOLDEADA EN PLANOS POLIGONALES -->
+      <g id="cabeza-grupo" class="cabeza-grupo">
+        <!-- Facetas geométricas / polígonos esculpidos de la cabeza -->
+        <g id="poligonos-cabeza">
+          <!-- 1. Plano Frente Superior / Corona -->
+          <polygon points="62,38 98,38 104,54 56,54" fill="#fed679"/>
 
-      <!-- manchas color canela y franja clara -->
+          <!-- 2. Plano Diamante Central de la Frente -->
+          <polygon points="56,54 104,54 100,72 80,78 60,72" fill="#f8bf53"/>
 
-      <path d="M19 15c2-7 8-11 15-12-3 7-3 15-1 22-4-5-8-8-14-7z" fill="#c1844b"/>
+          <!-- 3. Faceta Lateral Izquierda (Sien superior) -->
+          <polygon points="62,38 56,54 44,52" fill="#e8982c"/>
 
-      <path d="M53 15c-2-7-8-11-15-12 3 7 3 15 1 22 4-5 8-8 14-7z" fill="#c1844b"/>
+          <!-- 4. Faceta Lateral Derecha (Sien superior) -->
+          <polygon points="98,38 104,54 116,52" fill="#df8e22"/>
 
-      <path d="M36 3c-4 7-4 14-3 22 1 7 0 13-2 19 2 6 4 9 5 10 2-1 4-4 6-10-2-6-3-12-2-19 1-8 1-15-4-22z" fill="#fffdf5"/>
+          <!-- 5. Mejilla Izquierda Superior (Polígono angular que ensancha la cara) -->
+          <polygon points="44,52 56,54 60,72 40,78 34,64" fill="url(#grad-mejilla-izq)"/>
 
-      <!-- ojos pequeños, oscuros y miel; sin ojos de caricatura -->
+          <!-- 6. Mejilla Derecha Superior (Polígono angular simétrico) -->
+          <polygon points="116,52 104,54 100,72 120,78 126,64" fill="url(#grad-mejilla-der)"/>
 
-      <path d="M20 21q6-7 12 0-6 5-12 0zM40 21q6-7 12 0-6 5-12 0z" fill="#68452f" opacity=".76"/>
+          <!-- 7. Mejilla Izquierda Inferior (Mandíbula) -->
+          <polygon points="34,64 40,78 54,98 44,106 32,84" fill="#c97312"/>
 
-      <ellipse id="oi" class="ojo" cx="27" cy="20" rx="3.8" ry="4.2" fill="url(#miel)"/>
+          <!-- 8. Mejilla Derecha Inferior (Mandíbula) -->
+          <polygon points="126,64 120,78 106,98 116,106 128,84" fill="#be670c"/>
 
-      <ellipse id="od" class="ojo" cx="45" cy="20" rx="3.8" ry="4.2" fill="url(#miel)"/>
+          <!-- 9. Quijada y Barbilla (Planos inferiores) -->
+          <polygon points="44,106 54,98 80,110 66,126 50,120" fill="#dc851d"/>
+          <polygon points="116,106 106,98 80,110 94,126 110,120" fill="#ce7714"/>
+          <polygon points="66,126 80,110 94,126 80,128" fill="#e8952b"/>
 
-      <circle class="pupila" cx="27" cy="20.5" r="1.8" fill="#20150f"/>
+          <!-- Líneas de estructura sutiles entre facetas -->
+          <path d="M 62 38 L 98 38 L 104 54 L 120 78 L 116 106 L 94 126 L 66 126 L 44 106 L 40 78 L 56 54 Z" fill="none" stroke="#ad5b07" stroke-width="1.2" opacity="0.32"/>
+        </g>
 
-      <circle class="pupila" cx="45" cy="20.5" r="1.8" fill="#20150f"/>
+        <!-- PELITO DIMINUTO EN LA CORONA (Para que no se vea calvo) -->
+        <g id="pelito-cabeza" class="pelito-tuft">
+          <path d="M 76 38 C 77 30 79 25 82 26 C 84 27 83 33 85 38 C 87 31 91 30 90 38 Z" fill="#fed679" stroke="#ad5b07" stroke-width="1" stroke-linejoin="round"/>
+          <path d="M 79 34 C 80 29 81 28 82 28" fill="none" stroke="#fff1bd" stroke-width="1.2" stroke-linecap="round"/>
+        </g>
 
-      <circle cx="26.4" cy="19.7" r=".6" fill="#fff" opacity=".95"/>
+        <!-- CEJAS EXPRESIVAS -->
+        <g id="cejas">
+          <path id="ceja-izq" class="ceja ceja-izq" d="M 48 50 Q 58 45 66 49" fill="none" stroke="#7a3f0f" stroke-width="3" stroke-linecap="round"/>
+          <path id="ceja-der" class="ceja ceja-der" d="M 94 49 Q 102 45 112 50" fill="none" stroke="#7a3f0f" stroke-width="3" stroke-linecap="round"/>
+        </g>
 
-      <circle cx="44.4" cy="19.7" r=".6" fill="#fff" opacity=".95"/>
+        <!-- OJOS (Animados con párpados, reflejos y estado feliz) -->
+        <!-- Ojo Izquierdo -->
+        <g id="ojo-izq-cont" class="ojo-contenedor" transform="translate(58, 63)">
+          <g id="ojo-izq-abierto" class="ojo-abierto">
+            <ellipse cx="0" cy="0" rx="10" ry="12" fill="#ffffff" stroke="#ecd7c4" stroke-width="0.8"/>
+            <path d="M -9.5 -2 C -9 -9 9 -9 9.5 -2 C 6 -4 -6 -4 -9.5 -2 Z" fill="#d9c5b2" opacity="0.45"/>
+            <g id="pupila-izq" class="pupila">
+              <ellipse cx="0.5" cy="0.5" rx="7.5" ry="9" fill="url(#grad-ojo)"/>
+              <circle cx="0.5" cy="0.5" r="7.5" fill="none" stroke="#a2571b" stroke-width="1"/>
+              <circle cx="-2.5" cy="-3.5" r="3" fill="#ffffff"/>
+              <circle cx="3" cy="3.5" r="1.3" fill="#ffffff" opacity="0.9"/>
+            </g>
+            <path id="parpado-izq" class="parpado" d="M -11 -13 L 11 -13 L 11 0 Q 0 4 -11 0 Z" fill="#e8982c" style="transform-origin: 0px -12px; transform: scaleY(0); transition: transform 0.12s ease;"/>
+          </g>
+          <path id="ojo-izq-feliz" class="ojo-feliz" d="M -9 3 Q 0 -8 9 3" fill="none" stroke="#2c1a0e" stroke-width="3.6" stroke-linecap="round" style="display: none;"/>
+        </g>
 
-      <!-- hocico blanco y nariz de perro -->
+        <!-- Ojo Derecho -->
+        <g id="ojo-der-cont" class="ojo-contenedor" transform="translate(102, 63)">
+          <g id="ojo-der-abierto" class="ojo-abierto">
+            <ellipse cx="0" cy="0" rx="10" ry="12" fill="#ffffff" stroke="#ecd7c4" stroke-width="0.8"/>
+            <path d="M -9.5 -2 C -9 -9 9 -9 9.5 -2 C 6 -4 -6 -4 -9.5 -2 Z" fill="#d9c5b2" opacity="0.45"/>
+            <g id="pupila-der" class="pupila">
+              <ellipse cx="-0.5" cy="0.5" rx="7.5" ry="9" fill="url(#grad-ojo)"/>
+              <circle cx="-0.5" cy="0.5" r="7.5" fill="none" stroke="#a2571b" stroke-width="1"/>
+              <circle cx="-3.5" cy="-3.5" r="3" fill="#ffffff"/>
+              <circle cx="2" cy="3.5" r="1.3" fill="#ffffff" opacity="0.9"/>
+            </g>
+            <path id="parpado-der" class="parpado" d="M -11 -13 L 11 -13 L 11 0 Q 0 4 -11 0 Z" fill="#df8e22" style="transform-origin: 0px -12px; transform: scaleY(0); transition: transform 0.12s ease;"/>
+          </g>
+          <path id="ojo-der-feliz" class="ojo-feliz" d="M -9 3 Q 0 -8 9 3" fill="none" stroke="#2c1a0e" stroke-width="3.6" stroke-linecap="round" style="display: none;"/>
+        </g>
 
-      <ellipse cx="36" cy="39" rx="14" ry="10" fill="#fffdf5"/>
+        <!-- Mejillas con rubor sutil -->
+        <ellipse cx="42" cy="79" rx="7" ry="4" fill="#f87a55" opacity="0.28"/>
+        <ellipse cx="118" cy="79" rx="7" ry="4" fill="#f87a55" opacity="0.28"/>
 
-      <ellipse cx="36" cy="36" rx="5.2" ry="3.7" fill="#30241e"/>
+        <!-- HOCICO (Estructura poligonal-redondeada con trufa, boca y lengua) -->
+        <g id="hocico-grupo" class="hocico-grupo" filter="url(#soft-shadow)">
+          <!-- Base crema del hocico -->
+          <path d="M 64 74 C 70 71, 90 71, 96 74 C 105 78, 107 90, 103 99 C 97 108, 89 113, 80 113 C 71 113, 63 108, 57 99 C 53 90, 55 78, 64 74 Z" fill="url(#grad-hocico)" stroke="#e4cbab" stroke-width="1.2"/>
+          <ellipse cx="80" cy="85" rx="14" ry="7" fill="#ebd2b2" opacity="0.5"/>
 
-      <path d="M30 42q6 5 12 0" fill="none" stroke="#30241e" stroke-width="1.7" stroke-linecap="round"/>
+          <!-- Puntos de bigote caricaturizados -->
+          <circle cx="68" cy="94" r="1" fill="#c49f76"/>
+          <circle cx="72" cy="97" r="1" fill="#c49f76"/>
+          <circle cx="88" cy="97" r="1" fill="#c49f76"/>
+          <circle cx="92" cy="94" r="1" fill="#c49f76"/>
 
+          <!-- Boca y lengua -->
+          <g id="boca-grupo">
+            <!-- Boca cerrada / sonrisa amigable -->
+            <path id="boca-cerrada" d="M 69 98 Q 75 102 80 98 Q 85 102 91 98" fill="none" stroke="#52321c" stroke-width="2.2" stroke-linecap="round"/>
+
+            <!-- Boca abierta con lengua alegre (en feliz o hablando) -->
+            <g id="boca-abierta" style="display: none;">
+              <path d="M 72 98 Q 80 99 88 98 Q 89 110 80 113 Q 71 110 72 98 Z" fill="#631722"/>
+              <g id="lengua-animada" class="lengua-animada">
+                <path d="M 73 104 Q 80 101 87 104 C 88 116 86 122 80 123 C 74 122 72 116 73 104 Z" fill="#f86284" stroke="#d43f62" stroke-width="0.8"/>
+                <path d="M 80 106 L 80 118" fill="none" stroke="#de4366" stroke-width="1.2" stroke-linecap="round"/>
+                <ellipse cx="77" cy="112" rx="1.8" ry="3" fill="#ff9cb4" opacity="0.65"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- Trufa de la nariz -->
+          <g id="trufa-nariz">
+            <path d="M 72 79 C 75 76, 85 76, 88 79 C 90 82, 87 87, 80 89 C 73 87, 70 82, 72 79 Z" fill="#291b12" stroke="#1d120a" stroke-width="1"/>
+            <ellipse cx="76" cy="83.5" rx="1.6" ry="1.2" fill="#150c06"/>
+            <ellipse cx="84" cy="83.5" rx="1.6" ry="1.2" fill="#150c06"/>
+            <ellipse cx="77.5" cy="80" rx="3.5" ry="1.5" fill="#ffffff" opacity="0.5" transform="rotate(-8, 77.5, 80)"/>
+            <line x1="80" y1="89" x2="80" y2="98" stroke="#52321c" stroke-width="2.2" stroke-linecap="round"/>
+          </g>
+        </g>
+      </g>
     </svg>
-
   </div>
-
-  </div>
-
   <div>
 
     <h1 id="titulo">Dante</h1>
@@ -1277,88 +1553,154 @@ button:active{transform:translateY(0) scale(.98)}
 <script>
 
 const $ = (s) => document.querySelector(s);
-
-const charla = $('#charla'), animo = $('#animo'), carita = $('#carita');
-
-const oi = $('#oi'), od = $('#od');
-
-const pupilas = document.querySelectorAll('.pupila');
+const charla = $('#charla'), animo = $('#animo');
+const danteBox = $('#dante-avatar-box');
+const parpadoIzq = $('#parpado-izq'), parpadoDer = $('#parpado-der');
+const pupilaIzq = $('#pupila-izq'), pupilaDer = $('#pupila-der');
+const bocaCerrada = $('#boca-cerrada'), bocaAbierta = $('#boca-abierta');
 
 let ws, entra, sale, flujo, nodo, hablando = false, proximo = 0;
-
 let altavozOn = localStorage.getItem('dante_altavoz') !== 'no';
+let estadoActual = 'idle';
+let parpadeando = false;
 
-
-
-/* ---------- la carita ---------- */
-
-const CARAS = {
-
-  idle:      {c:'#c8872b', f:'listo',      h:9,  y:14, r:4},
-
-  escuchando:{c:'#e0a83f', f:'te escucha', h:11, y:13, r:5},
-
-  pensando:  {c:'#9a6125', f:'pensando…',  h:5,  y:17, r:2},
-
-  hablando:  {c:'#d99a32', f:'hablando',   h:9,  y:14, r:4},
-
-  feliz:     {c:'#f0b84b', f:'contento',   h:5,  y:17, r:2},
-
-  atencion:  {c:'#b96f27', f:'atento',     h:11, y:13, r:5},
-
+/* ---------- Nombres y descripciones de las emociones de Dante ---------- */
+const NOMBRES_EMOCION = {
+  idle:       'listo',
+  escuchando: 'te escucha',
+  pensando:   'pensando…',
+  hablando:   'hablando',
+  feliz:      'contento',
+  atencion:   'atento',
+  dormido:    'descansando'
 };
 
-function pintarCara(e){
+function pintarCara(e) {
+  estadoActual = e || 'idle';
+  const texto = NOMBRES_EMOCION[estadoActual] || 'listo';
+  if (animo) animo.textContent = texto;
 
-  const d = CARAS[e] || CARAS.idle;
+  if (!danteBox) return;
 
-  animo.textContent = d.f;
+  // Limpiar clases de emoción previas
+  danteBox.classList.remove(
+    'emocion-idle', 'emocion-escuchando', 'emocion-pensando',
+    'emocion-hablando', 'emocion-feliz', 'emocion-atencion', 'emocion-dormido'
+  );
+  danteBox.classList.add('emocion-' + estadoActual);
 
-  // Las orejas siguen al animo y los ojos conservan el color miel de Rocky.
+  // Manejo de boca y ojos según emoción
+  const ojoIzqAbierto = $('#ojo-izq-abierto');
+  const ojoIzqFeliz = $('#ojo-izq-feliz');
+  const ojoDerAbierto = $('#ojo-der-abierto');
+  const ojoDerFeliz = $('#ojo-der-feliz');
 
-  // Es lo primero que mira alguien que entra, y dice el estado sin leer nada.
+  if (estadoActual === 'feliz') {
+    if (ojoIzqAbierto) ojoIzqAbierto.style.display = 'none';
+    if (ojoIzqFeliz) ojoIzqFeliz.style.display = 'block';
+    if (ojoDerAbierto) ojoDerAbierto.style.display = 'none';
+    if (ojoDerFeliz) ojoDerFeliz.style.display = 'block';
+    if (bocaCerrada) bocaCerrada.style.display = 'none';
+    if (bocaAbierta) bocaAbierta.style.display = 'block';
+  } else {
+    if (ojoIzqAbierto) ojoIzqAbierto.style.display = 'block';
+    if (ojoIzqFeliz) ojoIzqFeliz.style.display = 'none';
+    if (ojoDerAbierto) ojoDerAbierto.style.display = 'block';
+    if (ojoDerFeliz) ojoDerFeliz.style.display = 'none';
 
-  const p = $('#perro');
-
-  p.classList.toggle('contento', e === 'feliz' || e === 'escuchando');
-
-  p.classList.toggle('dormido',  e === 'pensando');
-
-  for (const [o, cx] of [[oi,27],[od,45]]){
-
-    o.setAttribute('fill', d.c);
-
-    o.setAttribute('cy', d.y + d.h / 2);
-
-    o.setAttribute('ry', d.h / 2);
-
-    o.setAttribute('rx', d.r);
-
-    o.setAttribute('cx', cx);
-
+    if (estadoActual === 'hablando') {
+      if (bocaCerrada) bocaCerrada.style.display = 'none';
+      if (bocaAbierta) bocaAbierta.style.display = 'block';
+    } else {
+      if (bocaCerrada) bocaCerrada.style.display = 'block';
+      if (bocaAbierta) bocaAbierta.style.display = 'none';
+    }
   }
 
+  // Párpados si está dormido
+  if (parpadoIzq && parpadoDer) {
+    if (estadoActual === 'dormido') {
+      parpadoIzq.style.transform = 'scaleY(1)';
+      parpadoDer.style.transform = 'scaleY(1)';
+    } else if (!parpadeando) {
+      parpadoIzq.style.transform = 'scaleY(0)';
+      parpadoDer.style.transform = 'scaleY(0)';
+    }
+  }
 }
-
 pintarCara('idle');
 
-setInterval(() => {                       // parpadeo
+/* Pestañeo natural periódico */
+setInterval(() => {
+  if (estadoActual !== 'idle' && estadoActual !== 'escuchando') return;
+  parpadeando = true;
+  if (parpadoIzq) parpadoIzq.style.transform = 'scaleY(1)';
+  if (parpadoDer) parpadoDer.style.transform = 'scaleY(1)';
+  setTimeout(() => {
+    parpadeando = false;
+    if (estadoActual !== 'dormido') {
+      if (parpadoIzq) parpadoIzq.style.transform = 'scaleY(0)';
+      if (parpadoDer) parpadoDer.style.transform = 'scaleY(0)';
+    }
+  }, 130);
+}, 3800 + Math.random() * 3200);
 
-  if (animo.textContent !== 'listo') return;
+/* Seguimiento suave de la mirada con el cursor */
+window.addEventListener('mousemove', (e) => {
+  if (estadoActual === 'dormido' || estadoActual === 'pensando' || estadoActual === 'feliz') return;
+  if (!danteBox || !pupilaIzq || !pupilaDer) return;
+  const rect = danteBox.getBoundingClientRect();
+  const centroX = rect.left + rect.width / 2;
+  const centroY = rect.top + rect.height / 2;
+  const dx = Math.max(-1, Math.min(1, (e.clientX - centroX) / 300));
+  const dy = Math.max(-1, Math.min(1, (e.clientY - centroY) / 300));
+  pupilaIzq.style.transform = `translate(${dx * 2.5}px, ${dy * 2.2}px)`;
+  pupilaDer.style.transform = `translate(${dx * 2.5}px, ${dy * 2.2}px)`;
+});
 
-  for (const [o, cx] of [[oi,27],[od,45]]){
-
-    o.setAttribute('cx',cx); o.setAttribute('cy',19); o.setAttribute('ry',.7);
-
+/* Ladrido sintético tierno con Web Audio al acariciar a Dante */
+function ladrarCachorro() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(340, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(160, ctx.currentTime + 0.16);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.16);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.17);
+  } catch (err) {
+    console.debug('Audio ladrar:', err);
   }
+}
 
-  pupilas.forEach(o => o.style.opacity = '0');
+/* Interacción táctil / clic sobre Dante */
+if (danteBox) {
+  danteBox.addEventListener('click', (ev) => {
+    ladrarCachorro();
 
-  setTimeout(()=>{ pupilas.forEach(o => o.style.opacity = '1'); pintarCara('idle'); }, 130);
+    // Partícula visual flotante (corazón o huellita)
+    const part = document.createElement('div');
+    part.className = 'particula-amor';
+    part.textContent = Math.random() > 0.4 ? '🐾' : '💖';
+    part.style.left = (ev.offsetX || 36) + 'px';
+    part.style.top = (ev.offsetY || 36) + 'px';
+    danteBox.appendChild(part);
+    setTimeout(() => part.remove(), 850);
 
-}, 4200 + Math.random()*2600);
-
-
+    const prev = estadoActual;
+    pintarCara('feliz');
+    setTimeout(() => {
+      if (estadoActual === 'feliz') pintarCara(prev === 'dormido' ? 'idle' : prev);
+    }, 1800);
+  });
+}
 
 function linea(cl, t){
 
@@ -3039,4 +3381,3 @@ def arrancar(sesion, puerto: int = 8800) -> str:
     visible = "127.0.0.1" if config.PANEL_HOST in ("0.0.0.0", "") else config.PANEL_HOST
 
     return f"http://{visible}:{puerto}" 
-
