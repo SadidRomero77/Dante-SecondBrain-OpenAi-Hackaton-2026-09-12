@@ -76,6 +76,59 @@ h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.02em}
 .tab:hover{background:var(--hueso);color:var(--tinta)}
 .tab.on{background:var(--miel-suave);color:var(--miel)}
 
+/* ====================== que se note que es un perro ======================
+   Huellas, huesos y una cola. Suena a adorno y no lo es: quien abre esto es
+   una familia que le confio a su madre a un muneco, no un operador mirando
+   un tablero. Si la pantalla no tiene nada de perro, el perro no existe.
+   Todo esto se apaga entero con prefers-reduced-motion. */
+
+/* huellitas de fondo, casi invisibles: se ven si las buscas */
+body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='%23b99a72' fill-opacity='.055'%3E%3Cellipse cx='28' cy='36' rx='6.5' ry='8.5'/%3E%3Cellipse cx='16' cy='22' rx='3.6' ry='4.6'/%3E%3Cellipse cx='27' cy='16' rx='3.6' ry='4.6'/%3E%3Cellipse cx='38' cy='22' rx='3.6' ry='4.6'/%3E%3Cellipse cx='88' cy='96' rx='6.5' ry='8.5'/%3E%3Cellipse cx='76' cy='82' rx='3.6' ry='4.6'/%3E%3Cellipse cx='87' cy='76' rx='3.6' ry='4.6'/%3E%3Cellipse cx='98' cy='82' rx='3.6' ry='4.6'/%3E%3C/g%3E%3C/svg%3E");
+  background-attachment:fixed}
+
+/* la cola, detras de la carita */
+.perro{position:relative;display:flex;align-items:center;flex:none}
+.cola{position:absolute;left:-13px;top:50%;width:20px;height:7px;
+  background:var(--hocico);border-radius:6px 2px 2px 6px;
+  transform-origin:100% 50%;margin-top:-4px;z-index:-1}
+@keyframes menear{0%,100%{transform:rotate(-16deg)}50%{transform:rotate(16deg)}}
+.cola{animation:menear 1.1s ease-in-out infinite}
+.contento .cola{animation-duration:.3s}
+.dormido .cola{animation:none;transform:rotate(6deg)}
+
+/* un huesito antes de cada titulo */
+.caja h2::before{content:"";display:inline-block;width:17px;height:9px;
+  margin-right:9px;vertical-align:-1px;opacity:.65;
+  background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 18'%3E%3Cpath d='M7 4a4 4 0 1 0-.6 6.2A4 4 0 1 0 9.4 13h15.2A4 4 0 1 0 27 10.2 4 4 0 1 0 24.6 4H9.4A4 4 0 0 0 7 4z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 18'%3E%3Cpath d='M7 4a4 4 0 1 0-.6 6.2A4 4 0 1 0 9.4 13h15.2A4 4 0 1 0 27 10.2 4 4 0 1 0 24.6 4H9.4A4 4 0 0 0 7 4z'/%3E%3C/svg%3E") center/contain no-repeat}
+
+/* el boton principal saca una huella al pasar por encima */
+.pri{position:relative;overflow:hidden}
+.pri::after{content:"🐾";position:absolute;right:11px;top:50%;
+  transform:translateY(-50%) scale(.6);opacity:0;transition:all .22s}
+.pri:hover::after{opacity:.5;transform:translateY(-50%) scale(1)}
+
+/* estado vacio: un hueso grande y triste en vez de una linea de texto */
+.ayuda.vacio{text-align:center;padding:26px 16px}
+.ayuda.vacio::before{content:"🦴";display:block;font-size:34px;opacity:.45;
+  margin-bottom:8px;animation:respirar 2.6s ease-in-out infinite}
+
+/* cargando: un huesito que rebota */
+@keyframes rebotar{0%,100%{transform:translateY(0) rotate(-8deg)}
+  50%{transform:translateY(-9px) rotate(8deg)}}
+.cargando::before{content:"🦴";display:inline-block;margin-right:8px;
+  animation:rebotar .62s ease-in-out infinite}
+
+/* al guardar algo, una huella cruza el aviso */
+@keyframes pasar{from{transform:translateX(-14px);opacity:0}
+  40%{opacity:.85} to{transform:translateX(0);opacity:.85}}
+.aviso::before{content:"🐾";margin-right:8px;display:inline-block;
+  animation:pasar .45s ease-out}
+
+@media(prefers-reduced-motion:reduce){
+  .cola,.ayuda.vacio::before,.cargando::before,.aviso::before{animation:none}}
+
 /* la carita respira: quieta parece apagada, y esto no es un panel de control */
 @keyframes respirar{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 .carita{animation:respirar 3.4s ease-in-out infinite}
@@ -209,11 +262,14 @@ form{display:flex;flex-direction:column;gap:16px}
 </style></head><body>
 
 <header>
+  <div class="perro" id="perro">
+    <div class="cola"></div>
   <div class="carita" id="carita">
     <svg width="46" height="30" viewBox="0 0 46 30">
       <rect id="oi" class="ojo" x="4" y="5" width="16" height="20" rx="7" fill="#7fd4f5"/>
       <rect id="od" class="ojo" x="26" y="5" width="16" height="20" rx="7" fill="#7fd4f5"/>
     </svg>
+  </div>
   </div>
   <div>
     <h1 id="titulo">Dante</h1>
@@ -315,7 +371,7 @@ form{display:flex;flex-direction:column;gap:16px}
   </div>
   <div class="caja">
     <h2>Mensajes dejados <small id="n-voz"></small></h2>
-    <div id="voces"><div class="pad ayuda">Todavía no hay ninguno.</div></div>
+    <div id="voces"><div class="pad ayuda vacio">Todavía no hay ninguno.</div></div>
   </div>
 </div></main>
 
@@ -361,7 +417,7 @@ form{display:flex;flex-direction:column;gap:16px}
     <div class="pad" style="padding-bottom:6px">
       <p class="ayuda">Cosas que mencionó en sus conversaciones. <b>Esto no es un diagnóstico</b> y Dante no interpreta nada: solo repite lo que ella dijo, y cuántas veces. Si algo se repite, quizás valga la pena preguntarle.</p>
     </div>
-    <div id="senales"><div class="pad ayuda">Sin novedades. Eso es buena señal.</div></div>
+    <div id="senales"><div class="pad ayuda vacio">Sin novedades. Eso es buena señal.</div></div>
   </div>
 
   <div class="caja" style="max-width:760px;margin:18px auto 0">
@@ -478,6 +534,11 @@ const CARAS = {
 function pintarCara(e){
   const d = CARAS[e] || CARAS.idle;
   animo.textContent = d.f;
+  // La cola sigue al animo: contento menea rapido, pensando casi no. Es lo
+  // primero que mira alguien que entra, y dice el estado sin leer nada.
+  const p = $('#perro');
+  p.classList.toggle('contento', e === 'feliz' || e === 'escuchando');
+  p.classList.toggle('dormido',  e === 'pensando');
   for (const o of [oi, od]){
     o.setAttribute('fill', d.c);
     o.setAttribute('height', d.h);
@@ -654,7 +715,7 @@ async function cargarObjetos(){
   const l = r.objetos || [];
   $('#n-obj').textContent = l.length ? l.length+' cosas' : '';
   if (!l.length){
-    g.innerHTML = '<div class="pad ayuda">Todavía no tiene ninguna anotada.</div>';
+    g.innerHTML = '<div class="pad ayuda vacio">Todavía no tiene ninguna anotada.</div>';
     return; }
   g.innerHTML = '';
   l.forEach(o => {
@@ -682,7 +743,7 @@ async function cargarAgenda(){
 function pintarAgenda(lista){
   const g = $('#agenda');
   if (!lista.length){
-    g.innerHTML = '<div class="pad ayuda">Todavía no hay ninguno. '
+    g.innerHTML = '<div class="pad ayuda vacio">Todavía no hay ninguno. '
                 + 'Dante también los anota si se lo pedís hablando.</div>'; return; }
   g.innerHTML = '';
   lista.forEach(e => {
@@ -826,7 +887,7 @@ async function cargarSenales(){
   const c = $('#senales'), r = await (await fetch('/api/senales')).json();
   $('#n-sen').textContent = r.senales.length ? r.senales.length+' cosas' : '';
   pintarCambios(r.cambios||[]);
-  if (!r.senales.length){ c.innerHTML='<div class="pad ayuda">Sin novedades. Eso es buena señal.</div>'; return; }
+  if (!r.senales.length){ c.innerHTML='<div class="pad ayuda vacio">Sin novedades. Eso es buena señal.</div>'; return; }
   c.innerHTML='';
   r.senales.forEach(s => {
     const d=document.createElement('div');
@@ -844,7 +905,7 @@ function pintarCambios(lista){
   const c = $('#cambios');
   $('#n-cam').textContent = lista.length ? lista.length+' cosas' : '';
   if (!lista.length){
-    c.innerHTML = '<div class="pad ayuda">Nada distinto de lo habitual, '
+    c.innerHTML = '<div class="pad ayuda vacio">Nada distinto de lo habitual, '
                 + 'o todavía no hay suficientes semanas para comparar.</div>'; return; }
   c.innerHTML = '';
   lista.forEach(x => {
@@ -857,7 +918,7 @@ function pintarCambios(lista){
 }
 $('#b-resumen').onclick = async () => {
   const caja = $('#resumen');
-  caja.innerHTML = '<span class="ayuda">Dante lo está escribiendo…</span>';
+  caja.innerHTML = '<span class="ayuda cargando">Dante lo está escribiendo…</span>';
   const r = await (await fetch('/api/resumen')).json();
   caja.innerHTML = r.hay
     ? `<div class="pad" style="background:var(--hueso);border-radius:12px">
@@ -903,7 +964,7 @@ async function cargarVoces(){
   const c=$('#voces'), r=await (await fetch('/api/mensajes')).json();
   const sin = r.mensajes.filter(m=>!m.escuchado).length;
   $('#n-voz').textContent = sin ? sin+' sin escuchar' : '';
-  if (!r.mensajes.length){ c.innerHTML='<div class="pad ayuda">Todavía no hay ninguno.</div>'; return; }
+  if (!r.mensajes.length){ c.innerHTML='<div class="pad ayuda vacio">Todavía no hay ninguno.</div>'; return; }
   c.innerHTML='';
   r.mensajes.forEach(m => {
     const d=document.createElement('div'); d.className='mensaje';
