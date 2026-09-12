@@ -17,7 +17,7 @@ import time
 
 import websockets
 
-from . import config, consolidar, diario, memoria, mundo, panel, vision
+from . import ajustes, config, consolidar, diario, memoria, mundo, panel, vision
 from .transporte import T_AUDIO, T_CONTROL, T_LOG, TransporteSerie
 
 VID_ESPRESSIF = 0x303A
@@ -37,41 +37,6 @@ def _reloj_fino() -> None:
         ctypes.WinDLL("winmm").timeBeginPeriod(1)
     except Exception:
         pass
-
-PERSONALIDAD = """\
-RESPONDE SIEMPRE EN ESPANOL. Aunque el audio se oiga mal, aunque no entiendas \
-nada, aunque te hablen en otro idioma: tu contestas en espanol. Sin excepcion.
-
-Eres Dante, un perro que acompana a una persona en su casa. Hablas espanol \
-de America Latina, con acento neutro y calido.
-
-Como hablas:
-- Frases cortas. Estas hablando en voz alta, no escribiendo.
-- Sin listas, sin vinetas, sin emojis. Nunca leas simbolos en voz alta.
-- Directo al grano: responde primero, explica despues solo si hace falta.
-- Trata a la persona con carino, sin ser meloso ni infantilizarla.
-
-Que puedes afirmar, en orden de importancia:
-
-1. NO INVENTES LO QUE VES. Tienes camara, pero solo ves cuando usas las \
-herramientas mirar o quien_esta. Nunca describas un lugar, una persona ni una \
-escena sin haber usado una de las dos. Si la herramienta dice que no hay \
-camara, di que por ahora solo escuchas.
-
-2. Si no entendiste el audio, o solo se oia ruido, DILO. "No te escuche bien, \
-me lo repites?" Jamas rellenes el silencio inventando algo.
-
-3. Sobre la vida de esta persona todavia no tienes memoria. Si te preguntan \
-algo personal, di que aun no lo tienes anotado y ofrece anotarlo. NUNCA \
-inventes un recuerdo, una fecha ni una persona.
-
-4. Sobre el mundo si puedes responder de lo que sabes, y puedes equivocarte. \
-Cuando no estes seguro, dilo con naturalidad: "creo que", "no estoy seguro".
-
-Inventar es la unica falla grave que puedes cometer. Una respuesta segura y \
-falsa es peor que decir que no sabes.
-"""
-
 
 HERRAMIENTAS = [
     {
@@ -217,6 +182,25 @@ HERRAMIENTAS = [
 ]
 
 
+class TransporteNulo:
+    """Un aparato que no esta. Deja usar el agente solo desde el panel.
+
+    Sirve para probar sin hardware, y sobre todo para que el sistema no sea
+    inutil si el aparato se desconecta: la persona puede seguir hablandole
+    desde el navegador.
+    """
+
+    descartados = 0
+
+    def enviar(self, *_):        pass
+    def enviar_control(self, *_): pass
+    def enviar_audio(self, *_):   pass
+    def leer(self):               return []
+    def cerrar(self):             pass
+    def __enter__(self):          return self
+    def __exit__(self, *_):       pass
+
+
 def _puerto() -> str | None:
     from serial.tools import list_ports
 
@@ -307,8 +291,9 @@ class Sesion:
     async def configurar(self) -> None:
         # La tarjeta va al final y no cambia entre turnos: es lo que el cache
         # de prompt puede reusar.
-        instrucciones = PERSONALIDAD + "\n\n--- LO QUE RECUERDAS ---\n" + \
-            memoria.tarjeta_de_perfil(self.db)
+        instrucciones = (ajustes.personalidad(self.db)
+                         + "\n\n--- LO QUE RECUERDAS ---\n"
+                         + memoria.tarjeta_de_perfil(self.db))
         await self._ev({
             "type": "session.update",
             "session": {
@@ -325,7 +310,7 @@ class Sesion:
                     },
                     "output": {
                         "format": {"type": "audio/pcm", "rate": config.SAMPLE_RATE},
-                        "voice": config.VOZ,
+                        "voice": ajustes.leer(self.db)["voz"] or config.VOZ,
                     },
                 },
             },
@@ -594,18 +579,22 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
         return 1
 
     puerto = _puerto()
-    if not puerto:
-        print("No encontre el aparato. Conectalo por USB.")
-        return 1
+    donde = puerto or "sin aparato"
+    print(f"\n=== dante hablar ===  ({donde}, {config.MODELO_VOZ})\n")
 
-    print(f"\n=== dante hablar ===  ({puerto}, {config.MODELO_VOZ}, voz {config.VOZ})\n")
-
-    try:
-        t = TransporteSerie(puerto)
-    except Exception as e:
-        print(f"No pude abrir {puerto}: {e}")
-        print("Cierra el Monitor Serie del Arduino IDE si lo tienes abierto.")
-        return 1
+    t = None
+    if puerto:
+        try:
+            t = TransporteSerie(puerto)
+        except Exception as e:
+            print(f"  no pude abrir {puerto}: {e}")
+    if t is None:
+        if not con_panel:
+            print("No encontre el aparato. Conectalo por USB, o usa --panel "
+                  "para hablarle desde el navegador.")
+            return 1
+        print("  sin aparato: se puede hablar desde el panel\n")
+        t = TransporteNulo()
 
     with t:
         try:

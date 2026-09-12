@@ -51,6 +51,30 @@ dante hablar --panel   Ademas abre el panel web en http://127.0.0.1:8800
 dante hablar --diario  Fuerza el saludo del dia
 ```
 
+## Configuracion
+
+El portal tiene tres pestanas: **Conversacion** (video, chat, microfono),
+**Personas** (registrar caras) y **Configuracion**.
+
+Ahi se define quien es el propietario, si se le habla de tu o de usted, como se
+llama la mascota, con que voz habla, como debe comportarse y que temas es mejor
+no sacar. Todo eso arma el prompt del agente.
+
+**Lo que NO es configurable**: no inventar, no describir sin haber mirado, y
+responder en espanol. Esas reglas son lo que hace confiable al agente y no
+dependen del gusto de nadie.
+
+## Auth0 (opcional)
+
+Sin configurar, el portal queda abierto — que es lo correcto cuando corre en
+`127.0.0.1` y nadie mas lo ve. Si va a salir de la maquina, poner
+`AUTH0_DOMAIN`, `AUTH0_CLIENT_ID` y `AUTH0_CLIENT_SECRET` en el `.env` y el
+portal exige entrar con Google.
+
+El login protege **el portal**, no los datos: la memoria sigue siendo un
+archivo en el disco del usuario. Autenticar no mueve nada a la nube, solo
+decide quien puede abrir la ventana.
+
 ## El panel
 
 `dante hablar --panel` abre una página donde se ve **lo que Dante está

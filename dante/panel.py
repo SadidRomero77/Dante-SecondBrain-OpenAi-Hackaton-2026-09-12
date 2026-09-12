@@ -16,7 +16,10 @@ import json
 import threading
 import time
 
-from . import config
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+
+from . import ajustes, auth, config, memoria
 
 PAGINA = """<!doctype html>
 <html lang="es"><head><meta charset="utf-8">
@@ -71,17 +74,56 @@ PAGINA = """<!doctype html>
   button.hablando{background:#2d5a3d;border-color:#4ade80;color:#dcfce7}
   #micro{min-width:150px;font-weight:600}
   .pista{padding:0 15px 12px;font-size:11px;color:var(--tinta2)}
+  .tabs{display:flex;gap:4px;margin-left:18px}
+  .tab{background:none;border:none;color:var(--tinta2);padding:7px 13px;
+       border-radius:8px;font-size:13px}
+  .tab:hover{color:var(--tinta);border:none;background:#1b222a}
+  .tab.activo{background:#1c2b38;color:var(--acento)}
+  .vista{display:none}
+  .vista.activo{display:block}
+  form.cfg{padding:16px;display:flex;flex-direction:column;gap:15px}
+  label{display:flex;flex-direction:column;gap:6px;font-size:12px;
+        color:var(--tinta2);text-transform:uppercase;letter-spacing:.08em}
+  label input,label select,label textarea{background:#0e141a;
+        border:1px solid var(--linea);border-radius:9px;color:var(--tinta);
+        padding:10px 12px;font:14px inherit;text-transform:none;letter-spacing:0}
+  label textarea{min-height:74px;resize:vertical;line-height:1.5}
+  label input:focus,label select:focus,label textarea:focus{
+        outline:none;border-color:var(--acento)}
+  .dos{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+  @media(max-width:640px){.dos{grid-template-columns:1fr}}
+  .guardar{background:#1d4d33;border-color:#2f7a52;color:#d6f5e3;font-weight:600}
+  .aviso{padding:9px 15px;font-size:12px;border-radius:8px;margin:0 16px;
+         background:#1a2a1f;color:#8fe0ac;display:none}
+  .gente{padding:14px 16px;display:grid;
+         grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .persona{background:#111820;border:1px solid var(--linea);border-radius:10px;
+           padding:12px;display:flex;flex-direction:column;gap:5px}
+  .persona b{font-size:14px}
+  .persona small{color:var(--tinta2);font-size:11px}
+  .chip{display:inline-block;font:10px ui-monospace,monospace;padding:2px 7px;
+        border-radius:999px;background:#12301f;color:#6ee7a0;width:fit-content}
+  .chip.no{background:#2a2118;color:var(--calido)}
+  .registrar{padding:0 16px 16px;display:flex;gap:9px;flex-wrap:wrap}
+  .registrar input{flex:1;min-width:160px;background:#0e141a;
+        border:1px solid var(--linea);border-radius:9px;color:var(--tinta);
+        padding:10px 12px;font-size:14px}
 </style></head><body>
 <header>
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
     <ellipse cx="8.5" cy="13" rx="4" ry="5" fill="#4fc3f7"/>
     <ellipse cx="17.5" cy="13" rx="4" ry="5" fill="#4fc3f7"/>
   </svg>
-  <h1>Dante</h1>
+  <h1 id="titulo">Dante</h1>
+  <nav class="tabs">
+    <button class="tab activo" data-vista="conversar">Conversacion</button>
+    <button class="tab" data-vista="personas">Personas</button>
+    <button class="tab" data-vista="ajustes">Configuracion</button>
+  </nav>
   <div class="estado"><span class="punto" id="punto"></span><span id="etiqueta">conectando</span></div>
 </header>
 
-<main>
+<main id="v-conversar" class="vista activo">
   <div>
     <div class="caja">
       <h2>Lo que ve Dante</h2>
@@ -101,6 +143,63 @@ PAGINA = """<!doctype html>
       <button id="micro">Mantener para hablar</button>
     </div>
     <div class="pista">Manten apretado el boton, o la barra espaciadora, para hablarle por el microfono del computador.</div>
+  </div>
+</main>
+
+<main id="v-personas" class="vista" style="grid-template-columns:minmax(0,1fr)">
+  <div class="caja">
+    <h2>Quien esta enfrente ahora</h2>
+    <img id="video2" src="/camara.mjpg" alt="camara">
+    <div class="registrar">
+      <input type="text" id="nom" placeholder="Nombre (ej: Ana)">
+      <input type="text" id="rel" placeholder="Relacion (ej: hija)" style="max-width:180px">
+      <button id="btn-cara" class="guardar">Registrar esta cara</button>
+    </div>
+    <div class="pista">Que quede una sola cara en el cuadro, de frente y con buena luz.
+      Dante la va a reconocer la proxima vez y va a decir el nombre en voz alta.</div>
+    <div class="aviso" id="aviso-cara"></div>
+    <h2 style="border-top:1px solid var(--linea)">Personas registradas</h2>
+    <div class="gente" id="gente">cargando...</div>
+  </div>
+</main>
+
+<main id="v-ajustes" class="vista" style="grid-template-columns:minmax(0,1fr)">
+  <div class="caja">
+    <h2>Como es y como se comporta</h2>
+    <div class="aviso" id="aviso-cfg">Guardado. Se aplica en la proxima conversacion.</div>
+    <form class="cfg" id="cfg">
+      <div class="dos">
+        <label>Nombre del propietario
+          <input name="nombre_usuario" placeholder="Rosa"></label>
+        <label>Como tratarlo
+          <select name="trato"><option value="tu">De tu</option>
+            <option value="usted">De usted</option></select></label>
+      </div>
+      <div class="dos">
+        <label>Nombre de la mascota
+          <input name="nombre_mascota" placeholder="Dante"></label>
+        <label>Que es
+          <input name="especie" placeholder="perro"></label>
+      </div>
+      <div class="dos">
+        <label>Voz
+          <select name="voz">
+            <option value="marin">marin</option><option value="cedar">cedar</option>
+            <option value="alloy">alloy</option><option value="sage">sage</option>
+            <option value="coral">coral</option></select></label>
+        <label>Ciudad
+          <input name="ciudad" placeholder="Bogota"></label>
+      </div>
+      <label>Como quieres que se comporte
+        <textarea name="caracter" placeholder="Paciente. Si repite una pregunta, respondele igual de bien la segunda vez, sin hacerselo notar."></textarea></label>
+      <label>Temas que le gusta conversar
+        <textarea name="temas_queridos" placeholder="Su epoca de maestra, musica de los sesenta, sus nietos"></textarea></label>
+      <label>Temas que es mejor no sacar
+        <textarea name="temas_evitar" placeholder="La muerte de su esposo, a menos que ella lo saque"></textarea></label>
+      <label>A quien avisar si algo preocupa
+        <input name="contacto_familia" placeholder="ana@correo.com"></label>
+      <button type="submit" class="guardar">Guardar configuracion</button>
+    </form>
   </div>
 </main>
 
@@ -204,6 +303,66 @@ function terminar(){
   micro.textContent = 'Mantener para hablar';
   ws.send(JSON.stringify({t:'boton', v:'arriba'}));
 }
+// --- pestanas ---
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('activo'));
+  document.querySelectorAll('.vista').forEach(x => x.classList.remove('activo'));
+  b.classList.add('activo');
+  document.getElementById('v-' + b.dataset.vista).classList.add('activo');
+  if (b.dataset.vista === 'personas') cargarGente();
+});
+
+// --- configuracion ---
+const form = document.getElementById('cfg');
+async function cargarCfg(){
+  const a = await (await fetch('/api/ajustes')).json();
+  for (const [k, v] of Object.entries(a.ajustes || {})){
+    const el = form.elements[k]; if (el) el.value = v;
+  }
+  if (a.ajustes && a.ajustes.nombre_mascota)
+    document.getElementById('titulo').textContent = a.ajustes.nombre_mascota;
+}
+cargarCfg();
+form.onsubmit = async (e) => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(form).entries());
+  await fetch('/api/ajustes', {method:'POST',
+    headers:{'Content-Type':'application/json'}, body: JSON.stringify(d)});
+  const av = document.getElementById('aviso-cfg');
+  av.style.display = 'block'; setTimeout(()=>av.style.display='none', 2600);
+  if (d.nombre_mascota) document.getElementById('titulo').textContent = d.nombre_mascota;
+};
+
+// --- personas ---
+async function cargarGente(){
+  const g = document.getElementById('gente');
+  const r = await (await fetch('/api/personas')).json();
+  if (!r.personas.length){ g.textContent = 'Todavia no hay nadie registrado.'; return; }
+  g.innerHTML = '';
+  r.personas.forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'persona';
+    d.innerHTML = `<b></b><small></small>
+      <span class="chip ${p.cara ? '' : 'no'}">${p.cara ? 'cara registrada' : 'sin cara'}</span>`;
+    d.querySelector('b').textContent = p.nombre;
+    d.querySelector('small').textContent = p.relacion || 'sin relacion';
+    g.appendChild(d);
+  });
+}
+document.getElementById('btn-cara').onclick = async () => {
+  const nombre = document.getElementById('nom').value.trim();
+  const relacion = document.getElementById('rel').value.trim();
+  const av = document.getElementById('aviso-cara');
+  if (!nombre){ av.textContent = 'Escribe primero el nombre.'; av.style.display='block'; return; }
+  const r = await (await fetch('/api/cara', {method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({nombre, relacion})})).json();
+  av.textContent = r.ok ? `Listo. ${nombre} quedo registrada.` : ('No pude: ' + r.motivo);
+  av.style.display = 'block';
+  setTimeout(()=>av.style.display='none', 4000);
+  if (r.ok) cargarGente();
+};
+
 micro.addEventListener('mousedown', empezar);
 micro.addEventListener('touchstart', (e)=>{e.preventDefault();empezar();});
 window.addEventListener('mouseup', terminar);
@@ -216,11 +375,59 @@ window.addEventListener('keyup', (e)=>{ if (e.code === 'Space') terminar(); });
 
 def crear_app(sesion, bucle):
     """Arma la aplicacion web sobre una sesion que ya esta corriendo."""
-    from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-    from fastapi.responses import HTMLResponse, StreamingResponse
-
     app = FastAPI(title="Dante")
     clientes: set = set()
+    estados: set = set()
+
+    @app.middleware("http")
+    async def puerta(peticion, siguiente):
+        """Si Auth0 esta configurado, todo pasa por el login menos el propio
+        login. Si no lo esta, esto no hace nada."""
+        ruta = peticion.url.path
+        if not auth.activo() or ruta in ("/login", "/callback", "/salir"):
+            return await siguiente(peticion)
+        if auth.usuario_de(peticion):
+            return await siguiente(peticion)
+        return RedirectResponse("/login")
+
+    @app.get("/login")
+    def login(peticion: Request):
+        if not auth.activo():
+            return RedirectResponse("/")
+        e = auth.nuevo_estado()
+        estados.add(e)
+        volver = str(peticion.base_url).rstrip("/") + "/callback"
+        return RedirectResponse(auth.url_de_login(volver, e))
+
+    @app.get("/callback")
+    def callback(peticion: Request, code: str = "", state: str = ""):
+        if state not in estados:
+            return HTMLResponse("<p>Estado invalido. Vuelve a entrar.</p>", 400)
+        estados.discard(state)
+        volver = str(peticion.base_url).rstrip("/") + "/callback"
+        u = auth.canjear(code, volver)
+        if not u:
+            return HTMLResponse("<p>No pude verificar tu cuenta.</p>", 400)
+        if u.get("rechazado"):
+            return HTMLResponse(
+                f"<p>La cuenta {u['rechazado']} no esta autorizada para este "
+                f"agente.</p>", 403)
+        r = RedirectResponse("/")
+        r.set_cookie(auth.COOKIE, auth.galleta_de(u), httponly=True,
+                     samesite="lax", max_age=auth.DURACION)
+        return r
+
+    @app.get("/salir")
+    def salir(peticion: Request):
+        r = RedirectResponse(auth.url_de_salida(str(peticion.base_url))
+                             if auth.activo() else "/")
+        r.delete_cookie(auth.COOKIE)
+        return r
+
+    @app.get("/api/quien_soy")
+    def quien_soy(peticion: Request):
+        u = auth.usuario_de(peticion) or {}
+        return {"auth": auth.activo(), "usuario": u}
 
     def repartir(ev: dict) -> None:
         """El bus de la sesion llama a esto desde su propio hilo."""
@@ -236,6 +443,66 @@ def crear_app(sesion, bucle):
     @app.get("/", response_class=HTMLResponse)
     def inicio():
         return PAGINA
+
+    # ------------------------------------------------------------- API ----
+    @app.get("/api/ajustes")
+    def ver_ajustes():
+        c = memoria.abrir()
+        try:
+            return ajustes.resumen(c)
+        finally:
+            c.close()
+
+    @app.post("/api/ajustes")
+    async def poner_ajustes(datos: dict):
+        c = memoria.abrir()
+        try:
+            nuevos = ajustes.guardar(c, datos)
+        finally:
+            c.close()
+        # La sesion en curso ya tiene sus instrucciones cargadas; se las
+        # cambiamos en caliente para no tener que reiniciar nada.
+        try:
+            asyncio.run_coroutine_threadsafe(sesion.configurar(), sesion.bucle)
+        except Exception:
+            pass
+        repartir({"t": "ajustes", "ajustes": nuevos})
+        return {"ok": True, "ajustes": nuevos}
+
+    @app.get("/api/personas")
+    def ver_personas():
+        c = memoria.abrir()
+        try:
+            filas = c.execute(
+                "SELECT nombre, relacion, notas, ultima_visita, "
+                "cara IS NOT NULL AS cara FROM personas ORDER BY nombre").fetchall()
+            return {"personas": [dict(f) for f in filas]}
+        finally:
+            c.close()
+
+    @app.post("/api/cara")
+    async def registrar_cara(datos: dict):
+        """Toma el cuadro de ahora mismo y lo asocia a un nombre."""
+        nombre = (datos.get("nombre") or "").strip()
+        if not nombre:
+            return {"ok": False, "motivo": "falta el nombre"}
+        if not sesion.ojos.activa:
+            return {"ok": False, "motivo": sesion.ojos.motivo or "sin camara"}
+
+        cuadro = sesion.ojos.camara.ultimo()
+        if cuadro is None:
+            return {"ok": False, "motivo": "la camara no esta dando imagen"}
+
+        r = sesion.ojos.rostros.registrar(cuadro, nombre)
+        if r.get("ok"):
+            c = memoria.abrir()
+            try:
+                memoria.registrar_persona(c, nombre, (datos.get("relacion") or "").strip())
+            finally:
+                c.close()
+            sesion.pantalla("Nueva cara", f"Ahora reconozco a {nombre}", 7)
+            sesion.cara("atencion")
+        return r
 
     @app.get("/camara.mjpg")
     def camara():
