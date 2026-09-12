@@ -47,4 +47,6 @@ ENV DANTE_DB=/datos/dante.db \
 EXPOSE 8800 8770
 
 # Sin cable: el aparato entra por WiFi y la gente por el portal.
-CMD ["python", "-m", "dante", "hablar", "--panel", "8800"]
+# En un servidor no hay aparato al que enchufarse ni camara que mirar: se
+# sirve solo el portal, y cada visitante trae lo suyo por el navegador.
+CMD ["python", "-m", "dante", "servir", "--puerto", "8800"]
