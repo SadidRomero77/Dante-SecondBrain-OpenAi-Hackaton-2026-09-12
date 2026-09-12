@@ -161,6 +161,9 @@ async def _cerrar_cuando_venza(id_: str) -> None:
         v = _visitas.get(id_)
         if v is None:
             return
+        # Solo el tiempo cierra una visita. Cerrarla al desconectar el
+        # navegador borraba lo que el visitante acababa de guardar en cuanto
+        # recargaba la pagina, que es lo primero que hace cualquiera.
         if v.vencida:
             print(f"  [demo] visita {id_[:6]} vencio a los {MINUTOS()} min")
             await cerrar(id_)

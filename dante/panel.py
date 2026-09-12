@@ -3865,6 +3865,8 @@ def crear_app(sesion, bucle):
                     return
             propio = visita.sesion
             memoria.RUTA.set(visita.ruta)
+            print(f"   [demo] {id_[:6]} conectado ({visita.quedan} min, "
+                  f"memoria en {visita.ruta.parent.name})")
 
         await ws.accept()
         if visita is None:
@@ -3941,10 +3943,14 @@ def crear_app(sesion, bucle):
             clientes.discard(ws)
             if visita is not None:
                 visita.clientes.discard(ws)
-                # Si cerro la pestana, su Dante se va con el: dejarlo abierto
-                # gastaria creditos hablandole a nadie.
-                if not visita.clientes:
-                    await demo.cerrar(visita.id)
+                # NO se cierra al desconectar. Un recargado de pagina, un
+                # cambio de pestaña o un corte de un segundo cierran el
+                # websocket, y con el se iba la visita entera: el visitante
+                # registraba su nombre, su cara y sus recordatorios, recargaba,
+                # y volvia a empezar de cero sin entender por que. La visita
+                # vive hasta que se le acaba el tiempo, y mientras tanto
+                # reconectar devuelve la misma memoria.
+                pass
     return app
 
 
