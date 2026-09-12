@@ -49,6 +49,256 @@ from .favicon_b64 import B64 as FAVICON_B64
 
 
 
+# El nombre vive en un solo sitio. Se decidio tarde y todavia baila entre dos
+# formas, asi que cambiarlo tiene que costar una linea y no una busqueda por
+# todo el repositorio.
+MARCA = config._v("DANTE_MARCA", "") or "Kibo"
+
+INICIO = """<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>@@MARCA@@ — tu compañero, tu memoria</title>
+<link rel="icon" href="data:image/png;base64,@@FAVICON@@">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fondo:#faf6f0; --tarjeta:#fffdfa; --borde:#e9ded0; --hueso:#f2e9dd;
+  --tinta:#33281f; --tinta2:#7d6b58; --tinta3:#a89684;
+  --miel:#e8952f; --miel-suave:#fdf0dc; --paseo:#3f9c73; --paseo-suave:#e3f3ec;
+  --hocico:#5b4636;
+  --sombra:0 1px 2px rgba(91,70,54,.06), 0 12px 34px -20px rgba(91,70,54,.34);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --fondo:#1b1712; --tarjeta:#241e18; --borde:#3a3129; --hueso:#2c251e;
+  --tinta:#f4ece2; --tinta2:#b8a794; --tinta3:#8a7863;
+  --miel:#f0aa4e; --miel-suave:#3a2c18; --paseo:#6fc39b; --paseo-suave:#1e3229;
+  --hocico:#d9c4ac;
+  --sombra:0 1px 2px rgba(0,0,0,.3), 0 12px 34px -20px rgba(0,0,0,.75);}}
+:root[data-theme="dark"]{
+  --fondo:#1b1712; --tarjeta:#241e18; --borde:#3a3129; --hueso:#2c251e;
+  --tinta:#f4ece2; --tinta2:#b8a794; --tinta3:#8a7863;
+  --miel:#f0aa4e; --miel-suave:#3a2c18; --paseo:#6fc39b; --paseo-suave:#1e3229;
+  --hocico:#d9c4ac;
+  --sombra:0 1px 2px rgba(0,0,0,.3), 0 12px 34px -20px rgba(0,0,0,.75);}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--tinta);
+  font:17px/1.65 Nunito,system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cg fill='%23b99a72' fill-opacity='.05'%3E%3Cellipse cx='34' cy='44' rx='7' ry='9'/%3E%3Cellipse cx='21' cy='28' rx='4' ry='5'/%3E%3Cellipse cx='33' cy='21' rx='4' ry='5'/%3E%3Cellipse cx='45' cy='28' rx='4' ry='5'/%3E%3Cellipse cx='112' cy='120' rx='7' ry='9'/%3E%3Cellipse cx='99' cy='104' rx='4' ry='5'/%3E%3Cellipse cx='111' cy='97' rx='4' ry='5'/%3E%3Cellipse cx='123' cy='104' rx='4' ry='5'/%3E%3C/g%3E%3C/svg%3E")}
+.envoltura{max-width:1040px;margin:0 auto;padding:0 22px}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;letter-spacing:-.02em;
+  text-wrap:balance;margin:0}
+a{color:inherit}
+
+nav{display:flex;align-items:center;gap:12px;padding:18px 0}
+.logo{display:flex;align-items:center;gap:11px;font-weight:800;font-size:19px;
+  font-family:Fraunces,Georgia,serif}
+.hocico{width:40px;height:40px;border-radius:13px;background:var(--hocico);
+  display:grid;place-items:center;flex:none;box-shadow:var(--sombra)}
+.boton{display:inline-block;border:none;border-radius:13px;cursor:pointer;
+  font:700 16px Nunito,sans-serif;padding:13px 24px;text-decoration:none;
+  transition:transform .16s,box-shadow .16s}
+.boton:hover{transform:translateY(-2px)}
+.pri{background:var(--miel);color:#fff;box-shadow:var(--sombra)}
+.sec{background:var(--hueso);color:var(--tinta)}
+nav .boton{margin-left:auto;padding:10px 19px;font-size:15px}
+
+.portada{padding:34px 0 54px;display:grid;gap:34px;
+  grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);align-items:center}
+@media(max-width:860px){.portada{grid-template-columns:1fr;padding-top:10px}}
+.portada h1{font-size:clamp(36px,5.6vw,58px);line-height:1.06;font-weight:800}
+.lema{font-size:19px;color:var(--tinta2);margin:18px 0 26px;max-width:35ch}
+.destacado{color:var(--miel)}
+.acciones{display:flex;gap:12px;flex-wrap:wrap}
+.retrato{background:var(--tarjeta);border:1px solid var(--borde);
+  border-radius:26px;padding:26px;box-shadow:var(--sombra);text-align:center}
+.globo{background:var(--miel-suave);color:var(--tinta);border-radius:18px;
+  padding:14px 17px;margin-top:18px;text-align:left;font-size:15.5px}
+.globo b{color:var(--miel)}
+
+.franja{background:var(--tarjeta);border-top:1px solid var(--borde);
+  border-bottom:1px solid var(--borde);padding:52px 0;margin:0}
+h2{font-size:clamp(25px,3.4vw,33px);font-weight:800}
+.entrada{color:var(--miel);font-weight:800;font-size:13px;letter-spacing:.11em;
+  text-transform:uppercase;margin-bottom:9px}
+.rejilla{display:grid;gap:16px;margin-top:28px;
+  grid-template-columns:repeat(auto-fit,minmax(248px,1fr))}
+.ficha{background:var(--fondo);border:1px solid var(--borde);border-radius:18px;
+  padding:22px;transition:transform .18s,border-color .18s}
+.ficha:hover{transform:translateY(-3px);border-color:var(--miel)}
+.ficha .emoji{font-size:27px;display:block;margin-bottom:10px}
+.ficha h3{font-size:18px;margin-bottom:6px;font-weight:700;
+  font-family:Nunito,sans-serif}
+.ficha p{margin:0;color:var(--tinta2);font-size:15.5px;line-height:1.6}
+
+.pasos{counter-reset:p;display:grid;gap:14px;margin-top:28px;
+  grid-template-columns:repeat(auto-fit,minmax(236px,1fr))}
+.paso{position:relative;padding:22px 22px 22px 62px;background:var(--tarjeta);
+  border:1px solid var(--borde);border-radius:18px}
+.paso::before{counter-increment:p;content:counter(p);position:absolute;
+  left:20px;top:21px;width:28px;height:28px;border-radius:9px;
+  background:var(--miel);color:#fff;display:grid;place-items:center;
+  font-weight:800;font-size:14px}
+.paso h3{font-size:17px;margin-bottom:5px;font-family:Nunito,sans-serif}
+.paso p{margin:0;color:var(--tinta2);font-size:15px}
+
+.perfiles{display:grid;gap:16px;margin-top:28px;
+  grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.perfil{border:2px solid var(--borde);border-radius:20px;padding:24px;
+  background:var(--tarjeta)}
+.perfil.cuida{border-color:var(--miel)}
+.perfil.suya{border-color:var(--paseo)}
+.etiqueta{display:inline-block;border-radius:999px;padding:4px 13px;
+  font-size:12.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+.cuida .etiqueta{background:var(--miel-suave);color:var(--miel)}
+.suya .etiqueta{background:var(--paseo-suave);color:var(--paseo)}
+.perfil h3{font-size:20px;margin:13px 0 8px}
+.perfil ul{margin:12px 0 0;padding-left:19px;color:var(--tinta2);font-size:15.5px}
+.perfil li{margin-bottom:6px}
+
+.cierre{padding:56px 0;text-align:center}
+.cierre p{color:var(--tinta2);max-width:52ch;margin:14px auto 26px}
+footer{border-top:1px solid var(--borde);padding:26px 0;color:var(--tinta3);
+  font-size:14px;text-align:center}
+@keyframes respirar{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.hocico,.retrato .grande{animation:respirar 3.6s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style></head><body>
+
+<div class="envoltura">
+  <nav>
+    <span class="logo">
+      <span class="hocico">
+        <svg width="26" height="17" viewBox="0 0 46 30">
+          <rect x="4" y="5" width="16" height="20" rx="7" fill="#7fd4f5"/>
+          <rect x="26" y="5" width="16" height="20" rx="7" fill="#7fd4f5"/>
+        </svg>
+      </span>@@MARCA@@</span>
+    <a class="boton pri" href="/portal">Entrar</a>
+  </nav>
+
+  <header class="portada">
+    <div>
+      <h1>Alguien que <span class="destacado">se acuerda</span> por ella.</h1>
+      <p class="lema">@@MARCA@@ es un perrito que conversa, escucha y guarda lo
+        que importa. Para quien empieza a olvidar, y para la familia que no
+        siempre puede estar.</p>
+      <div class="acciones">
+        <a class="boton pri" href="/portal">Probarlo ahora</a>
+        <a class="boton sec" href="#como">Ver cómo funciona</a>
+      </div>
+    </div>
+    <div class="retrato">
+      <div class="grande" style="font-size:66px;line-height:1">🐕</div>
+      <div class="globo">
+        <b>@@MARCA@@:</b> «Hoy toca la pastilla azul, a las nueve.
+        Y su hija Ana dejó un recado: mañana viene a las cuatro.»
+      </div>
+    </div>
+  </header>
+</div>
+
+<section class="franja" id="que">
+  <div class="envoltura">
+    <div class="entrada">Qué es</div>
+    <h2>Una memoria que no se cansa de repetir</h2>
+    <div class="rejilla">
+      <div class="ficha"><span class="emoji">🧠</span>
+        <h3>Recuerda su vida</h3>
+        <p>Quién la visitó, qué le preocupa, qué le gusta contar. Cada cosa
+        con su fecha y de dónde salió.</p></div>
+      <div class="ficha"><span class="emoji">⏰</span>
+        <h3>Avisa sin que le pregunten</h3>
+        <p>Los medicamentos, las citas, los cumpleaños. Habla él cuando llega
+        la hora: quien lo necesita es quien no se va a acordar de preguntar.</p></div>
+      <div class="ficha"><span class="emoji">💌</span>
+        <h3>Trae recados de la familia</h3>
+        <p>Grabados con su voz de verdad, o escritos. Se los da apenas se
+        ven, sin que ella tenga que buscarlos.</p></div>
+      <div class="ficha"><span class="emoji">👀</span>
+        <h3>Reconoce caras y cosas</h3>
+        <p>Sabe quién entró por la puerta y dónde quedaron los lentes.</p></div>
+      <div class="ficha"><span class="emoji">📩</span>
+        <h3>Le cuenta a la familia</h3>
+        <p>Una nota semanal con cómo estuvo y qué cambió. Con números, nunca
+        con diagnósticos.</p></div>
+      <div class="ficha"><span class="emoji">🦴</span>
+        <h3>Nunca inventa</h3>
+        <p>Sobre su vida solo afirma lo que tiene anotado. Si no lo sabe, lo
+        dice y ofrece anotarlo.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="envoltura" id="como">
+  <section style="padding:52px 0">
+    <div class="entrada">Cómo funciona</div>
+    <h2>Se configura conversando, no llenando formularios</h2>
+    <div class="pasos">
+      <div class="paso"><h3>Entrás y te presentás</h3>
+        <p>@@MARCA@@ no sabe nada todavía. Te pregunta quién sos y va
+        anotando lo que le contás.</p></div>
+      <div class="paso"><h3>La familia lo completa</h3>
+        <p>Desde el portal se añaden su historia, sus recordatorios y las
+        caras de los suyos.</p></div>
+      <div class="paso"><h3>Conversan todos los días</h3>
+        <p>Por el portal, o por el perrito de juguete si lo tienen. Cada
+        charla le enseña algo nuevo.</p></div>
+      <div class="paso"><h3>La familia se entera</h3>
+        <p>Una vez por semana llega la nota: cómo estuvo, qué mencionó, qué
+        cambió respecto de antes.</p></div>
+    </div>
+  </section>
+</div>
+
+<section class="franja" id="perfiles">
+  <div class="envoltura">
+    <div class="entrada">Quién usa qué</div>
+    <h2>Dos personas, dos cosas distintas</h2>
+    <div class="perfiles">
+      <div class="perfil cuida">
+        <span class="etiqueta">Cuidador o familiar</span>
+        <h3>Entra con su cuenta</h3>
+        <p style="color:var(--tinta2);margin:0">Quien cuida necesita
+        configurar; quien es cuidado, no.</p>
+        <ul>
+          <li>Configura el nombre, la voz y el carácter</li>
+          <li>Escribe su historia, su familia y su salud</li>
+          <li>Pone y corrige recordatorios</li>
+          <li>Deja recados y registra caras</li>
+          <li>Lee cómo estuvo la semana</li>
+        </ul>
+      </div>
+      <div class="perfil suya">
+        <span class="etiqueta">La persona acompañada</span>
+        <h3>No entra a ningún lado</h3>
+        <p style="color:var(--tinta2);margin:0">Pedirle una contraseña a quien
+        olvida las cosas sería el peor diseño posible.</p>
+        <ul>
+          <li>Le habla al perrito y ya está</li>
+          <li>Sin cuentas, sin claves, sin pantallas</li>
+          <li>Solo conversación: nada que pueda desconfigurar</li>
+          <li>El hardware es suyo; el portal, de su familia</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="envoltura">
+  <section class="cierre">
+    <h2>El hardware es opcional</h2>
+    <p>@@MARCA@@ funciona entero desde el navegador. El perrito de juguete
+      —un ESP32 con micrófono, parlante, ojos y una oreja que se mueve— hace
+      la experiencia física, pero nada depende de él.</p>
+    <a class="boton pri" href="/portal">Empezar a conversar</a>
+  </section>
+</div>
+
+<footer>@@MARCA@@ · un segundo cerebro para quien empieza a olvidar</footer>
+</body></html>"""
+
 PAGINA = """<!doctype html>
 
 <html lang="es"><head><meta charset="utf-8">
@@ -2635,7 +2885,7 @@ def crear_app(sesion, bucle):
             return await siguiente(peticion)
 
         if not auth.activo() or ruta in (
-            "/login", "/callback", "/salir",
+            "/", "/login", "/callback", "/salir",
             "/favicon.svg", "/favicon.ico", "/favicon.png",
         ):
 
@@ -2792,10 +3042,20 @@ def crear_app(sesion, bucle):
 
 
     @app.get("/", response_class=HTMLResponse)
-
     def inicio():
+        """La cara publica. No le pide cuenta a nadie.
 
-        return PAGINA.replace("@@FAVICON@@", FAVICON_B64)
+        Quien llega desde un enlace todavia no sabe si esto le sirve; pedirle
+        que se registre antes de contarle que es pierde a casi todos en la
+        primera pantalla.
+        """
+        return (INICIO.replace("@@FAVICON@@", FAVICON_B64)
+                      .replace("@@MARCA@@", MARCA))
+
+    @app.get("/portal", response_class=HTMLResponse)
+    def portal():
+        return (PAGINA.replace("@@FAVICON@@", FAVICON_B64)
+                      .replace("@@MARCA@@", MARCA))
 
 
 
