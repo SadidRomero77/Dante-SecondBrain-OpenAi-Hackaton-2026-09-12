@@ -28,6 +28,10 @@ inventar.
 | **Saluda** | Al empezar el día cuenta qué pasó ayer, quién viene y qué medicamento toca. |
 | **Tiene cara** | Dos ojos animados, y texto para recordatorios y confirmaciones. |
 | **Avisa a la familia** | Resumen semanal y alerta si algo no se confirmó, por Trigger.dev. |
+| **Nota lo que preocupa** | Marca menciones de dolor, caídas o confusión. Sin diagnosticar: repite lo que ella dijo y cuántas veces. |
+| **Lleva mensajes** | La familia graba treinta segundos y Dante se los reproduce con su voz, no con la suya. |
+| **Se presenta solo** | La primera vez conoce a la persona conversando, no con un formulario. |
+| **El botón de «no me acuerdo»** | Pulsación larga: le cuenta quién es, dónde está y qué día es. |
 
 ---
 
@@ -179,8 +183,13 @@ dante puente           Micrófono → PC → parlante, sin modelo de por medio.
 
 `--panel` abre una página con tres pestañas.
 
-**Conversación** — el video de lo que Dante ve con las caras marcadas, la charla
-en vivo con las herramientas que va usando, chat por texto y micrófono.
+**Conversar** — el video con las caras marcadas, la charla en vivo, chat por
+texto y micrófono. Arriba, la carita de Dante cambia con su estado.
+
+**Mensajes** — grabá con tu voz y Dante se lo reproduce cuando pregunte por vos.
+
+**Cómo está** — lo que mencionó esta semana: dolor, caídas, confusión, ánimo.
+Con sus palabras y cuántas veces. **No es un diagnóstico.**
 
 **Personas** — poné a alguien frente a la cámara, escribí "Ana / hija", un botón.
 Dante la reconoce y la nombra en voz alta la próxima vez.

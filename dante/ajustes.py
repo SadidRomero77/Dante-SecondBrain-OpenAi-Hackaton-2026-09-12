@@ -116,6 +116,81 @@ def personalidad(c: sqlite3.Connection) -> str:
     return "\n".join(partes)
 
 
+# Lo que Dante pregunta la primera vez, en vez de un formulario. Configurar el
+# producto usando el producto.
+ONBOARDING = """\
+Es la PRIMERA vez que hablas con esta persona y no sabes nada de ella. Tu
+trabajo ahora es conocerla conversando, no interrogarla.
+
+Como hacerlo:
+- Presentate en una frase y decile que todavia no la conoces.
+- Preguntale UNA cosa por vez y esperá la respuesta. Nunca dos preguntas juntas.
+- Cuando te diga algo, usa la herramienta anotar para guardarlo, y registrar_persona
+  para cada familiar que mencione.
+- Si no quiere contestar algo, seguí adelante sin insistir.
+
+El orden de lo que necesitas saber:
+1. Como se llama, y si prefiere que la tutees o que la trates de usted.
+2. Quien vive con ella o quien la visita, y que parentesco tienen.
+3. Si toma algun medicamento y a que hora.
+4. Algo que le guste: musica, un lugar, una epoca de su vida.
+
+Cuando tengas al menos el nombre y una persona mas, dale las gracias, deci que
+ya la vas conociendo, y usa la herramienta terminar_presentacion.
+
+No inventes NADA. Solo guardas lo que ella te diga.
+"""
+
+
+def falta_presentarse(c: sqlite3.Connection) -> bool:
+    """True si Dante todavía no conoce a nadie."""
+    if memoria.ajuste(c, "presentacion_hecha") == "si":
+        return False
+    return not leer(c)["nombre_usuario"].strip()
+
+
+def quien_soy(c: sqlite3.Connection) -> str:
+    """Instrucciones para el «no me acuerdo»: quién es, dónde está, qué día es.
+
+    Para alguien desorientado, formular la pregunta es justamente lo difícil.
+    Esto responde la pregunta que no pudo hacer.
+    """
+    from . import memoria as _m
+    from .mundo import fecha_larga
+    from datetime import datetime
+
+    a = leer(c)
+    ahora = datetime.now()
+    partes = [f"Hoy es {fecha_larga(ahora)} y son las {ahora.strftime('%H:%M')}."]
+    if a["nombre_usuario"]:
+        partes.append(f"La persona se llama {a['nombre_usuario']}.")
+
+    gente = c.execute("SELECT nombre, relacion FROM personas ORDER BY id LIMIT 6").fetchall()
+    if gente:
+        partes.append("Su gente: " + ", ".join(
+            f"{g['nombre']}" + (f" ({g['relacion']})" if g["relacion"] else "")
+            for g in gente))
+
+    altos = c.execute("SELECT texto FROM hechos WHERE confianza >= 0.85 "
+                      "ORDER BY id LIMIT 6").fetchall()
+    if altos:
+        partes.append("De su vida:\n" + "\n".join(f"- {h['texto']}" for h in altos))
+
+    hoy = _m.agenda_de(c, "hoy")
+    if hoy:
+        partes.append("Hoy: " + " · ".join(hoy))
+
+    return (
+        "La persona apretó el botón porque está desorientada y no sabe cómo "
+        "preguntar. Decile con mucha calma, en cuatro o cinco frases cortas: "
+        "quién es ella, dónde está (en su casa), qué día es, y quiénes son los "
+        "suyos. Tono tranquilo, sin alarmarla, sin decirle que se olvidó de "
+        "nada. Termina ofreciendote a repetirlo cuando quiera.\n\n"
+        "NO inventes nada que no esté aquí abajo.\n\n"
+        "--- LO QUE SABES ---\n" + "\n\n".join(partes)
+    )
+
+
 def resumen(c: sqlite3.Connection) -> dict:
     a = leer(c)
     faltan = [CAMPOS[k][1] for k in ("nombre_usuario", "caracter") if not a[k].strip()]

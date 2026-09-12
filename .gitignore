@@ -17,3 +17,4 @@ data/modelos/
 node_modules/
 data/.secreto
 data/.ficha
+data/mensajes/

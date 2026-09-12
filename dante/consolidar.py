@@ -37,9 +37,21 @@ Es un resultado correcto y frecuente.
 Ademas, si aparecen citas, visitas o medicamentos con fecha y hora, sacalos \
 como eventos para la agenda. Solo los que tengan un momento concreto.
 
+Y SENALES. Si la persona menciono alguna de estas cosas, anotala con sus \
+propias palabras. NO diagnostiques ni interpretes: solo registra que lo dijo.
+- dolor: dolor o molestia fisica
+- caida: una caida, un tropiezo, un mareo al levantarse
+- confusion: se desorientó, no recordó algo cotidiano, repitio la misma pregunta
+- animo: tristeza, miedo, soledad, ganas de no hacer nada
+- sueno: durmio mal, se desperto de noche
+- apetito: no tuvo hambre, no comio
+
+Si no menciono ninguna, devuelve la lista vacia. Es lo normal y lo correcto.
+
 Devuelve JSON:
 {"hechos": [{"texto": "...", "sujeto": "...", "confianza": 0.9}],
  "eventos": [{"que": "...", "cuando": "AAAA-MM-DD HH:MM", "tipo": "cita|visita|medicacion"}],
+ "senales": [{"tipo": "dolor|caida|confusion|animo|sueno|apetito", "texto": "lo que dijo"}],
  "resumen": "una o dos frases sobre de que hablaron"}
 """
 
@@ -119,5 +131,14 @@ def de_transcripcion(c: sqlite3.Connection, transcripcion: str,
         eventos += 1
     c.commit()
 
-    return {"hechos": guardados, "repetidos": repetidos,
-            "eventos": eventos, "resumen": resumen}
+    # Senales: lo que la familia querria saber. Se guarda lo que DIJO, no una
+    # interpretacion, y nunca se le presenta como diagnostico.
+    senales = 0
+    for x in datos.get("senales", []):
+        t = (x.get("texto") or "").strip()
+        if t:
+            memoria.anotar_senal(c, (x.get("tipo") or "animo").strip(), t, episodio)
+            senales += 1
+
+    return {"hechos": guardados, "repetidos": repetidos, "eventos": eventos,
+            "senales": senales, "resumen": resumen}

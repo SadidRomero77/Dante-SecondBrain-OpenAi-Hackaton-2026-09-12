@@ -561,10 +561,20 @@ void loop() {
     diario_rebote = millis() + 30;
     if (d == LOW) {
       diario_desde = millis();
-    } else if (diario_desde && millis() - diario_desde < 2000) {
-      const char *m = "{\"t\":\"diario\"}";
-      enviar(T_CONTROL, m, strlen(m));
-      mostrar_texto("Un momento", "Voy a contarte como va el dia", 4);
+    } else if (diario_desde) {
+      uint32_t dur = millis() - diario_desde;
+      if (dur < 2000) {
+        // Toque corto: como va el dia.
+        const char *m = "{\"t\":\"diario\"}";
+        enviar(T_CONTROL, m, strlen(m));
+        mostrar_texto("Un momento", "Voy a contarte como va el dia", 4);
+      } else if (dur < 15000) {
+        // Pulsacion larga: "no me acuerdo". Para alguien desorientado,
+        // formular la pregunta es justamente lo dificil.
+        const char *m = "{\"t\":\"quien_soy\"}";
+        enviar(T_CONTROL, m, strlen(m));
+        mostrar_texto("Aqui estoy", "Ya te cuento quien eres", 5);
+      }
     }
     diario_previo = d;
   }

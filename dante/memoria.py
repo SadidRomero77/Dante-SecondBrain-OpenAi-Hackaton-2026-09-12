@@ -52,6 +52,26 @@ CREATE TABLE IF NOT EXISTS eventos (
     hecho  INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS senales (
+    id        INTEGER PRIMARY KEY,
+    tipo      TEXT NOT NULL,       -- dolor | caida | confusion | animo | sueno | apetito
+    texto     TEXT NOT NULL,       -- lo que dijo, en sus palabras
+    fecha     TEXT NOT NULL,
+    episodio  INTEGER,
+    avisado   INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS mensajes (
+    id            INTEGER PRIMARY KEY,
+    de            TEXT NOT NULL,   -- quien lo dejo
+    para          TEXT,            -- vacio = para el propietario
+    archivo       TEXT NOT NULL,   -- WAV en data/mensajes/
+    transcripcion TEXT,
+    segundos      REAL,
+    creado        TEXT NOT NULL,
+    escuchado     TEXT             -- cuando se reprodujo, o vacio
+);
+
 CREATE TABLE IF NOT EXISTS ajustes (
     clave TEXT PRIMARY KEY,
     valor TEXT
@@ -143,6 +163,14 @@ def tarjeta_de_perfil(c: sqlite3.Connection) -> str:
     hoy = agenda_de(c, "hoy")
     if hoy:
         partes.append("Hoy:\n" + "\n".join(f"- {e}" for e in hoy))
+
+    try:
+        from .mensajes import pendientes_texto
+        m = pendientes_texto(c)
+        if m:
+            partes.append(m)
+    except Exception:
+        pass
 
     if not partes:
         return ("Todavia no tienes ningun recuerdo de esta persona. "
@@ -246,9 +274,85 @@ def cerrar_episodio(c: sqlite3.Connection, id_: int, transcripcion: str) -> None
     c.commit()
 
 
+# ------------------------------------------------------------- senales ----
+# Categorias que vale la pena que la familia sepa. Deliberadamente cortas y
+# sin nada clinico: describen lo que la persona DIJO, no lo que le pasa.
+SENALES = {
+    "dolor":     "mencionó dolor o molestia",
+    "caida":     "mencionó una caída o un tropiezo",
+    "confusion": "se mostró desorientada o no recordó algo cotidiano",
+    "animo":     "expresó tristeza, miedo o soledad",
+    "sueno":     "mencionó dormir mal",
+    "apetito":   "mencionó no tener hambre o no haber comido",
+}
+
+
+def anotar_senal(c: sqlite3.Connection, tipo: str, texto: str,
+                 episodio: int = 0) -> int:
+    if tipo not in SENALES:
+        tipo = "animo"
+    cur = c.execute(
+        "INSERT INTO senales(tipo,texto,fecha,episodio) VALUES(?,?,date('now'),?)",
+        (tipo, texto.strip()[:300], episodio or None))
+    c.commit()
+    return cur.lastrowid
+
+
+def senales_recientes(c: sqlite3.Connection, dias: int = 7) -> list[dict]:
+    """Agrupa por tipo y cuenta. Lo que le importa a la familia no es un
+    comentario suelto, es que algo se repita."""
+    from datetime import timedelta
+    desde = (date.today() - timedelta(days=dias)).isoformat()
+    filas = c.execute(
+        "SELECT tipo, count(*) veces, max(fecha) ultima, "
+        "       group_concat(texto, ' | ') textos "
+        "FROM senales WHERE fecha >= ? GROUP BY tipo ORDER BY veces DESC",
+        (desde,)).fetchall()
+    salida = []
+    for f in filas:
+        salida.append({
+            "tipo": f["tipo"],
+            "que": SENALES.get(f["tipo"], f["tipo"]),
+            "veces": f["veces"],
+            "ultima": f["ultima"],
+            "ejemplos": [t.strip() for t in (f["textos"] or "").split("|")][:3],
+        })
+    return salida
+
+
+# ------------------------------------------------------------- mensajes ---
+def guardar_mensaje(c: sqlite3.Connection, de: str, archivo: str,
+                    segundos: float, transcripcion: str = "",
+                    para: str = "") -> int:
+    cur = c.execute(
+        "INSERT INTO mensajes(de,para,archivo,transcripcion,segundos,creado) "
+        "VALUES(?,?,?,?,?,?)",
+        (de.strip(), para.strip(), archivo, transcripcion.strip(), segundos,
+         datetime.now().isoformat(timespec="seconds")))
+    c.commit()
+    return cur.lastrowid
+
+
+def mensajes_pendientes(c: sqlite3.Connection, de: str = "") -> list[dict]:
+    q = "SELECT * FROM mensajes WHERE escuchado IS NULL"
+    a: tuple = ()
+    if de:
+        q += " AND lower(de) = lower(?)"
+        a = (de.strip(),)
+    q += " ORDER BY id"
+    return [dict(f) for f in c.execute(q, a)]
+
+
+def marcar_escuchado(c: sqlite3.Connection, id_: int) -> None:
+    c.execute("UPDATE mensajes SET escuchado=? WHERE id=?",
+              (datetime.now().isoformat(timespec="seconds"), id_))
+    c.commit()
+
+
 def resumen(c: sqlite3.Connection) -> dict:
     def n(t: str) -> int:
         return c.execute(f"SELECT count(*) k FROM {t}").fetchone()["k"]
     return {"personas": n("personas"), "hechos": n("hechos"),
             "episodios": n("episodios"), "eventos": n("eventos"),
+            "senales": n("senales"), "mensajes": n("mensajes"),
             "usuario": ajuste(c, "nombre_usuario", "(sin nombre)")}

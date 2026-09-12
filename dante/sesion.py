@@ -17,7 +17,8 @@ import time
 
 import websockets
 
-from . import ajustes, config, consolidar, diario, memoria, mundo, panel, vision
+from . import (ajustes, config, consolidar, diario, memoria, mensajes,
+               mundo, panel, vision)
 from .transporte import (T_AUDIO, T_CONTROL, T_LOG, TransporteDoble,
                          TransporteSerie, TransporteWebSocket)
 
@@ -127,6 +128,45 @@ HERRAMIENTAS = [
             "type": "object",
             "properties": {"nombre": {"type": "string"}},
             "required": ["nombre"],
+        },
+    },
+    {
+        "type": "function",
+        "name": "terminar_presentacion",
+        "description": ("Usala solo la primera vez, cuando ya sepas el nombre "
+                        "de la persona y el de alguien cercano."),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "nombre": {"type": "string", "description": "como se llama"},
+                "trato": {"type": "string", "enum": ["tu", "usted"]},
+            },
+            "required": ["nombre"],
+        },
+    },
+    {
+        "type": "function",
+        "name": "mensajes_de_voz",
+        "description": (
+            "Mira si alguien de la familia dejo un mensaje de voz sin escuchar. "
+            "Usala cuando pregunten por alguien, cuando pregunten si alguien "
+            "llamo, o al empezar el dia."
+        ),
+        "parameters": {"type": "object", "properties": {}},
+    },
+    {
+        "type": "function",
+        "name": "reproducir_mensaje",
+        "description": (
+            "Reproduce un mensaje de voz de la familia con la voz de quien lo "
+            "dejo. Antes de usarla, avisa en una frase corta de quien es. "
+            "Despues de reproducirlo NO lo repitas de memoria: ya lo oyo."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {"id": {"type": "integer",
+                                  "description": "el id que devolvio mensajes_de_voz"}},
+            "required": ["id"],
         },
     },
     {
@@ -358,6 +398,15 @@ class Sesion:
                         print(f"  aparato listo: {m.texto}\n")
                     elif ev.get("t") == "boton":
                         await self._boton(ev.get("v") == "abajo")
+                    elif ev.get("t") == "quien_soy":
+                        print(">> QUIEN SOY (pulsacion larga)")
+                        self.cara("atencion")
+                        self.respondiendo = True
+                        self.t0 = time.time()
+                        await self._ev({
+                            "type": "response.create",
+                            "response": {"instructions": ajustes.quien_soy(self.db)},
+                        })
                     elif ev.get("t") == "diario":
                         # El boton fisico del diario. Para alguien desorientado,
                         # formular la pregunta es justamente lo dificil.
@@ -511,6 +560,26 @@ class Sesion:
                           "nota": "la foto ya esta en la conversacion, describela"}
                 print(f"   [vision] foto enviada ({len(b64)} caracteres)")
 
+        elif nombre == "terminar_presentacion":
+            ajustes.guardar(self.db, {"nombre_usuario": a.get("nombre", ""),
+                                      "trato": a.get("trato", "tu")})
+            memoria.poner_ajuste(self.db, "presentacion_hecha", "si")
+            await self.configurar()      # recargar con lo que acaba de aprender
+            salida = {"listo": True}
+            self.pantalla("Mucho gusto", f"Ya te conozco, {a.get('nombre','')}", 8)
+            self.cara("feliz")
+            print(f"   [presentacion] terminada: {a.get('nombre','')}")
+
+        elif nombre == "mensajes_de_voz":
+            m = memoria.mensajes_pendientes(self.db)
+            salida = {"pendientes": [
+                {"id": x["id"], "de": x["de"], "segundos": round(x["segundos"] or 0, 1),
+                 "dice": x["transcripcion"] or ""} for x in m]}
+            print(f"   [mensajes] pendientes: {len(m)}")
+
+        elif nombre == "reproducir_mensaje":
+            salida = await self._reproducir_mensaje(int(a.get("id", 0)))
+
         elif nombre == "buscar_web":
             q = a.get("consulta", "")
             print(f"   [mundo] buscando: {q!r}")
@@ -541,6 +610,33 @@ class Sesion:
                      "output": json.dumps(salida, ensure_ascii=False)},
         })
         await self._ev({"type": "response.create", "response": {}})
+
+    async def _reproducir_mensaje(self, id_: int) -> dict:
+        """Mete el mensaje en la misma cola que la voz de Dante.
+
+        Va por el mismo camino que todo lo demas, asi que suena en el aparato y
+        en el panel a la vez, y la pantalla lo acompana.
+        """
+        fila = self.db.execute("SELECT * FROM mensajes WHERE id=?", (id_,)).fetchone()
+        if not fila:
+            return {"ok": False, "motivo": "no encuentro ese mensaje"}
+
+        pcm = mensajes.leer_pcm(fila["archivo"])
+        if not pcm:
+            return {"ok": False, "motivo": "el archivo del mensaje no esta"}
+
+        self.pantalla(f"Mensaje de {fila['de']}",
+                      fila["transcripcion"] or "escuchando...", 12)
+        self.cara("atencion")
+        for i in range(0, len(pcm), TROZO):
+            await self.cola.put(pcm[i:i + TROZO])
+        await self.cola.put(None)
+
+        memoria.marcar_escuchado(self.db, id_)
+        self.avisar("mensaje", de=fila["de"], id=id_)
+        print(f"   [mensajes] reproduciendo el de {fila['de']}")
+        return {"ok": True, "de": fila["de"],
+                "nota": "ya se reprodujo, no lo repitas de memoria"}
 
     # ---------------------------------------------------- reproduccion ----
     async def reproducir(self) -> None:
@@ -582,6 +678,17 @@ class Sesion:
                 await asyncio.sleep(falta)
             else:
                 proximo = time.perf_counter()       # nos atrasamos: resincronizar
+
+
+async def _presentarse(s: "Sesion") -> None:
+    """La primera vez, Dante conoce a la persona conversando."""
+    await asyncio.sleep(1.2)
+    print(">> PRESENTACION (primera vez)")
+    s.cara("atencion")
+    s.respondiendo = True
+    s.t0 = time.time()
+    await s._ev({"type": "response.create",
+                 "response": {"instructions": ajustes.ONBOARDING}})
 
 
 async def _dar_diario(s: "Sesion") -> None:
@@ -703,7 +810,10 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
                 asyncio.create_task(s.reproducir()),
             ]
             aparte = []
-            if con_diario if con_diario is not None else diario.toca_hoy(db):
+            if ajustes.falta_presentarse(db):
+                # Todavia no conoce a nadie: primero preguntar, no saludar.
+                aparte.append(asyncio.create_task(_presentarse(s)))
+            elif con_diario if con_diario is not None else diario.toca_hoy(db):
                 aparte.append(asyncio.create_task(_dar_diario(s)))
             if simular:
                 # Fuera del grupo de espera: si estuviera dentro, terminar el
