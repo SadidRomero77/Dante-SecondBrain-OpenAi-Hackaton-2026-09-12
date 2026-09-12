@@ -3025,12 +3025,15 @@ def crear_app(sesion, bucle):
         # Su ruta se calcula desde la galleta, exista o no una conversacion
         # abierta. Si aqui cayera en la base de siempre, el visitante veria
         # -y podria cambiar- la vida del dueno del aparato.
-        memoria.RUTA.set(demo.ruta_de(id_) if id_ else demo.ruta_de("nuevo"))
+        nuevo = "" if id_ else demo.nueva_id()
+        # Sin galleta se generaba una ya, en vez de mandar a todos los recien
+        # llegados a una misma base compartida llamada "nuevo".
+        memoria.RUTA.set(demo.ruta_de(id_ or nuevo))
         respuesta = await siguiente(peticion)
         if not id_:
             # Se entrega ya, para que el websocket la traiga puesta y sepamos
             # que visita es antes de abrirle un @@MARCA@@ propio.
-            respuesta.set_cookie(demo.GALLETA, demo.nueva_id(), httponly=True,
+            respuesta.set_cookie(demo.GALLETA, nuevo, httponly=True,
                                  samesite="lax", max_age=3600)
         return respuesta
 

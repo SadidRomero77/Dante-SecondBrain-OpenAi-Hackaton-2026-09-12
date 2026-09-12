@@ -767,9 +767,25 @@ class Sesion:
         elif nombre == "recordar_cara":
             cuadro = self.ojos.camara.ultimo() if self.ojos.activa else None
             if cuadro is None:
-                salida = {"ok": False, "motivo": "no hay camara"}
+                # En la nube los ojos los presta el navegador. Sin esto, Kibo
+                # decia "no hay camara" con la camara encendida y su cara en
+                # pantalla, justo despues de pedirle que se la aprendiera.
+                cuadro = self._decodificar_cuadro()
+            if cuadro is None:
+                salida = {"ok": False, "motivo":
+                          "No tengo imagen. Pidele que active la camara con "
+                          "el boton del portal y vuelve a intentarlo."}
             else:
+                if self.ojos.rostros is None:
+                    from .vision import Rostros
+                    self.ojos.rostros = Rostros()
                 salida = self.ojos.rostros.registrar(cuadro, a.get("nombre", ""))
+                if salida.get("ok"):
+                    # Recargar, o no se reconoce hasta reiniciar.
+                    try:
+                        self.ojos.rostros.cargar()
+                    except Exception:
+                        pass
             print(f"   [vision] registrar cara -> {salida}")
 
         elif nombre == "mirar":
@@ -854,6 +870,19 @@ class Sesion:
                      "output": json.dumps(salida, ensure_ascii=False)},
         })
         await self._ev({"type": "response.create", "response": {}})
+
+    def _decodificar_cuadro(self):
+        """El ultimo cuadro del navegador, como imagen. None si no hay."""
+        if not self.cuadro_navegador:
+            return None
+        try:
+            import base64 as _b64
+            import cv2
+            import numpy as np
+            crudo = _b64.b64decode(self.cuadro_navegador)
+            return cv2.imdecode(np.frombuffer(crudo, np.uint8), cv2.IMREAD_COLOR)
+        except Exception:
+            return None
 
     def _quien_en_el_navegador(self) -> dict:
         """Reconoce caras sobre el cuadro que mando el navegador.
