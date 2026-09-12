@@ -103,3 +103,51 @@ Casi siempre es una de dos:
   Una barra de mas al final ya basta para que falle.
 - `DANTE_PANEL_URL` se puso **despues** de arrancar Dante. Se lee al empezar:
   hay que reiniciarlo.
+
+---
+
+# Como quedo desplegado (12/09/2026)
+
+```
+navegador  ->  Cloudflare (HTTPS)  ->  EC2  ->  Caddy :443  ->  contenedor :8800
+```
+
+**https://kibo.kibosecondbrain.com**
+
+| Pieza | Que es |
+|---|---|
+| EC2 `t3.small` en `us-east-1` | la maquina. Nombre `kibo` |
+| `kibo-web` | grupo de seguridad: 80, 443 y 22 |
+| `kibo-ssm` | rol que le deja leer el secreto y ser administrada por HTTPS |
+| `/kibo/openai` | la llave, cifrada en el almacen de AWS |
+| Registro A `kibo` | apunta a la IP, con la nube **naranja** |
+
+## Tres cosas que costaron y conviene no repetir
+
+**No hay SSH.** La red desde donde se desplego bloquea el puerto 22 -ni
+siquiera llega a github.com-, asi que la maquina se administra con
+`aws ssm send-command`, que va por HTTPS. Quedo mejor asi: **no hace falta
+dejar SSH abierto a internet**. Para tocarla:
+
+```
+aws ssm send-command --instance-ids <id> --document-name AWS-RunShellScript \
+  --parameters file://comandos.json
+```
+
+**Caddy necesita el nombre escrito.** Con un bloque generico `:443`, Caddy no
+emite certificado para un nombre que no conoce y Cloudflare devuelve 525. El
+Caddyfile dice `kibo.kibosecondbrain.com:443` a proposito.
+
+**Cloudflare bloquea clientes automaticos.** Un `curl` o un script reciben 403
+en todas las rutas mientras un navegador recibe 200. Al probar el despliegue
+parece que el sitio esta roto y no lo esta: hay que mandar una cabecera de
+navegador, o probar desde uno de verdad.
+
+## Lo que falta para produccion
+
+- El tramo Cloudflare -> maquina usa un certificado propio no verificado
+  (modo Full). Para produccion, un certificado de origen de Cloudflare.
+- El puerto 22 sigue abierto en el grupo de seguridad aunque no se use.
+  Cerrarlo.
+- La memoria de cada visitante vive en el disco de la maquina y se borra al
+  irse. Si la maquina se reinicia, las visitas en curso se pierden.

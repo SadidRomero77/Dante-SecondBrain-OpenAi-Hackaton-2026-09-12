@@ -18,3 +18,10 @@ node_modules/
 data/.secreto
 data/.ficha
 data/mensajes/
+.ami.tmp
+.vpc.tmp
+.sg.tmp
+.ec2.tmp
+.ip.tmp
+.cmd.tmp
+*.tmp
