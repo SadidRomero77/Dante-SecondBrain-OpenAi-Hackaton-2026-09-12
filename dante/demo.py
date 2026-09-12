@@ -91,6 +91,9 @@ class Visita:
         self.tareas: list[asyncio.Task] = []
         self.db = None
         self.reparte = False
+        # Su propio reconocedor de caras: uno compartido le enseñaria a este
+        # visitante las caras que registro otro.
+        self.rostros = None
         self.nacio = time.time()
         self.clientes: set = set()
 

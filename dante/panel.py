@@ -56,6 +56,34 @@ from .favicon_b64 import B64 as FAVICON_B64
 MARCA = config._v("DANTE_MARCA", "") or "Kibo"
 
 
+def _visita_de(peticion):
+    """La visita de quien pregunta, o None si no hay demo."""
+    from . import demo as _demo
+    if not _demo.activo():
+        return None
+    return _demo.de(peticion.cookies.get(_demo.GALLETA) or "")
+
+
+def _rostros_de(peticion, sesion):
+    """El reconocedor que le toca a quien pregunta.
+
+    Uno por visita, no uno global. Compartirlo cargaba las caras del primer
+    visitante que entrara y se las aplicaba a todos los demas: ademas de dar
+    resultados falsos, es enseñarle a alguien la cara de un desconocido.
+    """
+    from .vision import Rostros
+    v = _visita_de(peticion)
+    if v is not None:
+        if getattr(v, "rostros", None) is None:
+            from . import memoria as _m
+            _m.RUTA.set(v.ruta)
+            v.rostros = Rostros()
+        return v.rostros
+    if sesion.ojos.rostros is None:
+        sesion.ojos.rostros = Rostros()
+    return sesion.ojos.rostros
+
+
 def _cuadro_de_la_visita(peticion):
     """El ultimo cuadro que mando el navegador de quien pregunta, ya decodificado.
 
@@ -3487,10 +3515,7 @@ def crear_app(sesion, bucle):
         if img is None:
             return {"hay_imagen": False, "caras": []}
         try:
-            if sesion.ojos.rostros is None:
-                from .vision import Rostros
-                sesion.ojos.rostros = Rostros()
-            caras = sesion.ojos.rostros.quien(img)
+            caras = _rostros_de(peticion, sesion).quien(img)
             return {"hay_imagen": True,
                     "caras": [{"nombre": c.get("nombre") or "",
                                "parecido": round(c.get("parecido", 0), 2)}
@@ -3525,10 +3550,16 @@ def crear_app(sesion, bucle):
             return {"ok": False, "motivo":
                     "No hay imagen. Activa la camara con el boton de arriba."}
 
-        if sesion.ojos.rostros is None:
-            from .vision import Rostros
-            sesion.ojos.rostros = Rostros()
-        r = sesion.ojos.rostros.registrar(cuadro, nombre)
+        rostros = _rostros_de(peticion, sesion)
+        r = rostros.registrar(cuadro, nombre)
+        if r.get("ok"):
+            # Recargar: si no, la cara recien guardada no se reconoce hasta
+            # reiniciar, y quien acaba de registrarse ve "alguien que no
+            # conozco" justo despues de darle a guardar.
+            try:
+                rostros.cargar()
+            except Exception:
+                pass
 
         if r.get("ok"):
 
