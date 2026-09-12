@@ -3013,10 +3013,11 @@ def crear_app(sesion, bucle):
         login. Si no lo esta, esto no hace nada."""
 
         ruta = peticion.url.path
-        # En el demo no se pide cuenta de Google. Cada visita esta aislada y
-        # dura minutos; exigirle un login a un jurado del otro lado del mundo
-        # es la forma mas segura de que cierre la pestana sin ver nada.
-        if demo.activo():
+        # La portada es publica siempre; el portal, no. En el demo se puede
+        # apagar el login con DANTE_DEMO_LOGIN=0 si Auth0 diera problemas: un
+        # login roto deja el portal inaccesible para todos, y mas vale poder
+        # revertirlo en un minuto que descubrirlo delante de un jurado.
+        if demo.activo() and not demo.pide_login():
             return await siguiente(peticion)
 
         if not auth.activo() or ruta in (
@@ -3115,13 +3116,17 @@ def crear_app(sesion, bucle):
     @app.get("/salir")
 
     def salir(peticion: Request):
+        """Cierra la sesion de Kibo y vuelve a la portada.
 
-        r = RedirectResponse(auth.url_de_salida(_raiz(peticion) + "/")
-
-                             if auth.activo() else "/")
-
+        NO pasa por el cierre de sesion de Auth0 a proposito. Auth0 rechaza la
+        vuelta si la direccion no esta dada de alta en 'Allowed Logout URLs', y
+        entonces el usuario acaba en una pantalla de error de Auth0 que no
+        entiende y sin forma de volver. Borrar la galleta ya lo saca de aqui,
+        que es lo que pidio; si ademas quiere cerrar su cuenta de Google, eso
+        es cosa suya y no algo que debamos romperle al intentarlo.
+        """
+        r = RedirectResponse("/")
         r.delete_cookie(auth.COOKIE)
-
         return r
 
 
@@ -3184,11 +3189,26 @@ def crear_app(sesion, bucle):
         que se registre antes de contarle que es pierde a casi todos en la
         primera pantalla.
         """
+        # La portada la mantiene el equipo como un HTML aparte: es la pieza
+        # que mas cambia y no tiene por que pasar por Python para tocarla.
+        propia = Path(__file__).resolve().parent / "portada" / "index.html"
+        if propia.exists():
+            return HTMLResponse(propia.read_text(encoding="utf-8"))
         chico = PERRO_SVG.replace('width="72" height="72"', 'width="44" height="44"')
         return (INICIO.replace("@@FAVICON@@", FAVICON_B64)
                       .replace("@@PERROCHICO@@", chico)
                       .replace("@@PERROGRANDE@@", PERRO_SVG)
                       .replace("@@MARCA@@", MARCA))
+
+    @app.get("/portada/assets/{archivo}")
+    def portada_asset(archivo: str):
+        # Solo el nombre, sin carpetas: asi nadie puede pedir ../../algo.
+        base = Path(__file__).resolve().parent / "portada" / "assets"
+        ruta = (base / Path(archivo).name)
+        if not ruta.exists():
+            return Response(status_code=404)
+        tipo = "image/png" if ruta.suffix == ".png" else "application/octet-stream"
+        return FileResponse(ruta, media_type=tipo)
 
     @app.get("/portal", response_class=HTMLResponse)
     def portal():
@@ -3763,7 +3783,8 @@ def crear_app(sesion, bucle):
         # puerta de arriba no cubre esta ruta. Sin esto, cualquiera que alcance
         # el puerto puede leer la conversacion, oir el audio y hablarle al
         # agente. Comprobado explotandolo.
-        if not demo.activo() and auth.activo() and not auth.usuario_de(ws):
+        if (not demo.activo() or demo.pide_login()) and auth.activo() \
+                and not auth.usuario_de(ws):
             await ws.close(1008, "sin sesion")
             return
 

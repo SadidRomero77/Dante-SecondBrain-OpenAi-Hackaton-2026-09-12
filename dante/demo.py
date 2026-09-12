@@ -41,6 +41,18 @@ def _n(clave: str, defecto: int) -> int:
         return defecto
 
 
+def pide_login() -> bool:
+    """Si el demo exige entrar con cuenta.
+
+    Se puede apagar con DANTE_DEMO_LOGIN=0 sin tocar codigo, porque si la
+    direccion de vuelta no esta dada de alta en Auth0 el login falla y el
+    portal queda inaccesible para todos. Poder revertirlo en un minuto vale
+    mas que la elegancia de no tener el interruptor.
+    """
+    return str(config._v("DANTE_DEMO_LOGIN", "1")).strip().lower() not in (
+        "0", "no", "false")
+
+
 MINUTOS = lambda: _n("DANTE_DEMO_MINUTOS", 8)      # noqa: E731
 MAXIMO = lambda: _n("DANTE_DEMO_MAX", 4)           # noqa: E731
 

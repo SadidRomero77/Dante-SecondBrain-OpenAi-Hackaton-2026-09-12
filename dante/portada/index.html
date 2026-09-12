@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta id="meta-description" name="description" content="Kibo: compañero físico con inteligencia artificial y memoria del mundo para acompañar a adultos mayores y mantenerlos conectados con su familia." />
+  <title id="page-title">Kibo — Tu compañía. Tu memoria.</title>
+  <style>
+    :root{
+      --bg:#fbf6ee; --surface:#fffaf4; --card:#f7ede2; --ink:#21130f;
+      --muted:#6f625c; --line:#eadfd3; --accent:#ef7d00; --accent-2:#ff9e2e;
+      --dark:#3a1f16; --white:#fff; --shadow:0 20px 50px rgba(74,42,27,.10);
+      --radius:24px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+    a{text-decoration:none;color:inherit} img{max-width:100%;display:block}
+    .container{width:min(1180px,calc(100% - 40px));margin:0 auto}
+    .nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(14px);background:rgba(251,246,238,.9);border-bottom:1px solid rgba(234,223,211,.8)}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;min-height:72px;gap:20px}
+    .brand{font-size:34px;font-weight:900;letter-spacing:-1.5px}.brand span{color:var(--accent)}
+    .nav-links{display:flex;gap:24px;color:var(--muted);font-weight:650;font-size:14px}
+    .nav-actions{display:flex;gap:9px;align-items:center}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:13px 20px;border:0;font-weight:800;cursor:pointer;transition:.2s ease;font:inherit}
+    .btn-primary{background:var(--accent);color:white;box-shadow:0 10px 22px rgba(239,125,0,.22)}
+    .btn-primary:hover{transform:translateY(-2px);background:#d96f00}
+    .btn-secondary{border:1px solid var(--line);background:rgba(255,255,255,.56)}
+    .btn-ghost{border:1px solid var(--line);background:transparent}
+    .lang-switch{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:rgba(255,255,255,.5)}
+    .lang-switch button{border:0;background:transparent;border-radius:999px;padding:8px 10px;font-size:12px;font-weight:900;color:var(--muted);cursor:pointer}
+    .lang-switch button.active{background:var(--dark);color:white}
+    .hero{padding:92px 0 64px;overflow:hidden}.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:58px;align-items:center}
+    .eyebrow{display:inline-flex;gap:9px;align-items:center;color:var(--accent);font-weight:850;font-size:13px;letter-spacing:.08em;text-transform:uppercase}.dot{width:8px;height:8px;background:var(--accent);border-radius:50%}
+    h1{font-size:clamp(48px,7vw,84px);line-height:.98;margin:16px 0 22px;letter-spacing:-4px}
+    .hero p{font-size:clamp(19px,2vw,23px);color:var(--muted);max-width:720px}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}.hero-note{margin-top:18px;color:var(--muted);font-size:13px}
+    .hero-card{position:relative;background:linear-gradient(145deg,#f3e5d7,#fffaf5);border:1px solid var(--line);border-radius:34px;padding:28px;box-shadow:var(--shadow);min-height:460px;display:flex;align-items:center;justify-content:center}
+    .robot{width:250px;height:310px;background:#bd8c68;border-radius:120px 120px 90px 90px;position:relative;box-shadow:inset 0 -18px 40px rgba(63,32,20,.12),0 30px 50px rgba(61,32,20,.18)}
+    .screen{position:absolute;top:45px;left:38px;right:38px;height:126px;border-radius:36px;background:#201816;border:10px solid #2b211f}
+    .eye{position:absolute;top:43px;width:44px;height:16px;border-top:7px solid #ffad34;border-radius:50%}.eye.l{left:34px;transform:rotate(12deg)}.eye.r{right:34px;transform:rotate(-12deg)}
+    .ear{position:absolute;top:72px;width:72px;height:130px;background:#6b4938;border-radius:55% 45% 60% 40%}.ear.l{left:-48px;transform:rotate(16deg)}.ear.r{right:-48px;transform:rotate(-16deg)}
+    .paw{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);font-size:44px;color:#492a1e}
+    .hero-bubble{position:absolute;background:white;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:18px;padding:13px 16px;font-size:13px;font-weight:700;color:var(--dark)}
+    .b1{left:-30px;top:52px}.b2{right:-22px;bottom:75px}.b3{right:12px;top:14px}
+    section{padding:84px 0}.section-head{max-width:820px;margin-bottom:38px}.section-head h2{font-size:clamp(34px,5vw,58px);line-height:1.05;letter-spacing:-2px;margin:10px 0 12px}.section-head p{color:var(--muted);font-size:18px}
+    .problem-grid,.features-grid,.providers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .card{background:rgba(255,255,255,.5);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:0 8px 24px rgba(71,45,31,.05)}
+    .card .num{font-size:12px;color:var(--accent);font-weight:900;letter-spacing:.08em}.card h3{margin:7px 0 8px;font-size:21px}.card p{color:var(--muted);margin:0}
+    .memory{background:var(--dark);color:white;border-radius:34px;padding:42px;display:grid;grid-template-columns:.9fr 1.1fr;gap:42px;align-items:center}.memory p{color:#d8c9c2}
+    .entity-map{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.entity{border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:16px;background:rgba(255,255,255,.05)}.entity strong{display:block;font-size:14px;color:#ffb457;margin-bottom:4px}
+    .how-wrap{background:white;border:1px solid var(--line);border-radius:30px;padding:14px;box-shadow:var(--shadow)}.how-wrap img{border-radius:20px;width:100%;height:auto}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}.step{padding:20px;border-radius:20px;background:var(--card);border:1px solid var(--line)}.step b{color:var(--accent)}
+    .provider{display:flex;flex-direction:column;gap:7px}.provider .tag{display:inline-flex;align-self:flex-start;padding:5px 10px;border-radius:999px;background:#fff0df;color:#9b4d00;font-size:11px;font-weight:850}
+    .requirements{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+    .req-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px}
+    .req-card h3{margin:0 0 8px}.req-card ul{padding-left:19px;color:var(--muted);margin:10px 0 0}.req-card li{margin:7px 0}
+    .req-card code{font-size:12px;background:#f7efe8;padding:2px 6px;border-radius:6px}
+    .privacy{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center}.privacy-box{background:var(--card);border:1px solid var(--line);border-radius:30px;padding:36px}.check{display:flex;gap:12px;margin:14px 0;color:var(--muted)}.check span:first-child{color:var(--accent);font-weight:900}
+    .cta{background:linear-gradient(135deg,#321a12,#5a2d16);color:white;border-radius:36px;padding:48px;display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center}.cta p{color:#e7d7ce}
+    .cta-form{display:flex;gap:10px;background:rgba(255,255,255,.08);padding:10px;border-radius:20px}.cta-form input{min-width:0;flex:1;border:0;border-radius:14px;padding:14px 16px;font-size:15px;outline:none}
+    .disclaimer{font-size:12px;color:var(--muted);margin-top:14px}
+    footer{padding:36px 0 48px;color:var(--muted);font-size:13px}.footer-inner{display:flex;justify-content:space-between;gap:20px;align-items:center;border-top:1px solid var(--line);padding-top:26px}.mini{font-size:12px;color:var(--muted)}
+    @media (max-width:1040px){.nav-links{display:none}}
+    @media (max-width:900px){.hero-grid,.memory,.privacy,.cta{grid-template-columns:1fr}.problem-grid,.features-grid,.providers-grid,.steps,.requirements{grid-template-columns:1fr 1fr}.hero-card{min-height:380px}}
+    @media (max-width:720px){.nav-actions .btn-primary{display:none}.brand{font-size:30px}}
+    @media (max-width:620px){.container{width:min(100% - 24px,1180px)}.hero{padding-top:58px}h1{letter-spacing:-2px}.problem-grid,.features-grid,.providers-grid,.steps,.requirements{grid-template-columns:1fr}.cta-form{flex-direction:column}.memory,.cta{padding:28px}.hero-card{min-height:320px}.robot{transform:scale(.82)}.nav-actions{gap:5px}.btn{padding:11px 14px;font-size:13px}.lang-switch button{padding:7px 8px}}
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="#top">Ki<span>bo</span></a>
+      <div class="nav-links">
+        <a href="#problema" data-i18n="nav.problem">El problema</a>
+        <a href="#memoria" data-i18n="nav.memory">Memoria</a>
+        <a href="#funciona" data-i18n="nav.how">Cómo funciona</a>
+        <a href="#tecnologia" data-i18n="nav.tech">Tecnología</a>
+        <a href="#requisitos" data-i18n="nav.requirements">Requisitos</a>
+      </div>
+      <div class="nav-actions">
+        <a class="btn btn-primary" href="/portal" data-i18n="nav.join">Quiero participar</a>
+        <a class="btn btn-ghost" href="/portal" data-i18n="nav.login">Login</a>
+        <div class="lang-switch" aria-label="Language selector">
+          <button id="lang-es" class="active" type="button">ES</button>
+          <button id="lang-en" type="button">EN</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow"><span class="dot"></span><span data-i18n="hero.badge">Prototipo funcional</span></div>
+          <h1 data-i18n="hero.title">Cuando tú no puedes estar ahí, Kibo recuerda contigo.</h1>
+          <p data-i18n-html="hero.subtitle">Kibo es un compañero físico con inteligencia artificial y <strong>memoria del mundo</strong> que ayuda a adultos mayores a recordar, sentirse acompañados y mantenerse conectados con su familia y cuidadores.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="/portal" data-i18n="hero.cta">Quiero participar en el piloto</a>
+            <a class="btn btn-secondary" href="#funciona" data-i18n="hero.how">Ver cómo funciona</a>
+          </div>
+          <div class="hero-note" data-i18n="hero.note">Acompañamiento, no vigilancia. Kibo no reemplaza a un cuidador ni realiza diagnósticos médicos.</div>
+        </div>
+        <div class="hero-card" aria-label="Kibo">
+          <div class="hero-bubble b1" data-i18n="hero.b1">“Tu cita es a las 3:00.”</div>
+          <div class="hero-bubble b2" data-i18n="hero.b2">“La última vez vi tus gafas en la mesa.”</div>
+          <div class="hero-bubble b3" data-i18n="hero.b3">“Laura es tu hija.”</div>
+          <div class="robot">
+            <div class="ear l"></div><div class="ear r"></div>
+            <div class="screen"><div class="eye l"></div><div class="eye r"></div></div>
+            <div class="paw">🐾</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="problema">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow"><span class="dot"></span><span data-i18n="problem.eyebrow">La brecha de acompañamiento</span></div>
+          <h2 data-i18n="problem.title">Estar lejos no debería significar estar desconectados.</h2>
+          <p data-i18n="problem.subtitle">Cuando la familia no puede estar presente todo el tiempo, los olvidos, la dificultad con la tecnología y la pérdida de comunicación pueden hacer que el cuidado diario sea más difícil.</p>
+        </div>
+        <div class="problem-grid">
+          <div class="card"><div class="num">01</div><h3 data-i18n="problem.c1t">Olvidos cotidianos</h3><p data-i18n="problem.c1p">Medicamentos, citas, rutinas, nombres, objetos y eventos pueden perderse en el día a día.</p></div>
+          <div class="card"><div class="num">02</div><h3 data-i18n="problem.c2t">Menos conexión</h3><p data-i18n="problem.c2p">Una llamada perdida o una interfaz compleja puede convertirse en horas sin comunicación con la familia.</p></div>
+          <div class="card"><div class="num">03</div><h3 data-i18n="problem.c3t">Cuidado a distancia</h3><p data-i18n="problem.c3p">El familiar necesita saber cuándo intervenir sin convertir el hogar en un espacio de vigilancia constante.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="memoria">
+      <div class="container">
+        <div class="memory">
+          <div>
+            <div class="eyebrow"><span class="dot"></span><span data-i18n="memory.eyebrow">Diferencial Kibo</span></div>
+            <h2 style="font-size:clamp(34px,5vw,56px);line-height:1.03;margin:12px 0 18px" data-i18n="memory.title">Memoria del mundo, no solo memoria de chat.</h2>
+            <p data-i18n="memory.p1">Kibo conecta entidades del mundo real para construir contexto: quién es una persona, dónde fue visto un objeto, qué evento ocurrió y cómo se relacionan esos recuerdos.</p>
+            <p data-i18n-html="memory.p2"><strong>Una inferencia de IA nunca sobrescribe un hecho confirmado.</strong> Cada recuerdo conserva procedencia, tiempo y nivel de confianza.</p>
+          </div>
+          <div class="entity-map">
+            <div class="entity"><strong data-i18n="memory.people">PERSONAS</strong><span data-i18n="memory.peopleEx">Laura → hija de Carlos</span></div>
+            <div class="entity"><strong data-i18n="memory.objects">OBJETOS</strong><span data-i18n="memory.objectsEx">Gafas → vistas en la mesa</span></div>
+            <div class="entity"><strong data-i18n="memory.places">LUGARES</strong><span data-i18n="memory.placesEx">Mesa → ubicada en la sala</span></div>
+            <div class="entity"><strong data-i18n="memory.events">EVENTOS</strong><span data-i18n="memory.eventsEx">Cita médica → martes 3:00 PM</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow"><span class="dot"></span><span data-i18n="features.eyebrow">Qué puede hacer</span></div>
+          <h2 data-i18n="features.title">Un compañero que toma la iniciativa.</h2>
+          <p data-i18n="features.subtitle">Kibo no espera siempre una pregunta. Puede iniciar interacciones y mantener una conversación contextual con el adulto mayor.</p>
+        </div>
+        <div class="features-grid">
+          <div class="card"><h3 data-i18n="features.f1t">⏰ Recuerda</h3><p data-i18n="features.f1p">Medicamentos, citas, actividades, rutinas y eventos importantes.</p></div>
+          <div class="card"><h3 data-i18n="features.f2t">💬 Conversa</h3><p data-i18n="features.f2p">Habla de forma natural y utiliza el contexto disponible para responder mejor.</p></div>
+          <div class="card"><h3 data-i18n="features.f3t">👤 Reconoce</h3><p data-i18n="features.f3p">Identifica personas conocidas y recupera relaciones previamente verificadas.</p></div>
+          <div class="card"><h3 data-i18n="features.f4t">📨 Entrega mensajes</h3><p data-i18n="features.f4p">La familia puede dejar mensajes para que Kibo los entregue en el momento indicado.</p></div>
+          <div class="card"><h3 data-i18n="features.f5t">🧠 Recupera recuerdos</h3><p data-i18n="features.f5p">Relaciona personas, objetos, lugares y eventos para responder preguntas del entorno.</p></div>
+          <div class="card"><h3 data-i18n="features.f6t">🔔 Avisa</h3><p data-i18n="features.f6p">Si el adulto solicita ayuda o una situación requiere atención, Kibo informa al cuidador con el contexto disponible.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="funciona">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow"><span class="dot"></span><span data-i18n="how.eyebrow">Cómo funciona</span></div>
+          <h2 data-i18n="how.title">De una voz a una acción real.</h2>
+          <p data-i18n="how.subtitle">El prototipo combina procesamiento local en el dispositivo con servicios de IA, memoria y automatización. El diagrama siguiente es exactamente el diagrama técnico proporcionado para Kibo.</p>
+        </div>
+
+        <!-- Exact original diagram provided by the user -->
+        <div class="how-wrap">
+          <img src="/portada/assets/kibo-how-it-works.png" alt="Kibo technical architecture diagram" />
+        </div>
+
+        <div class="steps">
+          <div class="step"><b>1.</b> <span data-i18n="how.s1">El adulto habla o presiona el botón. El ESP32 captura audio y controla la interacción física.</span></div>
+          <div class="step"><b>2.</b> <span data-i18n="how.s2">La voz se transforma en texto y se combina con identidad, sesión y contexto del usuario.</span></div>
+          <div class="step"><b>3.</b> <span data-i18n="how.s3">Kibo recupera memoria, decide qué herramienta necesita y genera una respuesta o acción.</span></div>
+          <div class="step"><b>4.</b> <span data-i18n="how.s4">Si necesita información externa, puede consultar servicios especializados como búsqueda web.</span></div>
+          <div class="step"><b>5.</b> <span data-i18n="how.s5">Recordatorios y tareas programadas se ejecutan mediante automatizaciones y eventos.</span></div>
+          <div class="step"><b>6.</b> <span data-i18n="how.s6">La respuesta vuelve al robot como voz, expresión y, cuando aplica, movimiento.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tecnologia">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow"><span class="dot"></span><span data-i18n="tech.eyebrow">Tecnología y proveedores</span></div>
+          <h2 data-i18n="tech.title">Un stack modular para conectar hardware, memoria e inteligencia.</h2>
+          <p data-i18n="tech.subtitle">El prototipo combina componentes locales y servicios especializados. Cada proveedor cumple una función concreta dentro del flujo.</p>
+        </div>
+        <div class="providers-grid">
+          <div class="card provider"><span class="tag">Hardware</span><h3>ESP32 AI Chat Board</h3><p data-i18n="tech.esp32">Control del dispositivo, captura de audio, pantalla, parlante, botón y comunicación con los servicios de Kibo.</p></div>
+          <div class="card provider"><span class="tag">Identity</span><h3>Auth0</h3><p data-i18n="tech.auth0">Autenticación y manejo del contexto de usuario para asociar cada interacción con la persona y su configuración.</p></div>
+          <div class="card provider"><span class="tag">Model routing</span><h3>OpenRouter</h3><p data-i18n="tech.openrouter">Enrutamiento de solicitudes al modelo de IA más apropiado según la tarea.</p></div>
+          <div class="card provider"><span class="tag">AI</span><h3>OpenAI</h3><p data-i18n="tech.openai">Conversación, razonamiento y síntesis de voz dentro del flujo mostrado.</p></div>
+          <div class="card provider"><span class="tag">Web search</span><h3>Exa</h3><p data-i18n="tech.exa">Búsqueda web para recuperar información actual cuando la conversación requiere datos externos.</p></div>
+          <div class="card provider"><span class="tag">Automation</span><h3>Trigger.dev</h3><p data-i18n="tech.trigger">Recordatorios, tareas programadas y procesos en segundo plano.</p></div>
+          <div class="card provider"><span class="tag">Memory</span><h3>Database</h3><p data-i18n="tech.db">Conversaciones, recordatorios, entidades, relaciones y memoria de largo plazo.</p></div>
+          <div class="card provider"><span class="tag">Vision</span><h3>Local Face Recognition</h3><p data-i18n="tech.face">Reconocimiento de personas mediante vectores faciales y asociación con memoria.</p></div>
+          <div class="card provider"><span class="tag">Voice</span><h3>Speech-to-Text + Text-to-Speech</h3><p data-i18n="tech.voice">Entrada de voz, transcripción y conversión de respuestas nuevamente a audio.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="requisitos">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow"><span class="dot"></span><span data-i18n="req.eyebrow">Requisitos de integración</span></div>
+          <h2 data-i18n="req.title">Qué necesita cada proveedor para funcionar.</h2>
+          <p data-i18n="req.subtitle">Estos son los requisitos técnicos y credenciales que debe contemplar el proyecto para reproducir el flujo del diagrama. Los nombres concretos de variables pueden adaptarse al repositorio.</p>
+        </div>
+
+        <div class="requirements">
+          <div class="req-card">
+            <h3>ESP32 AI Chat Board</h3>
+            <ul>
+              <li data-i18n="req.esp1">Placa ESP32 AI Chat Board con micrófono, pantalla, parlante y botón conectados.</li>
+              <li data-i18n="req.esp2">Firmware capaz de capturar audio, enviar solicitudes HTTP/WebSocket y reproducir audio.</li>
+              <li data-i18n="req.esp3">Wi‑Fi configurado y URL del backend de Kibo.</li>
+              <li><code>KIBO_API_BASE_URL</code></li>
+              <li data-i18n="req.esp4">Identificador único del dispositivo para asociarlo con el usuario.</li>
+            </ul>
+          </div>
+
+          <div class="req-card">
+            <h3>Auth0</h3>
+            <ul>
+              <li data-i18n="req.auth1">Tenant de Auth0.</li>
+              <li data-i18n="req.auth2">Application configurada para la web del cuidador.</li>
+              <li data-i18n="req.auth3">API/Audience configurado para proteger el backend.</li>
+              <li><code>AUTH0_DOMAIN</code></li>
+              <li><code>AUTH0_CLIENT_ID</code></li>
+              <li><code>AUTH0_CLIENT_SECRET</code> <span data-i18n="req.serverOnly">(solo backend)</span></li>
+              <li><code>AUTH0_AUDIENCE</code></li>
+              <li data-i18n="req.auth4">Callback/logout URLs para los entornos local y desplegado.</li>
+            </ul>
+          </div>
+
+          <div class="req-card">
+            <h3>OpenRouter</h3>
+            <ul>
+              <li data-i18n="req.or1">Cuenta y API key de OpenRouter.</li>
+              <li><code>OPENROUTER_API_KEY</code></li>
+              <li data-i18n="req.or2">Listado de modelos permitidos y fallback.</li>
+              <li data-i18n="req.or3">Límites de costo/tokens por interacción.</li>
+              <li data-i18n="req.or4">Metadatos opcionales de aplicación para identificar tráfico del proyecto.</li>
+            </ul>
+          </div>
+
+          <div class="req-card">
+            <h3>OpenAI</h3>
+            <ul>
+              <li data-i18n="req.oa1">Proyecto/cuenta con acceso a los modelos utilizados por Kibo.</li>
+              <li><code>OPENAI_API_KEY</code></li>
+              <li data-i18n="req.oa2">Modelo conversacional definido.</li>
+              <li data-i18n="req.oa3">Modelo/servicio TTS definido si se usa OpenAI para voz.</li>
+              <li data-i18n="req.oa4">Política de retención y logging acorde con los datos sensibles procesados.</li>
+              <li data-i18n="req.oa5">Timeouts, reintentos y límites de gasto configurados en backend.</li>
+            </ul>
+          </div>
+
+          <div class="req-card">
+            <h3>Exa</h3>
+            <ul>
+              <li data-i18n="req.exa1">Cuenta y API key.</li>
+              <li><code>EXA_API_KEY</code></li>
+              <li data-i18n="req.exa2">Uso restringido a preguntas que realmente necesitan información web reciente.</li>
+              <li data-i18n="req.exa3">Timeout y número máximo de resultados para controlar latencia y costo.</li>
+            </ul>
+          </div>
+
+          <div class="req-card">
+            <h3>Trigger.dev</h3>
+            <ul>
+              <li data-i18n="req.tr1">Proyecto Trigger.dev conectado al backend.</li>
+              <li><code>TRIGGER_SECRET_KEY</code></li>
+              <li data-i18n="req.tr2">Tareas para recordatorios, reintentos, mensajes programados y notificaciones.</li>
+              <li data-i18n="req.tr3">Zona horaria almacenada por usuario.</li>
+              <li data-i18n="req.tr4">Idempotencia para evitar recordatorios duplicados.</li>
+            </ul>
+          </div>
+
+          <div class="req-card">
+            <h3 data-i18n="req.dbTitle">Base de datos / memoria</h3>
+            <ul>
+              <li data-i18n="req.db1">Base relacional para usuarios, cuidadores, recordatorios, entidades, relaciones y eventos.</li>
+              <li><code>DATABASE_URL</code></li>
+              <li data-i18n="req.db2">Soporte para vectores o almacén vectorial separado para embeddings faciales y memoria semántica.</li>
+              <li data-i18n="req.db3">Campos de procedencia, timestamp, confianza y estado de verificación en cada recuerdo.</li>
+              <li data-i18n="req.db4">Backups y cifrado de datos sensibles.</li>
+            </ul>
+          </div>
+
+          <div class="req-card">
+            <h3 data-i18n="req.voiceTitle">Speech-to-Text / Text-to-Speech</h3>
+            <ul>
+              <li data-i18n="req.voice1">STT local en ESP32 o servicio definido para transcribir la voz.</li>
+              <li data-i18n="req.voice2">TTS configurado para convertir la respuesta a audio.</li>
+              <li data-i18n="req.voice3">Formato de audio consistente entre dispositivo y backend.</li>
+              <li data-i18n="req.voice4">Control de latencia y fallback cuando el servicio no esté disponible.</li>
+            </ul>
+          </div>
+
+          <div class="req-card">
+            <h3 data-i18n="req.faceTitle">Reconocimiento facial local</h3>
+            <ul>
+              <li data-i18n="req.face1">Cámara del robot disponible durante interacción.</li>
+              <li data-i18n="req.face2">Modelo local de embeddings faciales.</li>
+              <li data-i18n="req.face3">Base de vectores/índice con identidades autorizadas.</li>
+              <li data-i18n="req.face4">Umbral de similitud configurable y manejo explícito de identidad desconocida.</li>
+              <li data-i18n="req.face5">No promover automáticamente una coincidencia incierta a hecho confirmado.</li>
+            </ul>
+          </div>
+
+          <div class="req-card">
+            <h3 data-i18n="req.notificationsTitle">Notificaciones al cuidador</h3>
+            <ul>
+              <li data-i18n="req.not1">Canal de salida definido: web, email, WhatsApp, push u otro.</li>
+              <li data-i18n="req.not2">Información del cuidador y reglas de escalamiento.</li>
+              <li data-i18n="req.not3">Estados mínimos: INFO, ATTENTION y HELP REQUEST.</li>
+              <li data-i18n="req.not4">Registrar entrega y respuesta sin asumir que una ausencia de respuesta equivale a una emergencia.</li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="disclaimer" data-i18n="req.note">Nota: esta sección documenta los prerrequisitos de integración del prototipo mostrado; los planes comerciales, límites de uso y precios de terceros pueden cambiar y deben revisarse antes de producción.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="container privacy">
+        <div>
+          <div class="eyebrow"><span class="dot"></span><span data-i18n="privacy.eyebrow">Privacidad por diseño</span></div>
+          <h2 style="font-size:clamp(34px,5vw,56px);line-height:1.05;margin:12px 0 16px" data-i18n="privacy.title">Acompañamiento, no vigilancia.</h2>
+          <p style="color:var(--muted);font-size:18px" data-i18n="privacy.subtitle">Kibo utiliza su cámara durante interacciones para comprender y recordar el contexto, no como una cámara de monitoreo permanente.</p>
+        </div>
+        <div class="privacy-box">
+          <div class="check"><span>✓</span><span data-i18n="privacy.p1">La cámara se activa con la interacción.</span></div>
+          <div class="check"><span>✓</span><span data-i18n="privacy.p2">Se prioriza almacenar información procesada frente a grabación continua.</span></div>
+          <div class="check"><span>✓</span><span data-i18n="privacy.p3">Los hechos confirmados tienen prioridad sobre inferencias de IA.</span></div>
+          <div class="check"><span>✓</span><span data-i18n="privacy.p4">El familiar recibe información cuando Kibo detecta una necesidad de atención.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="piloto">
+      <div class="container">
+        <div class="cta">
+          <div>
+            <div class="eyebrow" style="color:#ffb65d"><span class="dot" style="background:#ffb65d"></span><span data-i18n="pilot.badge">Prototipo funcional</span></div>
+            <h2 style="font-size:clamp(36px,5vw,58px);line-height:1.03;margin:12px 0" data-i18n="pilot.title">Ayúdanos a construir la próxima etapa de Kibo.</h2>
+            <p data-i18n="pilot.subtitle">Estamos buscando familias, cuidadores y organizaciones interesadas en participar en la validación del producto.</p>
+          </div>
+          <form class="cta-form" onsubmit="event.preventDefault(); document.getElementById('thanks').style.display='block'; this.style.display='none';">
+            <input type="email" aria-label="Email" placeholder="Tu correo electrónico" data-i18n-placeholder="pilot.placeholder" required />
+            <button class="btn btn-primary" type="submit" data-i18n="pilot.button">Quiero participar</button>
+          </form>
+          <div id="thanks" style="display:none;font-weight:800;font-size:18px" data-i18n="pilot.thanks">¡Gracias! Tu interés quedó registrado para la demo.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div><strong>Kibo</strong><br><span class="mini">Your companion. Your memory.</span></div>
+      <div class="mini" data-i18n="footer.note">Prototipo funcional • Kibo no reemplaza cuidado humano ni atención médica.</div>
+    </div>
+  </footer>
+
+<script>
+const translations = {
+  es: {
+    "meta.description":"Kibo: compañero físico con inteligencia artificial y memoria del mundo para acompañar a adultos mayores y mantenerlos conectados con su familia.",
+    "page.title":"Kibo — Tu compañía. Tu memoria.",
+    "nav.problem":"El problema","nav.memory":"Memoria","nav.how":"Cómo funciona","nav.tech":"Tecnología","nav.requirements":"Requisitos","nav.join":"Quiero participar","nav.login":"Login",
+    "hero.badge":"Prototipo funcional","hero.title":"Cuando tú no puedes estar ahí, Kibo recuerda contigo.",
+    "hero.subtitle":"Kibo es un compañero físico con inteligencia artificial y <strong>memoria del mundo</strong> que ayuda a adultos mayores a recordar, sentirse acompañados y mantenerse conectados con su familia y cuidadores.",
+    "hero.cta":"Quiero participar en el piloto","hero.how":"Ver cómo funciona","hero.note":"Acompañamiento, no vigilancia. Kibo no reemplaza a un cuidador ni realiza diagnósticos médicos.",
+    "hero.b1":"“Tu cita es a las 3:00.”","hero.b2":"“La última vez vi tus gafas en la mesa.”","hero.b3":"“Laura es tu hija.”",
+    "problem.eyebrow":"La brecha de acompañamiento","problem.title":"Estar lejos no debería significar estar desconectados.",
+    "problem.subtitle":"Cuando la familia no puede estar presente todo el tiempo, los olvidos, la dificultad con la tecnología y la pérdida de comunicación pueden hacer que el cuidado diario sea más difícil.",
+    "problem.c1t":"Olvidos cotidianos","problem.c1p":"Medicamentos, citas, rutinas, nombres, objetos y eventos pueden perderse en el día a día.",
+    "problem.c2t":"Menos conexión","problem.c2p":"Una llamada perdida o una interfaz compleja puede convertirse en horas sin comunicación con la familia.",
+    "problem.c3t":"Cuidado a distancia","problem.c3p":"El familiar necesita saber cuándo intervenir sin convertir el hogar en un espacio de vigilancia constante.",
+    "memory.eyebrow":"Diferencial Kibo","memory.title":"Memoria del mundo, no solo memoria de chat.",
+    "memory.p1":"Kibo conecta entidades del mundo real para construir contexto: quién es una persona, dónde fue visto un objeto, qué evento ocurrió y cómo se relacionan esos recuerdos.",
+    "memory.p2":"<strong>Una inferencia de IA nunca sobrescribe un hecho confirmado.</strong> Cada recuerdo conserva procedencia, tiempo y nivel de confianza.",
+    "memory.people":"PERSONAS","memory.peopleEx":"Laura → hija de Carlos","memory.objects":"OBJETOS","memory.objectsEx":"Gafas → vistas en la mesa","memory.places":"LUGARES","memory.placesEx":"Mesa → ubicada en la sala","memory.events":"EVENTOS","memory.eventsEx":"Cita médica → martes 3:00 PM",
+    "features.eyebrow":"Qué puede hacer","features.title":"Un compañero que toma la iniciativa.","features.subtitle":"Kibo no espera siempre una pregunta. Puede iniciar interacciones y mantener una conversación contextual con el adulto mayor.",
+    "features.f1t":"⏰ Recuerda","features.f1p":"Medicamentos, citas, actividades, rutinas y eventos importantes.","features.f2t":"💬 Conversa","features.f2p":"Habla de forma natural y utiliza el contexto disponible para responder mejor.",
+    "features.f3t":"👤 Reconoce","features.f3p":"Identifica personas conocidas y recupera relaciones previamente verificadas.","features.f4t":"📨 Entrega mensajes","features.f4p":"La familia puede dejar mensajes para que Kibo los entregue en el momento indicado.",
+    "features.f5t":"🧠 Recupera recuerdos","features.f5p":"Relaciona personas, objetos, lugares y eventos para responder preguntas del entorno.","features.f6t":"🔔 Avisa","features.f6p":"Si el adulto solicita ayuda o una situación requiere atención, Kibo informa al cuidador con el contexto disponible.",
+    "how.eyebrow":"Cómo funciona","how.title":"De una voz a una acción real.","how.subtitle":"El prototipo combina procesamiento local en el dispositivo con servicios de IA, memoria y automatización. El diagrama siguiente es exactamente el diagrama técnico proporcionado para Kibo.",
+    "how.s1":"El adulto habla o presiona el botón. El ESP32 captura audio y controla la interacción física.","how.s2":"La voz se transforma en texto y se combina con identidad, sesión y contexto del usuario.",
+    "how.s3":"Kibo recupera memoria, decide qué herramienta necesita y genera una respuesta o acción.","how.s4":"Si necesita información externa, puede consultar servicios especializados como búsqueda web.","how.s5":"Recordatorios y tareas programadas se ejecutan mediante automatizaciones y eventos.","how.s6":"La respuesta vuelve al robot como voz, expresión y, cuando aplica, movimiento.",
+    "tech.eyebrow":"Tecnología y proveedores","tech.title":"Un stack modular para conectar hardware, memoria e inteligencia.","tech.subtitle":"El prototipo combina componentes locales y servicios especializados. Cada proveedor cumple una función concreta dentro del flujo.",
+    "tech.esp32":"Control del dispositivo, captura de audio, pantalla, parlante, botón y comunicación con los servicios de Kibo.","tech.auth0":"Autenticación y manejo del contexto de usuario para asociar cada interacción con la persona y su configuración.",
+    "tech.openrouter":"Enrutamiento de solicitudes al modelo de IA más apropiado según la tarea.","tech.openai":"Conversación, razonamiento y síntesis de voz dentro del flujo mostrado.","tech.exa":"Búsqueda web para recuperar información actual cuando la conversación requiere datos externos.","tech.trigger":"Recordatorios, tareas programadas y procesos en segundo plano.","tech.db":"Conversaciones, recordatorios, entidades, relaciones y memoria de largo plazo.","tech.face":"Reconocimiento de personas mediante vectores faciales y asociación con memoria.","tech.voice":"Entrada de voz, transcripción y conversión de respuestas nuevamente a audio.",
+    "req.eyebrow":"Requisitos de integración","req.title":"Qué necesita cada proveedor para funcionar.","req.subtitle":"Estos son los requisitos técnicos y credenciales que debe contemplar el proyecto para reproducir el flujo del diagrama. Los nombres concretos de variables pueden adaptarse al repositorio.",
+    "req.esp1":"Placa ESP32 AI Chat Board con micrófono, pantalla, parlante y botón conectados.","req.esp2":"Firmware capaz de capturar audio, enviar solicitudes HTTP/WebSocket y reproducir audio.","req.esp3":"Wi‑Fi configurado y URL del backend de Kibo.","req.esp4":"Identificador único del dispositivo para asociarlo con el usuario.",
+    "req.auth1":"Tenant de Auth0.","req.auth2":"Application configurada para la web del cuidador.","req.auth3":"API/Audience configurado para proteger el backend.","req.serverOnly":"(solo backend)","req.auth4":"Callback/logout URLs para los entornos local y desplegado.",
+    "req.or1":"Cuenta y API key de OpenRouter.","req.or2":"Listado de modelos permitidos y fallback.","req.or3":"Límites de costo/tokens por interacción.","req.or4":"Metadatos opcionales de aplicación para identificar tráfico del proyecto.",
+    "req.oa1":"Proyecto/cuenta con acceso a los modelos utilizados por Kibo.","req.oa2":"Modelo conversacional definido.","req.oa3":"Modelo/servicio TTS definido si se usa OpenAI para voz.","req.oa4":"Política de retención y logging acorde con los datos sensibles procesados.","req.oa5":"Timeouts, reintentos y límites de gasto configurados en backend.",
+    "req.exa1":"Cuenta y API key.","req.exa2":"Uso restringido a preguntas que realmente necesitan información web reciente.","req.exa3":"Timeout y número máximo de resultados para controlar latencia y costo.",
+    "req.tr1":"Proyecto Trigger.dev conectado al backend.","req.tr2":"Tareas para recordatorios, reintentos, mensajes programados y notificaciones.","req.tr3":"Zona horaria almacenada por usuario.","req.tr4":"Idempotencia para evitar recordatorios duplicados.",
+    "req.dbTitle":"Base de datos / memoria","req.db1":"Base relacional para usuarios, cuidadores, recordatorios, entidades, relaciones y eventos.","req.db2":"Soporte para vectores o almacén vectorial separado para embeddings faciales y memoria semántica.","req.db3":"Campos de procedencia, timestamp, confianza y estado de verificación en cada recuerdo.","req.db4":"Backups y cifrado de datos sensibles.",
+    "req.voiceTitle":"Speech-to-Text / Text-to-Speech","req.voice1":"STT local en ESP32 o servicio definido para transcribir la voz.","req.voice2":"TTS configurado para convertir la respuesta a audio.","req.voice3":"Formato de audio consistente entre dispositivo y backend.","req.voice4":"Control de latencia y fallback cuando el servicio no esté disponible.",
+    "req.faceTitle":"Reconocimiento facial local","req.face1":"Cámara del robot disponible durante interacción.","req.face2":"Modelo local de embeddings faciales.","req.face3":"Base de vectores/índice con identidades autorizadas.","req.face4":"Umbral de similitud configurable y manejo explícito de identidad desconocida.","req.face5":"No promover automáticamente una coincidencia incierta a hecho confirmado.",
+    "req.notificationsTitle":"Notificaciones al cuidador","req.not1":"Canal de salida definido: web, email, WhatsApp, push u otro.","req.not2":"Información del cuidador y reglas de escalamiento.","req.not3":"Estados mínimos: INFO, ATTENTION y HELP REQUEST.","req.not4":"Registrar entrega y respuesta sin asumir que una ausencia de respuesta equivale a una emergencia.",
+    "req.note":"Nota: esta sección documenta los prerrequisitos de integración del prototipo mostrado; los planes comerciales, límites de uso y precios de terceros pueden cambiar y deben revisarse antes de producción.",
+    "privacy.eyebrow":"Privacidad por diseño","privacy.title":"Acompañamiento, no vigilancia.","privacy.subtitle":"Kibo utiliza su cámara durante interacciones para comprender y recordar el contexto, no como una cámara de monitoreo permanente.",
+    "privacy.p1":"La cámara se activa con la interacción.","privacy.p2":"Se prioriza almacenar información procesada frente a grabación continua.","privacy.p3":"Los hechos confirmados tienen prioridad sobre inferencias de IA.","privacy.p4":"El familiar recibe información cuando Kibo detecta una necesidad de atención.",
+    "pilot.badge":"Prototipo funcional","pilot.title":"Ayúdanos a construir la próxima etapa de Kibo.","pilot.subtitle":"Estamos buscando familias, cuidadores y organizaciones interesadas en participar en la validación del producto.","pilot.placeholder":"Tu correo electrónico","pilot.button":"Quiero participar","pilot.thanks":"¡Gracias! Tu interés quedó registrado para la demo.",
+    "footer.note":"Prototipo funcional • Kibo no reemplaza cuidado humano ni atención médica."
+  },
+  en: {
+    "meta.description":"Kibo: a physical AI companion with world memory that helps older adults remember, feel accompanied, and stay connected with family and caregivers.",
+    "page.title":"Kibo — Your companion. Your memory.",
+    "nav.problem":"The problem","nav.memory":"Memory","nav.how":"How it works","nav.tech":"Technology","nav.requirements":"Requirements","nav.join":"Join the pilot","nav.login":"Login",
+    "hero.badge":"Functional prototype","hero.title":"When you cannot be there, Kibo remembers with them.",
+    "hero.subtitle":"Kibo is a physical AI companion with <strong>world memory</strong> that helps older adults remember, feel accompanied, and stay connected with family and caregivers.",
+    "hero.cta":"I want to join the pilot","hero.how":"See how it works","hero.note":"Companionship, not surveillance. Kibo does not replace a caregiver and does not provide medical diagnosis.",
+    "hero.b1":"“Your appointment is at 3:00 PM.”","hero.b2":"“The last time I saw your glasses, they were on the table.”","hero.b3":"“Laura is your daughter.”",
+    "problem.eyebrow":"The companionship gap","problem.title":"Being far away should not mean being disconnected.",
+    "problem.subtitle":"When family cannot be present all the time, forgetfulness, technology barriers, and communication loss can make everyday care much harder.",
+    "problem.c1t":"Everyday forgetfulness","problem.c1p":"Medication, appointments, routines, names, objects, and events can be forgotten throughout the day.",
+    "problem.c2t":"Less connection","problem.c2p":"A missed call or a complex interface can turn into hours without contact with family.",
+    "problem.c3t":"Care from a distance","problem.c3p":"Families need to know when to step in without turning the home into a constant surveillance space.",
+    "memory.eyebrow":"Kibo's differentiator","memory.title":"World memory, not just chat memory.",
+    "memory.p1":"Kibo connects real-world entities to build context: who a person is, where an object was seen, what event occurred, and how those memories relate to one another.",
+    "memory.p2":"<strong>An AI inference never overwrites a confirmed fact.</strong> Every memory keeps its source, timestamp, and confidence level.",
+    "memory.people":"PEOPLE","memory.peopleEx":"Laura → Carlos's daughter","memory.objects":"OBJECTS","memory.objectsEx":"Glasses → seen on the table","memory.places":"PLACES","memory.placesEx":"Table → located in the living room","memory.events":"EVENTS","memory.eventsEx":"Doctor appointment → Tuesday 3:00 PM",
+    "features.eyebrow":"What it can do","features.title":"A companion that takes initiative.","features.subtitle":"Kibo does not always wait for a question. It can proactively start interactions and maintain contextual conversations with the older adult.",
+    "features.f1t":"⏰ Remembers","features.f1p":"Medication, appointments, activities, routines, and important events.","features.f2t":"💬 Converses","features.f2p":"Speaks naturally and uses available context to respond more effectively.",
+    "features.f3t":"👤 Recognizes","features.f3p":"Identifies known people and retrieves previously verified relationships.","features.f4t":"📨 Delivers messages","features.f4p":"Family members can leave messages for Kibo to deliver at the right moment.",
+    "features.f5t":"🧠 Retrieves memories","features.f5p":"Connects people, objects, places, and events to answer questions about the environment.","features.f6t":"🔔 Alerts caregivers","features.f6p":"If the older adult asks for help or a situation needs attention, Kibo informs the caregiver with available context.",
+    "how.eyebrow":"How it works","how.title":"From a voice to real actions.","how.subtitle":"The prototype combines on-device processing with AI, memory, and automation services. The diagram below is the exact technical diagram provided for Kibo.",
+    "how.s1":"The older adult speaks or presses the button. The ESP32 captures audio and controls the physical interaction.","how.s2":"Voice is converted to text and combined with identity, session, and user context.",
+    "how.s3":"Kibo retrieves memory, chooses the tools it needs, and generates a response or action.","how.s4":"When current external information is needed, Kibo can call specialized services such as web search.","how.s5":"Reminders and scheduled tasks run through automations and background jobs.","how.s6":"The result returns to Kibo as voice, expression, and, when applicable, movement.",
+    "tech.eyebrow":"Technology and providers","tech.title":"A modular stack connecting hardware, memory, and intelligence.","tech.subtitle":"The prototype combines local components and specialized services. Each provider has a specific role in the workflow.",
+    "tech.esp32":"Device control, audio capture, display, speaker, button, and communication with Kibo services.","tech.auth0":"Authentication and user context management so each interaction maps to the right person and configuration.",
+    "tech.openrouter":"Routes requests to the most appropriate AI model for each task.","tech.openai":"Conversation, reasoning, and text-to-speech within the workflow shown.","tech.exa":"Web search for current external information when a conversation needs it.","tech.trigger":"Reminders, scheduled tasks, and background processes.","tech.db":"Conversations, reminders, entities, relationships, and long-term memory.","tech.face":"Recognizes people with face vectors and links identity to memory.","tech.voice":"Voice input, transcription, and conversion of generated responses back into audio.",
+    "req.eyebrow":"Integration requirements","req.title":"What each provider needs to work.","req.subtitle":"These are the technical prerequisites and credentials required to reproduce the workflow shown in the diagram. Exact environment-variable names can be adapted to the repository.",
+    "req.esp1":"ESP32 AI Chat Board with microphone, display, speaker, and button connected.","req.esp2":"Firmware capable of recording audio, sending HTTP/WebSocket requests, and playing audio.","req.esp3":"Configured Wi‑Fi and Kibo backend URL.","req.esp4":"A unique device ID linked to the user.",
+    "req.auth1":"Auth0 tenant.","req.auth2":"Application configured for the caregiver web app.","req.auth3":"API/Audience configured to protect the backend.","req.serverOnly":"(backend only)","req.auth4":"Callback/logout URLs for local and deployed environments.",
+    "req.or1":"OpenRouter account and API key.","req.or2":"Allowlist of models plus fallback.","req.or3":"Cost/token limits per interaction.","req.or4":"Optional application metadata to identify project traffic.",
+    "req.oa1":"Project/account with access to the models used by Kibo.","req.oa2":"Defined conversational model.","req.oa3":"Defined TTS model/service when OpenAI is used for voice output.","req.oa4":"Retention and logging policy appropriate for sensitive data.","req.oa5":"Backend timeouts, retries, and spend limits.",
+    "req.exa1":"Account and API key.","req.exa2":"Use only for questions that actually require current web information.","req.exa3":"Timeout and maximum result count to control latency and cost.",
+    "req.tr1":"Trigger.dev project connected to the backend.","req.tr2":"Tasks for reminders, retries, scheduled messages, and notifications.","req.tr3":"User timezone stored explicitly.","req.tr4":"Idempotency to prevent duplicate reminders.",
+    "req.dbTitle":"Database / memory","req.db1":"Relational database for users, caregivers, reminders, entities, relationships, and events.","req.db2":"Vector support or a separate vector store for face embeddings and semantic memory.","req.db3":"Source, timestamp, confidence, and verification-status fields for every memory.","req.db4":"Backups and encryption for sensitive data.",
+    "req.voiceTitle":"Speech-to-Text / Text-to-Speech","req.voice1":"On-device STT or a defined service to transcribe voice.","req.voice2":"Configured TTS to turn the response into audio.","req.voice3":"Consistent audio format between device and backend.","req.voice4":"Latency control and fallback when the service is unavailable.",
+    "req.faceTitle":"Local face recognition","req.face1":"Robot camera available during interaction.","req.face2":"Local face-embedding model.","req.face3":"Vector index/store containing authorized identities.","req.face4":"Configurable similarity threshold and explicit handling for unknown identities.","req.face5":"Never promote an uncertain face match into a confirmed fact automatically.",
+    "req.notificationsTitle":"Caregiver notifications","req.not1":"Defined output channel: web, email, WhatsApp, push, or another service.","req.not2":"Caregiver contact information and escalation rules.","req.not3":"Minimum statuses: INFO, ATTENTION, and HELP REQUEST.","req.not4":"Track delivery and response without assuming no response means an emergency.",
+    "req.note":"Note: this section documents the integration prerequisites for the prototype shown. Third-party plans, usage limits, and pricing can change and should be reviewed before production.",
+    "privacy.eyebrow":"Privacy by design","privacy.title":"Companionship, not surveillance.","privacy.subtitle":"Kibo uses its camera during interactions to understand and remember context, not as a permanent monitoring camera.",
+    "privacy.p1":"The camera activates during interaction.","privacy.p2":"Processed information is prioritized over continuous recording.","privacy.p3":"Confirmed facts take precedence over AI inferences.","privacy.p4":"Family members receive information when Kibo detects a need for attention.",
+    "pilot.badge":"Functional prototype","pilot.title":"Help us build Kibo's next stage.","pilot.subtitle":"We are looking for families, caregivers, and care organizations interested in participating in product validation.","pilot.placeholder":"Your email address","pilot.button":"I want to join","pilot.thanks":"Thank you! Your interest has been registered for the demo.",
+    "footer.note":"Functional prototype • Kibo does not replace human caregiving or medical care."
+  }
+};
+
+function setLanguage(lang){
+  const dict = translations[lang] || translations.es;
+  document.documentElement.lang = lang;
+  document.getElementById("page-title").textContent = dict["page.title"];
+  document.getElementById("meta-description").setAttribute("content", dict["meta.description"]);
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k=el.getAttribute("data-i18n"); if(dict[k]!==undefined) el.textContent=dict[k];
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach(el=>{
+    const k=el.getAttribute("data-i18n-html"); if(dict[k]!==undefined) el.innerHTML=dict[k];
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{
+    const k=el.getAttribute("data-i18n-placeholder"); if(dict[k]!==undefined) el.setAttribute("placeholder",dict[k]);
+  });
+  document.getElementById("lang-es").classList.toggle("active",lang==="es");
+  document.getElementById("lang-en").classList.toggle("active",lang==="en");
+  localStorage.setItem("kibo-lang",lang);
+}
+document.getElementById("lang-es").addEventListener("click",()=>setLanguage("es"));
+document.getElementById("lang-en").addEventListener("click",()=>setLanguage("en"));
+setLanguage(localStorage.getItem("kibo-lang") || "es");
+</script>
+</body>
+</html>
