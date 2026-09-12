@@ -112,15 +112,13 @@ Orientación: `MIRROR_X`, `SWAP_XY`.
 3. **La carpeta `Arduino15/.../esp32/3.3.8` está vacía.** El core que de verdad
    está instalado es el **3.3.11**.
 
-4. **El canal derecho del ES7210 no es un segundo microfono.** El `config.h` de
-   LAFVIN trae `AUDIO_INPUT_REFERENCE true`: ese canal lleva la señal de
-   referencia del parlante, la que alimentaría al cancelador de eco. Es mucho
-   más fuerte que la voz, así que mezclarlo con el micrófono suena a ruido y
-   falsea cualquier medición de nivel. **Usar solo el canal izquierdo.**
-
-   Consecuencia buena: la referencia de eco *existe y es accesible*. Eso hace
-   viable cancelar el eco por software en el PC más adelante, sin necesitar el
-   AEC de ESP-IDF.
+4. **Los dos canales del ES7210 llevan lo mismo.** El `config.h` de LAFVIN trae
+   `AUDIO_INPUT_REFERENCE true`, lo que hacía pensar que el canal derecho era la
+   señal de referencia del parlante para cancelación de eco. **Medido: no lo es.**
+   Con ruido ambiente los dos canales dan niveles prácticamente iguales
+   (izq pico 3264 / rms 878 contra der pico 3248 / rms 905), así que son los dos
+   micrófonos. La referencia, si se activa, debe salir por otros canales del
+   ES7210 y hay que habilitarla explícitamente.
 
 5. **Nunca hacer eco continuo micrófono → parlante para probar.** Se realimenta
    y chilla. Grabar un rato y reproducir después prueba las mismas dos rutas,
