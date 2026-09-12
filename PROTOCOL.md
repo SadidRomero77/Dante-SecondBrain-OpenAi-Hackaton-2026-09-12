@@ -15,11 +15,16 @@ Un solo formato, de punta a punta, sin conversiones en ningún punto de la caden
 | Codificación | PCM lineal, 16 bits con signo, little endian |
 | Frecuencia | 24000 Hz |
 | Canales | 1 (mono) |
-| Trozo | 20 ms = 480 muestras = **1920 bytes** |
+| Trozo | 20 ms = 480 muestras = **960 bytes** |
 | Caudal | 48 000 bytes/s por dirección |
 
 Es el mismo formato que pide la Realtime API de OpenAI. Por eso no hay ni
 remuestreo ni códec en el camino.
+
+El bus I2S de la placa trabaja en estéreo con los dos micrófonos, pero por el
+cable viaja **mono**: el aparato promedia los dos canales antes de enviar, y
+duplica el mono a los dos canales al reproducir. Probado a oído — la mezcla de
+los dos micrófonos suena claramente más limpia que cualquiera de los dos solo.
 
 ## Delimitación de mensajes
 
@@ -38,7 +43,7 @@ una cabecera de 4 bytes:
 
 | tipo | nombre | dirección | carga |
 |---|---|---|---|
-| `0x01` | `AUDIO` | ambas | 1920 bytes de PCM16 |
+| `0x01` | `AUDIO` | ambas | 960 bytes de PCM16 mono |
 | `0x02` | `CONTROL` | ambas | JSON en UTF-8 |
 | `0x03` | `LOG` | aparato → PC | texto plano, para depurar |
 

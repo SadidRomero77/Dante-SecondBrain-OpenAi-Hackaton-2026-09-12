@@ -11,6 +11,7 @@ Comandos de Dante:
   dante smoke           Prueba la Realtime API con una conversacion de texto.
   dante smoke --audio   Igual, pero pide la respuesta hablada y la guarda en WAV.
   dante monitor        Reinicia el aparato y muestra lo que imprime por serie.
+  dante puente         Microfono -> PC -> parlante. Aprieta BOOT y habla.
 """
 
 
@@ -25,6 +26,9 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("smoke", help="prueba la Realtime API")
     s.add_argument("--audio", action="store_true",
                    help="pedir la respuesta hablada y guardarla en WAV")
+
+    pu = sub.add_parser("puente", help="prueba el camino completo por USB")
+    pu.add_argument("--segundos", type=float, default=60.0)
 
     m = sub.add_parser("monitor", help="lee el puerto serie del aparato")
     m.add_argument("--segundos", type=float, default=15.0,
@@ -41,6 +45,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.comando == "smoke":
         from .smoke import correr
         return correr(con_audio=args.audio)
+
+    if args.comando == "puente":
+        from .puente import correr as puentear
+        return puentear(segundos=args.segundos)
 
     if args.comando == "monitor":
         from .monitor import correr as monitorear

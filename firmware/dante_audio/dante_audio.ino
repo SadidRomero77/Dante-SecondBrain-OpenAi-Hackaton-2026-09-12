@@ -56,8 +56,8 @@ static const uint8_t DIR_ES7210 = 0x41;
 static const uint8_t GANANCIA_MIC = 10;     // 30 dB. Medido con el canal ya
                                             //  limpio: a 34.5 dB satura con solo
                                             //  ruido ambiente.
-static const int     VOLUMEN_DAC  = 85;     // 100 quedaba muy fuerte, 78 corto
-static const float   GANANCIA_SW  = 1.5f;   // solo para escuchar la prueba;
+static const int     VOLUMEN_DAC  = 92;     // 100 distorsiona
+static const float   GANANCIA_SW  = 1.5f;   // mas que esto amplifica el ruido
                                             //  a OpenAI le va el audio crudo
 
 static const uint32_t FS         = 24000;   // igual que la Realtime API
