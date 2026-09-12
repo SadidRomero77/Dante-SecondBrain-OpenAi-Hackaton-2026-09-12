@@ -56,7 +56,7 @@ static const uint8_t DIR_ES7210 = 0x41;
 static const uint8_t GANANCIA_MIC = 10;     // 30 dB. Medido con el canal ya
                                             //  limpio: a 34.5 dB satura con solo
                                             //  ruido ambiente.
-static const int     VOLUMEN_DAC  = 78;     // 100 quedaba demasiado fuerte
+static const int     VOLUMEN_DAC  = 85;     // 100 quedaba muy fuerte, 78 corto
 static const float   GANANCIA_SW  = 1.5f;   // solo para escuchar la prueba;
                                             //  a OpenAI le va el audio crudo
 
@@ -416,26 +416,18 @@ void loop() {
   int32_t pi, pd; double ri, rd;
   nivel_canal(buffer, n, 0, &pi, &ri);
   nivel_canal(buffer, n, 1, &pd, &rd);
-  Serial.printf("   izquierdo  pico %5ld  rms %5.0f\n", (long)pi, ri);
-  Serial.printf("   derecho    pico %5ld  rms %5.0f\n", (long)pd, rd);
-  Serial.printf("   huecos %d\n", huecos(buffer, n));
+  int cortes = huecos(buffer, n);
 
-  /* Reproduce los tres candidatos, anunciados con pitidos:
-       1 pitido  -> solo canal izquierdo
-       2 pitidos -> solo canal derecho
-       3 pitidos -> los dos mezclados (asi sonaba en la version que funciono)
-     El que suene a tu voz es el bueno. Deja de adivinar cual es cual. */
-  for (int modo = 0; modo < 3; modo++) {
-    for (int b = 0; b <= modo; b++) { tono(880, 120); delay(110); }
-    delay(250);
+  Serial.printf("   izq pico %5ld rms %5.0f | der pico %5ld rms %5.0f | huecos %d  %s\n",
+                (long)pi, ri, (long)pd, rd, cortes,
+                (pi > 30000 || pd > 30000) ? "<-- saturado"
+                : (pi < 300 && pd < 300)   ? "<-- muy bajo"
+                : "bien");
 
-    reproducir(buffer, n, modo);
-    Serial.printf(">> reproducido: %s\n",
-                  modo == 0 ? "IZQUIERDO (1 pitido)"
-                  : modo == 1 ? "DERECHO (2 pitidos)"
-                  : "MEZCLA (3 pitidos)");
-    delay(700);
-  }
+  /* Modo 2: los dos microfonos tal como vienen. Probado a oido contra el
+     izquierdo y el derecho por separado; la mezcla suena claramente mas
+     limpia que cualquiera de los dos solo. */
+  reproducir(buffer, n, 2);
 
-  delay(1500);
+  delay(1200);
 }

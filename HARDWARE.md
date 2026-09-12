@@ -120,6 +120,10 @@ Orientación: `MIRROR_X`, `SWAP_XY`.
    micrófonos. La referencia, si se activa, debe salir por otros canales del
    ES7210 y hay que habilitarla explícitamente.
 
+   **Usar los dos.** Probado a oído contra cada canal por separado: la mezcla
+   suena claramente más limpia que el izquierdo o el derecho solos. Para
+   mandarle audio mono a OpenAI, promediar los dos canales — no tomar uno.
+
 5. **Nunca hacer eco continuo micrófono → parlante para probar.** Se realimenta
    y chilla. Grabar un rato y reproducir después prueba las mismas dos rutas,
    sin acople, y además es como va a funcionar de verdad con el botón.
