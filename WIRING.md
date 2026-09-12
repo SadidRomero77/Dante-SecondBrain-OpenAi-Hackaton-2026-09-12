@@ -56,6 +56,60 @@ siempre en la ranura izquierda y el firmware sabe dónde buscarlo.
 Así el firmware puede callar el amplificador con la misma línea de siempre, y
 además queda en el canal izquierdo, que es donde manda el micrófono.
 
+## ST7789 — la pantalla
+
+Tiene su **propio bus SPI** y no comparte ninguna señal con el audio. Solo
+comparte la alimentación de 3.3 V y la tierra.
+
+| Pin | Va a | Nota |
+|---|---|---|
+| `VCC` | 3V3 | riel de arriba, con el micrófono |
+| `GND` | GND | riel de arriba |
+| `DC` | `GPIO39` | dato o comando |
+| `CS` | `GPIO47` | selección de chip |
+| `CLK` | `GPIO41` | reloj SPI — **no** es el `BCLK` del audio |
+| `SDA` | `GPIO40` | datos SPI |
+| `BLK` | `GPIO42` | luz de fondo |
+| `RES` | `RST` | al reset de la placa |
+
+## En protoboard: dos rieles, no uno
+
+El amplificador puede pedir **picos de unos 400 mA**. Si sale del mismo
+regulador de 3.3 V que alimenta al ESP32 con WiFi y la luz de la pantalla, la
+tensión se hunde en los golpes de audio: distorsión, parpadeo de pantalla y
+reinicios al subir el volumen.
+
+| Riel | Qué lleva | Quién toma de ahí |
+|---|---|---|
+| **arriba +** | 3.3 V | micrófono y pantalla |
+| **arriba −** | GND | los dos |
+| **abajo +** | 5 V | solo el amplificador |
+| **abajo −** | GND | el amplificador |
+
+**Las dos tierras van unidas con un puente.** Sin eso no funciona nada, y es el
+olvido más común.
+
+Los 5 V vienen directo del USB sin pasar por el regulador de la placa, así que
+tienen margen. Y como los rieles quedan en extremos opuestos, poner el
+micrófono en el equivocado deja de ser un descuido posible.
+
+### Cómo se une una señal que va a dos sitios
+
+Las filas de la protoboard **son el empalme**: cada fila de cinco huecos está
+unida por dentro.
+
+```
+shield BCLK ──→ [una fila libre] ──→ micrófono SCK
+                       └──────────→ amplificador BCLK
+```
+
+Un cable entra, dos salen. Lo mismo con `WS`. Las señales que van a un solo
+sitio —`DIN`, `DOUT`, `PA_EN` y todo el SPI de la pantalla— van directas.
+
+> Los módulos suelen venir con la tira de pines **suelta**. Para pincharlos en
+> la protoboard hay que soldarles esa tira: 6 y 7 puntos. Si ya vienen con los
+> pines puestos, no hay nada que soldar en todo el montaje.
+
 ## Pines que quedan libres
 
 | Antes | Ahora |

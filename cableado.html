@@ -91,151 +91,180 @@
 
 <div class="wrap">
 <h1>Cableado de Dante</h1>
-<p class="sub">INMP441 y MAX98357A sobre el shield LAFVIN, en el zócalo donde estaba el códec original. Los dos módulos son I2S puro: sin configuración por I2C y sin MCLK.</p>
+<p class="sub">Plano completo en protoboard: micrófono INMP441, amplificador MAX98357A y pantalla ST7789, sobre el shield LAFVIN. Los dos módulos de audio son I2S puro — sin configuración por I2C y sin MCLK.</p>
 
 <div class="alerta">
   <p><b>El INMP441 no tolera 5 V.</b> Y el pin <code>VCC</code> del zócalo del códec es de 5 V, porque así lo pedía el módulo viejo.</p>
-  <p>El micrófono va al pin <b>3V3</b> de la placa ESP32-S3, <b>nunca</b> al <code>VCC</code> del zócalo. El amplificador sí puede usarlo, y a 5 V suena más fuerte.</p>
+  <p>Por eso este plano usa <b>dos rieles de alimentación separados</b>, uno arriba y otro abajo: 3.3 V para el micrófono y la pantalla, 5 V solo para el amplificador. Cada cosa toma del riel que le queda al lado, y confundirse cuesta trabajo.</p>
 </div>
 
+<h2>Los tres componentes</h2>
+<div class="tabla"><table>
+<thead><tr><th>Módulo</th><th>Alimentación</th><th>Señales</th><th>Comparte</th></tr></thead>
+<tbody>
+<tr><td class="pin">INMP441</td><td class="ojo">3.3 V · nunca 5</td><td><code>SD</code>→GPIO12</td><td>BCLK, WS</td></tr>
+<tr><td class="pin">MAX98357A</td><td class="pin">5 V</td><td><code>DIN</code>→GPIO45, <code>SD</code>→GPIO48</td><td>BCLK, WS</td></tr>
+<tr><td class="pin">ST7789</td><td class="pin">3.3 V</td><td>SPI propio: 39, 47, 41, 40, 42</td><td>nada — bus aparte</td></tr>
+</tbody></table></div>
+<p class="sub" style="margin-top:12px">La pantalla va por <b>SPI</b> y el audio por <b>I2S</b>: son buses distintos y no se estorban. Lo único que comparten es la alimentación y la tierra.</p>
+
+<h2>El plano</h2>
 <figure>
 <div class="lienzo">
-<svg viewBox="0 0 900 470" role="img" aria-label="El micrófono INMP441 se alimenta de 3.3 voltios y manda datos por GPIO12; el amplificador MAX98357A se alimenta de 5 voltios y recibe datos por GPIO45; ambos comparten el reloj BCLK en GPIO14 y el word select en GPIO13.">
+<svg viewBox="0 0 960 560" role="img" aria-label="Plano completo en protoboard: riel superior de 3.3 voltios para el micrófono y la pantalla, riel inferior de 5 voltios solo para el amplificador, las dos tierras unidas, y dos filas de empalme que reparten el reloj a los dos módulos de audio.">
   <defs>
-    <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <marker id="q" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
     </marker>
   </defs>
 
-  <!-- ============ zocalo del shield ============ -->
-  <rect x="316" y="40" width="268" height="392" rx="11" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55"/>
-  <text x="450" y="30" text-anchor="middle" font-size="12.5" font-weight="600" fill="currentColor">ZÓCALO DEL CÓDEC · shield LAFVIN</text>
+  <rect x="176" y="24" width="600" height="512" rx="10" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".45"/>
 
-  <!-- filas del zocalo -->
-  <g font-family="IBM Plex Mono, monospace" font-size="12">
-    <rect x="330" y="56" width="240" height="30" rx="6" fill="none" stroke="#ff8a5c" stroke-width="1.4"/>
-    <text x="344" y="76" fill="#ff8a5c" font-weight="600">VCC</text>
-    <text x="556" y="76" text-anchor="end" fill="currentColor" opacity=".6">5 V</text>
+  <!-- rieles de arriba: 3V3 -->
+  <rect x="192" y="38" width="568" height="22" rx="4" fill="none" stroke="#4fc3f7" stroke-width="1.6"/>
+  <text x="204" y="53" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="#4fc3f7">riel + arriba</text>
+  <text x="746" y="53" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#4fc3f7" opacity=".85">3.3 V — micrófono y pantalla</text>
 
-    <rect x="330" y="94" width="240" height="30" rx="6" fill="none" stroke="#8b98a5" stroke-width="1.4"/>
-    <text x="344" y="114" fill="#8b98a5" font-weight="600">GND</text>
+  <rect x="192" y="66" width="568" height="22" rx="4" fill="none" stroke="#8b98a5" stroke-width="1.5"/>
+  <text x="204" y="81" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="#8b98a5">riel − arriba</text>
 
-    <rect x="330" y="132" width="240" height="30" rx="6" fill="none" stroke="#ffd166" stroke-width="1.4"/>
-    <text x="344" y="152" fill="#ffd166" font-weight="600">PA_EN</text>
-    <text x="556" y="152" text-anchor="end" fill="currentColor" opacity=".6">GPIO48</text>
+  <!-- rieles de abajo: 5V -->
+  <rect x="192" y="472" width="568" height="22" rx="4" fill="none" stroke="#ff8a5c" stroke-width="1.6"/>
+  <text x="204" y="487" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="#ff8a5c">riel + abajo</text>
+  <text x="746" y="487" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#ff8a5c" opacity=".85">5 V — solo el amplificador</text>
 
-    <rect x="330" y="170" width="240" height="30" rx="6" fill="none" stroke="#7ee787" stroke-width="1.4"/>
-    <text x="344" y="190" fill="#7ee787" font-weight="600">DOUT</text>
-    <text x="556" y="190" text-anchor="end" fill="currentColor" opacity=".6">GPIO45</text>
+  <rect x="192" y="500" width="568" height="22" rx="4" fill="none" stroke="#8b98a5" stroke-width="1.5"/>
+  <text x="204" y="515" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="600" fill="#8b98a5">riel − abajo</text>
 
-    <rect x="330" y="208" width="240" height="30" rx="6" fill="none" stroke="#7ee787" stroke-width="1.4"/>
-    <text x="344" y="228" fill="#7ee787" font-weight="600">DIN</text>
-    <text x="556" y="228" text-anchor="end" fill="currentColor" opacity=".6">GPIO12</text>
+  <!-- puente entre las dos tierras -->
+  <path d="M770 77 H 792 V 511 H 770" fill="none" stroke="#8b98a5" stroke-width="2" stroke-dasharray="5 3"/>
+  <text x="800" y="298" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8b98a5">une las dos</text>
+  <text x="800" y="311" font-family="IBM Plex Mono, monospace" font-size="10" fill="#8b98a5">tierras: obligatorio</text>
 
-    <rect x="330" y="246" width="240" height="30" rx="6" fill="none" stroke="#c792ea" stroke-width="1.4"/>
-    <text x="344" y="266" fill="#c792ea" font-weight="600">WS</text>
-    <text x="556" y="266" text-anchor="end" fill="currentColor" opacity=".6">GPIO13</text>
+  <!-- filas de empalme -->
+  <rect x="360" y="242" width="132" height="22" rx="4" fill="none" stroke="#c792ea" stroke-width="1.6"/>
+  <text x="372" y="257" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="600" fill="#c792ea">fila BCLK</text>
+  <rect x="360" y="276" width="132" height="22" rx="4" fill="none" stroke="#c792ea" stroke-width="1.6"/>
+  <text x="372" y="291" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="600" fill="#c792ea">fila WS</text>
+  <text x="426" y="316" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".5">un cable entra, dos salen</text>
 
-    <rect x="330" y="284" width="240" height="30" rx="6" fill="none" stroke="#c792ea" stroke-width="1.4"/>
-    <text x="344" y="304" fill="#c792ea" font-weight="600">BCLK</text>
-    <text x="556" y="304" text-anchor="end" fill="currentColor" opacity=".6">GPIO14</text>
-
-    <rect x="330" y="322" width="240" height="30" rx="6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4" opacity=".35"/>
-    <text x="344" y="342" fill="currentColor" opacity=".45" font-weight="600">MCLK</text>
-    <text x="556" y="342" text-anchor="end" fill="currentColor" opacity=".35">sin usar</text>
-
-    <rect x="330" y="360" width="240" height="30" rx="6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4" opacity=".35"/>
-    <text x="344" y="380" fill="currentColor" opacity=".45" font-weight="600">SCL</text>
-    <text x="556" y="380" text-anchor="end" fill="currentColor" opacity=".35">libre</text>
-
-    <rect x="330" y="398" width="240" height="30" rx="6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4" opacity=".35"/>
-    <text x="344" y="418" fill="currentColor" opacity=".45" font-weight="600">SDA</text>
-    <text x="556" y="418" text-anchor="end" fill="currentColor" opacity=".35">libre</text>
+  <!-- shield -->
+  <rect x="10" y="86" width="128" height="404" rx="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="74" y="106" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">SHIELD</text>
+  <g font-family="IBM Plex Mono, monospace" font-size="10.5">
+    <text x="124" y="130" text-anchor="end" fill="#4fc3f7" font-weight="600">3V3</text>
+    <text x="124" y="154" text-anchor="end" fill="#ff8a5c" font-weight="600">5V</text>
+    <text x="124" y="178" text-anchor="end" fill="#8b98a5" font-weight="600">GND</text>
+    <text x="124" y="206" text-anchor="end" fill="#c792ea" font-weight="600">BCLK 14</text>
+    <text x="124" y="230" text-anchor="end" fill="#c792ea" font-weight="600">WS 13</text>
+    <text x="124" y="254" text-anchor="end" fill="#7ee787" font-weight="600">DIN 12</text>
+    <text x="124" y="278" text-anchor="end" fill="#7ee787" font-weight="600">DOUT 45</text>
+    <text x="124" y="302" text-anchor="end" fill="#ffd166" font-weight="600">PA_EN 48</text>
+    <text x="124" y="330" text-anchor="end" fill="#ffd166" font-weight="600">DC 39</text>
+    <text x="124" y="352" text-anchor="end" fill="#ffd166" font-weight="600">CS 47</text>
+    <text x="124" y="374" text-anchor="end" fill="#ffd166" font-weight="600">CLK 41</text>
+    <text x="124" y="396" text-anchor="end" fill="#ffd166" font-weight="600">SDA 40</text>
+    <text x="124" y="418" text-anchor="end" fill="#ffd166" font-weight="600">BLK 42</text>
+    <text x="124" y="440" text-anchor="end" fill="#8b98a5" font-weight="600">RST</text>
   </g>
 
-  <!-- pin 3V3 aparte -->
-  <rect x="330" y="-2" width="240" height="0" fill="none"/>
-  <rect x="130" y="18" width="120" height="30" rx="6" fill="none" stroke="#4fc3f7" stroke-width="1.6"/>
-  <text x="144" y="38" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#4fc3f7">3V3</text>
-  <text x="238" y="38" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".55">placa</text>
+  <!-- alimentacion del shield a los rieles -->
+  <path d="M128 126 H 156 V 49 H 190" fill="none" stroke="#4fc3f7" stroke-width="2" marker-end="url(#q)"/>
+  <path d="M128 150 H 166 V 483 H 190" fill="none" stroke="#ff8a5c" stroke-width="2" marker-end="url(#q)"/>
+  <path d="M128 174 H 176 V 77 H 190" fill="none" stroke="#8b98a5" stroke-width="2" marker-end="url(#q)"/>
 
-  <!-- ============ INMP441 ============ -->
-  <rect x="24" y="76" width="196" height="176" rx="10" fill="none" stroke="currentColor" stroke-width="1.6"/>
-  <text x="122" y="98" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">INMP441</text>
-  <text x="122" y="114" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">micrófono · 3.3 V</text>
-  <g font-family="IBM Plex Mono, monospace" font-size="11.5">
-    <text x="200" y="136" text-anchor="end" fill="#4fc3f7" font-weight="600">VDD</text>
-    <text x="200" y="158" text-anchor="end" fill="#8b98a5" font-weight="600">GND</text>
-    <text x="200" y="180" text-anchor="end" fill="#c792ea" font-weight="600">SCK</text>
-    <text x="200" y="202" text-anchor="end" fill="#c792ea" font-weight="600">WS</text>
-    <text x="200" y="224" text-anchor="end" fill="#7ee787" font-weight="600">SD</text>
-    <text x="200" y="246" text-anchor="end" fill="#8b98a5" font-weight="600">L/R</text>
+  <!-- relojes a las filas de empalme -->
+  <path d="M128 202 H 330 V 253 H 358" fill="none" stroke="#c792ea" stroke-width="2" marker-end="url(#q)"/>
+  <path d="M128 226 H 340 V 287 H 358" fill="none" stroke="#c792ea" stroke-width="2" marker-end="url(#q)"/>
+
+  <!-- datos directos -->
+  <path d="M128 250 H 520 V 168 H 566" fill="none" stroke="#7ee787" stroke-width="2.2" marker-end="url(#q)"/>
+  <path d="M128 274 H 532 V 372 H 566" fill="none" stroke="#7ee787" stroke-width="2.2" marker-end="url(#q)"/>
+  <path d="M128 298 H 544 V 396 H 566" fill="none" stroke="#ffd166" stroke-width="2" marker-end="url(#q)"/>
+
+  <!-- SPI de la pantalla, en manojo -->
+  <path d="M128 326 H 300 V 118 H 566" fill="none" stroke="#ffd166" stroke-width="1.5" opacity=".75" marker-end="url(#q)"/>
+  <path d="M128 348 H 292 V 128 H 566" fill="none" stroke="#ffd166" stroke-width="1.5" opacity=".75"/>
+  <path d="M128 370 H 284 V 138 H 566" fill="none" stroke="#ffd166" stroke-width="1.5" opacity=".75"/>
+  <path d="M128 392 H 276 V 148 H 566" fill="none" stroke="#ffd166" stroke-width="1.5" opacity=".75"/>
+  <path d="M128 414 H 268 V 158 H 566" fill="none" stroke="#ffd166" stroke-width="1.5" opacity=".75"/>
+  <path d="M128 436 H 260 V 108 H 566" fill="none" stroke="#8b98a5" stroke-width="1.5" opacity=".7"/>
+
+  <!-- PANTALLA -->
+  <rect x="566" y="96" width="176" height="98" rx="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="654" y="116" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">ST7789 · pantalla</text>
+  <g font-family="IBM Plex Mono, monospace" font-size="10">
+    <text x="580" y="136" fill="#4fc3f7">VCC a 3.3 V</text>
+    <text x="580" y="150" fill="#8b98a5">GND · RES al RST</text>
+    <text x="580" y="164" fill="#ffd166">DC CS CLK SDA BLK</text>
+    <text x="580" y="182" fill="currentColor" opacity=".5">SPI propio, no comparte nada</text>
   </g>
 
-  <!-- ============ MAX98357A ============ -->
-  <rect x="24" y="272" width="196" height="180" rx="10" fill="none" stroke="currentColor" stroke-width="1.6"/>
-  <text x="122" y="294" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">MAX98357A</text>
-  <text x="122" y="310" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">amplificador · 5 V</text>
-  <g font-family="IBM Plex Mono, monospace" font-size="11.5">
-    <text x="200" y="332" text-anchor="end" fill="#ff8a5c" font-weight="600">VIN</text>
-    <text x="200" y="352" text-anchor="end" fill="#8b98a5" font-weight="600">GND</text>
-    <text x="200" y="372" text-anchor="end" fill="#c792ea" font-weight="600">BCLK</text>
-    <text x="200" y="392" text-anchor="end" fill="#c792ea" font-weight="600">LRC</text>
-    <text x="200" y="412" text-anchor="end" fill="#7ee787" font-weight="600">DIN</text>
-    <text x="200" y="432" text-anchor="end" fill="#ffd166" font-weight="600">SD</text>
+  <!-- MICROFONO -->
+  <rect x="566" y="216" width="176" height="94" rx="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="654" y="236" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">INMP441</text>
+  <g font-family="IBM Plex Mono, monospace" font-size="10">
+    <text x="580" y="256" fill="#4fc3f7">VDD a 3.3 V</text>
+    <text x="580" y="270" fill="#8b98a5">GND · L/R los dos a tierra</text>
+    <text x="580" y="284" fill="#c792ea">SCK · WS de las filas</text>
+    <text x="580" y="298" fill="#7ee787">SD sale por GPIO12</text>
   </g>
-  <text x="122" y="452" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".45">GAIN sin conectar = 9 dB</text>
 
-  <!-- ============ cables ============ -->
-  <!-- mic VDD -> 3V3 -->
-  <path d="M204 132 H 268 V 33 H 128" fill="none" stroke="#4fc3f7" stroke-width="2" marker-end="url(#f)"/>
-  <!-- mic GND -->
-  <path d="M204 154 H 292 V 109 H 328" fill="none" stroke="#8b98a5" stroke-width="1.8" marker-end="url(#f)"/>
-  <!-- mic SCK -> BCLK -->
-  <path d="M204 176 H 246 V 299 H 328" fill="none" stroke="#c792ea" stroke-width="2" marker-end="url(#f)"/>
-  <!-- mic WS -->
-  <path d="M204 198 H 258 V 261 H 328" fill="none" stroke="#c792ea" stroke-width="2" marker-end="url(#f)"/>
-  <!-- mic SD -> DIN -->
-  <path d="M204 220 H 304 V 223 H 328" fill="none" stroke="#7ee787" stroke-width="2.2" marker-end="url(#f)"/>
-  <!-- mic L/R -> GND -->
-  <path d="M204 242 H 236 V 109 H 328" fill="none" stroke="#8b98a5" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#f)"/>
-  <text x="228" y="258" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8b98a5">a GND = izquierdo</text>
+  <!-- AMPLIFICADOR -->
+  <rect x="566" y="332" width="176" height="104" rx="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="654" y="352" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">MAX98357A</text>
+  <g font-family="IBM Plex Mono, monospace" font-size="10">
+    <text x="580" y="372" fill="#7ee787">DIN desde GPIO45</text>
+    <text x="580" y="386" fill="#ff8a5c">VIN a 5 V</text>
+    <text x="580" y="400" fill="#8b98a5">GND · GAIN los dos a tierra</text>
+    <text x="580" y="414" fill="#c792ea">BCLK · LRC de las filas</text>
+    <text x="580" y="428" fill="#ffd166">SD desde GPIO48</text>
+  </g>
 
-  <!-- amp VIN -> VCC -->
-  <path d="M204 328 H 282 V 71 H 328" fill="none" stroke="#ff8a5c" stroke-width="2" marker-end="url(#f)"/>
-  <!-- amp GND -->
-  <path d="M204 348 H 296 V 109 H 328" fill="none" stroke="#8b98a5" stroke-width="1.8" marker-end="url(#f)"/>
-  <!-- amp BCLK -->
-  <path d="M204 368 H 252 V 299 H 328" fill="none" stroke="#c792ea" stroke-width="2" marker-end="url(#f)"/>
-  <!-- amp LRC -->
-  <path d="M204 388 H 264 V 261 H 328" fill="none" stroke="#c792ea" stroke-width="2" marker-end="url(#f)"/>
-  <!-- amp DIN -> DOUT -->
-  <path d="M204 408 H 310 V 185 H 328" fill="none" stroke="#7ee787" stroke-width="2.2" marker-end="url(#f)"/>
-  <!-- amp SD -> PA_EN -->
-  <path d="M204 428 H 318 V 147 H 328" fill="none" stroke="#ffd166" stroke-width="2" marker-end="url(#f)"/>
+  <!-- rieles a los modulos -->
+  <path d="M762 49 H 800 V 132 H 746" fill="none" stroke="#4fc3f7" stroke-width="1.7" marker-end="url(#q)"/>
+  <path d="M762 49 H 816 V 252 H 746" fill="none" stroke="#4fc3f7" stroke-width="1.7" marker-end="url(#q)"/>
+  <path d="M762 77 H 832 V 146 H 746" fill="none" stroke="#8b98a5" stroke-width="1.6" marker-end="url(#q)"/>
+  <path d="M762 77 H 848 V 266 H 746" fill="none" stroke="#8b98a5" stroke-width="1.6" marker-end="url(#q)"/>
+  <path d="M762 483 H 864 V 382 H 746" fill="none" stroke="#ff8a5c" stroke-width="1.7" marker-end="url(#q)"/>
+  <path d="M762 511 H 880 V 396 H 746" fill="none" stroke="#8b98a5" stroke-width="1.6" marker-end="url(#q)"/>
+
+  <!-- filas de empalme a los dos modulos -->
+  <path d="M494 253 H 520 V 280 H 562" fill="none" stroke="#c792ea" stroke-width="1.7" marker-end="url(#q)"/>
+  <path d="M494 253 H 508 V 410 H 562" fill="none" stroke="#c792ea" stroke-width="1.7" marker-end="url(#q)"/>
+  <path d="M494 287 H 528 V 292 H 562" fill="none" stroke="#c792ea" stroke-width="1.7" stroke-dasharray="4 3" marker-end="url(#q)"/>
+  <path d="M494 287 H 516 V 418 H 562" fill="none" stroke="#c792ea" stroke-width="1.7" stroke-dasharray="4 3" marker-end="url(#q)"/>
 
   <!-- parlante -->
-  <rect x="640" y="360" width="150" height="58" rx="9" fill="none" stroke="currentColor" stroke-width="1.4"/>
-  <text x="715" y="384" text-anchor="middle" font-size="12" fill="currentColor">Parlante</text>
-  <text x="715" y="401" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">4Ω u 8Ω · 3W</text>
-  <path d="M122 452 V 466 H 640 V 400" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".55" marker-end="url(#f)"/>
-  <text x="400" y="463" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".5">bornera + y − · polaridad indistinta</text>
+  <rect x="566" y="456" width="176" height="46" rx="8" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="654" y="474" text-anchor="middle" font-size="11.5" fill="currentColor">Parlante 4Ω u 8Ω</text>
+  <text x="654" y="490" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">a la bornera · polaridad indistinta</text>
+  <path d="M654 440 V 452" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".6" marker-end="url(#q)"/>
 
-  <!-- nota MCLK -->
-  <text x="620" y="342" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".45">estos módulos generan</text>
-  <text x="620" y="356" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".45">su reloj del BCLK</text>
+  <text x="300" y="548" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".5">14 cables desde el shield · dentro de la protoboard no se cruza ninguno en el aire</text>
 </svg>
 </div>
 <div class="leyenda">
-  <span><i style="background:var(--v33)"></i>3.3 V</span>
-  <span><i style="background:var(--v5)"></i>5 V</span>
+  <span><i style="background:var(--v33)"></i>3.3 V · arriba</span>
+  <span><i style="background:var(--v5)"></i>5 V · abajo</span>
   <span><i style="background:var(--gnd)"></i>tierra</span>
-  <span><i style="background:var(--reloj)"></i>reloj — compartido</span>
+  <span><i style="background:var(--reloj)"></i>reloj I2S — compartido</span>
   <span><i style="background:var(--datos)"></i>datos de audio</span>
-  <span><i style="background:var(--ctrl)"></i>control</span>
+  <span><i style="background:var(--ctrl)"></i>control y SPI</span>
 </div>
-<figcaption>Las líneas moradas van a los dos módulos: comparten reloj. Las verdes no se cruzan nunca — el micrófono manda por GPIO12 y el amplificador recibe por GPIO45. Las tres filas punteadas del zócalo quedan sin usar.</figcaption>
+<figcaption>Dos alimentaciones en rieles opuestos: arriba 3.3 V para el micrófono y la pantalla, abajo 5 V solo para el amplificador. Cada módulo toma del riel que le queda al lado. Las dos tierras van unidas por un puente — sin eso nada funciona.</figcaption>
 </figure>
+
+<h2>Por qué dos rieles y no uno</h2>
+<p class="sub" style="margin-bottom:14px">No es manía: el amplificador puede pedir <b>picos de unos 400 mA</b>. Si sale del mismo regulador de 3.3 V que alimenta al ESP32 con WiFi encendido y la luz de la pantalla, la tensión se hunde en los golpes de audio.</p>
+<div class="tabla"><table>
+<thead><tr><th>Si todo cuelga del 3.3 V</th><th>Con el amplificador en 5 V</th></tr></thead>
+<tbody>
+<tr><td>audio distorsionado en los picos</td><td>el amplificador tiene lo suyo</td></tr>
+<tr><td>reinicios del ESP32 al subir volumen</td><td>el regulador solo alimenta lógica</td></tr>
+<tr><td>la pantalla parpadea al hablar</td><td>además suena más fuerte</td></tr>
+</tbody></table></div>
+<p class="sub" style="margin-top:12px">El 5 V viene directo del USB sin pasar por el regulador de la placa, así que tiene margen de sobra. Y como los dos rieles quedan en <b>extremos opuestos</b> de la protoboard, poner el micrófono en el equivocado deja de ser un descuido posible: hay que cruzar la placa entera a propósito.</p>
 
 <h2>INMP441 · el micrófono</h2>
 <div class="tabla"><table>
@@ -263,6 +292,21 @@
 <tr><td class="pin">+ −</td><td class="pin">parlante</td><td>polaridad indistinta</td></tr>
 </tbody></table></div>
 
+<h2>ST7789 · la pantalla</h2>
+<div class="tabla"><table>
+<thead><tr><th>Pin</th><th>Va a</th><th>Nota</th></tr></thead>
+<tbody>
+<tr><td class="pin"><span class="punto" style="background:var(--v33)"></span>VCC</td><td class="pin">3V3</td><td>riel de arriba, con el micrófono</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--gnd)"></span>GND</td><td class="pin">GND</td><td>riel de arriba</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--ctrl)"></span>DC</td><td class="pin">GPIO39</td><td>dato o comando</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--ctrl)"></span>CS</td><td class="pin">GPIO47</td><td>selección de chip</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--ctrl)"></span>CLK</td><td class="pin">GPIO41</td><td>reloj SPI — <b>no</b> es el BCLK del audio</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--ctrl)"></span>SDA</td><td class="pin">GPIO40</td><td>datos SPI</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--ctrl)"></span>BLK</td><td class="pin">GPIO42</td><td>luz de fondo</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--gnd)"></span>RES</td><td class="pin">RST</td><td>al reset de la placa</td></tr>
+</tbody></table></div>
+<p class="sub" style="margin-top:12px">La pantalla tiene su <b>propio bus SPI</b> y no comparte ninguna señal con el audio. <code>CLK</code> aquí y <code>BCLK</code> allá son relojes distintos que van a pines distintos: no los mezcles.</p>
+
 <h2>Por qué SD reutiliza PA_EN</h2>
 <div class="tabla"><table>
 <thead><tr><th>Voltaje en SD</th><th>Qué hace el amplificador</th></tr></thead>
@@ -271,6 +315,138 @@
 <tr><td class="pin">3.3 V · GPIO48 en alto</td><td>encendido, canal izquierdo</td></tr>
 </tbody></table></div>
 <p class="sub" style="margin-top:10px">Ese pin hace dos cosas a la vez: enciende y elige canal. Con 3.3 V queda en el izquierdo, que es justo donde manda el micrófono. Y el firmware conserva la misma línea de silencio de siempre.</p>
+
+<h2>En protoboard · lo recomendado</h2>
+<p class="sub" style="margin-bottom:16px">Las filas de la protoboard <b>son el empalme</b>: cada fila de cinco huecos está unida por dentro, así que un cable entra y dos salen. Eso resuelve solo el problema de las señales que van a dos sitios, sin soldar ni retorcer nada.</p>
+
+<div class="alerta" style="border-left-color:var(--ctrl);background:color-mix(in srgb,var(--ctrl) 10%,transparent);border-color:color-mix(in srgb,var(--ctrl) 40%,transparent)">
+  <p><b style="color:var(--ctrl)">Revisá esto primero:</b> los módulos suelen venir con la tira de pines <b>suelta, sin soldar</b>. Para pincharlos en la protoboard hay que soldarles esa tira — son 6 y 7 puntos, sencillos. Si ya vienen con los pines puestos, no hay nada que soldar en todo el montaje.</p>
+</div>
+
+<figure>
+<div class="lienzo">
+<svg viewBox="0 0 900 430" role="img" aria-label="Plano de protoboard: el riel rojo lleva 3.3 voltios y el azul tierra; una fila hace de empalme para el reloj BCLK y otra para WS, cada una repartiendo a los dos módulos.">
+  <defs>
+    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <!-- cuerpo de la protoboard -->
+  <rect x="150" y="30" width="600" height="370" rx="10" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".5"/>
+
+  <!-- riel rojo -->
+  <rect x="166" y="46" width="568" height="26" rx="5" fill="none" stroke="#ff8a5c" stroke-width="1.6"/>
+  <text x="180" y="64" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#ff8a5c">riel +</text>
+  <text x="720" y="64" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ff8a5c" opacity=".8">3.3 V a todo lo largo</text>
+
+  <!-- riel azul -->
+  <rect x="166" y="356" width="568" height="26" rx="5" fill="none" stroke="#8b98a5" stroke-width="1.6"/>
+  <text x="180" y="374" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#8b98a5">riel −</text>
+  <text x="720" y="374" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="11" fill="#8b98a5" opacity=".8">GND a todo lo largo</text>
+
+  <!-- filas de empalme -->
+  <rect x="330" y="150" width="150" height="26" rx="5" fill="none" stroke="#c792ea" stroke-width="1.6"/>
+  <text x="344" y="168" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="#c792ea">fila BCLK</text>
+
+  <rect x="330" y="196" width="150" height="26" rx="5" fill="none" stroke="#c792ea" stroke-width="1.6"/>
+  <text x="344" y="214" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="600" fill="#c792ea">fila WS</text>
+
+  <text x="405" y="242" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".5">un cable entra, dos salen</text>
+
+  <!-- shield a la izquierda -->
+  <rect x="14" y="86" width="122" height="262" rx="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="75" y="108" text-anchor="middle" font-size="12.5" font-weight="600" fill="currentColor">SHIELD</text>
+  <g font-family="IBM Plex Mono, monospace" font-size="11">
+    <text x="122" y="136" text-anchor="end" fill="#ff8a5c" font-weight="600">3V3</text>
+    <text x="122" y="164" text-anchor="end" fill="#8b98a5" font-weight="600">GND</text>
+    <text x="122" y="192" text-anchor="end" fill="#c792ea" font-weight="600">BCLK</text>
+    <text x="122" y="220" text-anchor="end" fill="#c792ea" font-weight="600">WS</text>
+    <text x="122" y="248" text-anchor="end" fill="#7ee787" font-weight="600">DIN</text>
+    <text x="122" y="276" text-anchor="end" fill="#7ee787" font-weight="600">DOUT</text>
+    <text x="122" y="304" text-anchor="end" fill="#ffd166" font-weight="600">PA_EN</text>
+  </g>
+
+  <!-- del shield a la protoboard: solo 5 cables -->
+  <path d="M126 132 H 152 V 59 H 164" fill="none" stroke="#ff8a5c" stroke-width="2" marker-end="url(#p)"/>
+  <path d="M126 160 H 158 V 369 H 164" fill="none" stroke="#8b98a5" stroke-width="2" marker-end="url(#p)"/>
+  <path d="M126 188 H 300 V 163 H 328" fill="none" stroke="#c792ea" stroke-width="2" marker-end="url(#p)"/>
+  <path d="M126 216 H 310 V 209 H 328" fill="none" stroke="#c792ea" stroke-width="2" marker-end="url(#p)"/>
+  <path d="M126 244 H 520 V 262 H 556" fill="none" stroke="#7ee787" stroke-width="2.2" marker-end="url(#p)"/>
+  <path d="M126 272 H 532 V 302 H 556" fill="none" stroke="#7ee787" stroke-width="2.2" marker-end="url(#p)"/>
+  <path d="M126 300 H 544 V 322 H 556" fill="none" stroke="#ffd166" stroke-width="2" marker-end="url(#p)"/>
+
+  <!-- modulos -->
+  <rect x="556" y="96" width="158" height="112" rx="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="635" y="118" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">INMP441</text>
+  <g font-family="IBM Plex Mono, monospace" font-size="10.5">
+    <text x="572" y="140" fill="#ff8a5c">VDD</text>
+    <text x="572" y="158" fill="#8b98a5">GND · L/R</text>
+    <text x="572" y="176" fill="#c792ea">SCK · WS</text>
+    <text x="572" y="194" fill="#7ee787">SD</text>
+  </g>
+
+  <rect x="556" y="228" width="158" height="118" rx="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="635" y="250" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">MAX98357A</text>
+  <g font-family="IBM Plex Mono, monospace" font-size="10.5">
+    <text x="572" y="272" fill="#7ee787">DIN</text>
+    <text x="572" y="290" fill="#ff8a5c">VIN</text>
+    <text x="572" y="308" fill="#8b98a5">GND · GAIN</text>
+    <text x="572" y="326" fill="#c792ea">BCLK · LRC</text>
+  </g>
+
+  <!-- de los rieles a los modulos -->
+  <path d="M740 59 H 764 V 140 H 718" fill="none" stroke="#ff8a5c" stroke-width="1.8" marker-end="url(#p)"/>
+  <path d="M740 59 H 786 V 290 H 718" fill="none" stroke="#ff8a5c" stroke-width="1.8" marker-end="url(#p)"/>
+  <path d="M740 369 H 806 V 155 H 718" fill="none" stroke="#8b98a5" stroke-width="1.8" marker-end="url(#p)"/>
+  <path d="M740 369 H 826 V 305 H 718" fill="none" stroke="#8b98a5" stroke-width="1.8" marker-end="url(#p)"/>
+
+  <!-- de las filas de empalme a los dos modulos -->
+  <path d="M484 163 H 512 V 173 H 552" fill="none" stroke="#c792ea" stroke-width="1.8" marker-end="url(#p)"/>
+  <path d="M484 163 H 500 V 330 H 552" fill="none" stroke="#c792ea" stroke-width="1.8" marker-end="url(#p)"/>
+  <path d="M484 209 H 524 V 178 H 552" fill="none" stroke="#c792ea" stroke-width="1.8" stroke-dasharray="4 3" marker-end="url(#p)"/>
+  <path d="M484 209 H 512 V 336 H 552" fill="none" stroke="#c792ea" stroke-width="1.8" stroke-dasharray="4 3" marker-end="url(#p)"/>
+
+  <text x="215" y="410" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".55">7 cables desde el shield · el resto se reparte solo dentro de la protoboard</text>
+</svg>
+</div>
+<figcaption>Del shield salen siete cables y ninguno se divide en el aire. Los rieles reparten la alimentación a lo largo de toda la placa, y las dos filas moradas hacen de empalme para el reloj: un cable entra y dos salen, por dentro.</figcaption>
+</figure>
+
+<h2>Fila por fila</h2>
+<div class="tabla"><table>
+<thead><tr><th>Dónde</th><th>Qué va ahí</th><th>Por qué</th></tr></thead>
+<tbody>
+<tr><td class="pin">riel + (rojo)</td><td>Un cable desde <b>3V3</b> del shield</td><td>De ahí toman <code>VDD</code> del micrófono y <code>VIN</code> del amplificador</td></tr>
+<tr><td class="pin">riel − (azul)</td><td>Un cable desde <b>GND</b> del shield</td><td>De ahí toman <code>GND</code> de los dos, más <code>L/R</code> y <code>GAIN</code></td></tr>
+<tr><td class="pin">una fila libre</td><td>Un cable desde <b>BCLK</b></td><td>Reparte a <code>SCK</code> del micrófono y <code>BCLK</code> del amplificador</td></tr>
+<tr><td class="pin">otra fila libre</td><td>Un cable desde <b>WS</b></td><td>Reparte a <code>WS</code> del micrófono y <code>LRC</code> del amplificador</td></tr>
+<tr><td class="pin">fila del módulo</td><td><b>DIN</b> del shield al <code>SD</code> del micrófono</td><td>Va a un solo sitio: directo, sin empalme</td></tr>
+<tr><td class="pin">fila del módulo</td><td><b>DOUT</b> del shield al <code>DIN</code> del amplificador</td><td>Va a un solo sitio</td></tr>
+<tr><td class="pin">fila del módulo</td><td><b>PA_EN</b> del shield al <code>SD</code> del amplificador</td><td>Va a un solo sitio</td></tr>
+</tbody></table></div>
+<p class="sub" style="margin-top:12px"><b>Siete cables desde el shield.</b> Los módulos se pinchan cada uno en su bloque de filas y todo lo demás se reparte por dentro de la protoboard.</p>
+
+<h2>Por qué en protoboard es mejor</h2>
+<ul class="lista">
+  <li><b>Los empalmes son gratis.</b> Una fila libre reparte una señal a dos módulos sin soldar ni retorcer cables.</li>
+  <li><b>Una sola toma de alimentación.</b> Un cable de 3V3 y uno de GND alimentan todo, en vez de cuatro cables saliendo del mismo pin.</li>
+  <li><b>Los módulos quedan firmes.</b> Pinchados en la placa y no colgando de los cables, que es lo que provoca los falsos contactos.</li>
+  <li><b>Se revisa mirando.</b> Cada fila es un nodo visible; en un manojo de cables sueltos no se ve nada.</li>
+  <li><b>Se cambia en segundos.</b> Si algo está mal, se saca un cable y se pincha en otra fila.</li>
+</ul>
+<p class="sub" style="margin-top:12px">Lo único en contra: más puntos de contacto, y los de una protoboard barata a veces quedan flojos. Si algo falla de forma intermitente, <b>cambiá el módulo de filas antes de dudar del módulo</b>.</p>
+
+<h2>Todo a 3.3 V · recomendado</h2>
+<p class="sub" style="margin-bottom:14px">El MAX98357A acepta de 2.5 a 5.5 V, así que puede correr con los mismos 3.3 V del micrófono. Si lo hacés, <b>en el montaje no existe ningún cable de 5 V</b> — y desaparece la única forma de quemar el INMP441.</p>
+<div class="tabla"><table>
+<thead><tr><th></th><th>Con 5 V para el amplificador</th><th>Todo a 3.3 V</th></tr></thead>
+<tbody>
+<tr><td class="pin">Rieles</td><td>dos alimentaciones</td><td><b>una sola</b></td></tr>
+<tr><td class="pin">Riesgo de quemar el micrófono</td><td>existe</td><td><b>ninguno</b></td></tr>
+<tr><td class="pin">Volumen</td><td>9 dB</td><td>12 dB con <code>GAIN</code> a GND</td></tr>
+</tbody></table></div>
+<p class="sub" style="margin-top:12px">Los 3 dB que se pierden se recuperan conectando <code>GAIN</code> al riel de tierra. Por esa diferencia no vale la pena dejar viva la única forma de romper el módulo nuevo.</p>
 
 <h2>Lo que ya no hace falta</h2>
 <div class="libres">
@@ -281,10 +457,12 @@
 
 <h2>Antes de dar corriente</h2>
 <ol class="lista">
-  <li><b>VDD del micrófono no está en 5 V.</b> Es lo único que puede romper algo hoy.</li>
-  <li><b>Todas las tierras unidas</b> — las de los dos módulos y la del shield.</li>
-  <li><b>BCLK y WS llegan a los dos módulos.</b> Si le falta a uno, ese queda mudo.</li>
+  <li><b>VDD del micrófono está en el riel de arriba</b>, el de 3.3 V. Nunca en el de abajo. Es lo único que puede romper algo hoy.</li>
+  <li><b>Las dos tierras están unidas</b> con un puente entre el riel de arriba y el de abajo. Sin eso no funciona nada, y es el olvido más común.</li>
+  <li><b>BCLK y WS llegan a los dos módulos de audio.</b> Si le falta a uno, ese queda mudo.</li>
   <li><b>GPIO12 y GPIO45 no se cruzan.</b> El micrófono manda por uno y el amplificador recibe por el otro.</li>
+  <li><b>El CLK de la pantalla es GPIO41</b>, no el BCLK del audio. Son dos relojes distintos.</li>
+  <li><b>VCC de la pantalla está en 3.3 V</b>, con el micrófono.</li>
   <li><b>El parlante va en la bornera del amplificador</b>, no en el shield.</li>
 </ol>
 
@@ -297,5 +475,8 @@
 <tr><td>Zumbido o ruido de fondo</td><td class="pin">tierras sin unir, o el micrófono a 5 V (ya dañado)</td></tr>
 <tr><td>Se oye entrecortado</td><td class="pin">BCLK o WS mal conectados en uno de los dos</td></tr>
 <tr><td>El amplificador se calienta</td><td class="pin">parlante de menos de 4 Ω, o + y − en corto</td></tr>
+<tr><td>La pantalla en negro</td><td class="pin">BLK sin 3.3 V, o VCC en el riel equivocado</td></tr>
+<tr><td>Todo muerto, nada arranca</td><td class="pin">falta el puente entre las dos tierras</td></tr>
+<tr><td>Se reinicia al subir el volumen</td><td class="pin">el amplificador quedó en 3.3 V y hunde el regulador</td></tr>
 </tbody></table></div>
 </div>
