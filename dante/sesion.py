@@ -22,7 +22,21 @@ from .transporte import T_AUDIO, T_CONTROL, T_LOG, TransporteSerie
 
 VID_ESPRESSIF = 0x303A
 TROZO = 960                 # 20 ms de PCM16 mono a 24 kHz
-RITMO = 0.018               # apenas mas rapido que 20 ms, para no quedarse corto
+RITMO = 0.020               # exactamente tiempo real
+PRECARGA = 6                # trozos en cola antes de empezar: 120 ms de colchon
+
+
+def _reloj_fino() -> None:
+    """Pide a Windows un temporizador de 1 ms.
+
+    Por defecto la resolucion es de 15.6 ms, asi que dormir 20 ms duerme entre
+    16 y 31. Esa irregularidad se oye como audio sucio.
+    """
+    try:
+        import ctypes
+        ctypes.WinDLL("winmm").timeBeginPeriod(1)
+    except Exception:
+        pass
 
 PERSONALIDAD = """\
 RESPONDE SIEMPRE EN ESPANOL. Aunque el audio se oiga mal, aunque no entiendas \
@@ -323,18 +337,43 @@ class Sesion:
 
     # ---------------------------------------------------- reproduccion ----
     async def reproducir(self) -> None:
-        """Le da el audio al aparato al ritmo real.
+        """Le da el audio al aparato al ritmo real, con reloj absoluto.
 
-        El modelo genera mucho mas rapido que tiempo real. Si le mandaramos
-        todo de golpe, el aparato se quedaria sin espacio y se oiria cortado.
+        El modelo genera mucho mas rapido que tiempo real, asi que hay que
+        dosificar. Pero dormir 20 ms en cada vuelta no sirve: cada espera se
+        pasa un poco y los errores se suman hasta desbordar al aparato o
+        dejarlo seco. En vez de eso llevamos la hora a la que le toca a cada
+        trozo y dormimos hasta ella, asi el error nunca se acumula.
         """
+        proximo = 0.0
+        sonando = False
+
         while True:
             trozo = await self.cola.get()
-            if trozo is None:
+
+            if trozo is None:                       # fin de la respuesta
+                sonando = False
                 self.t.enviar_control({"t": "emocion", "v": "idle"})
                 continue
+
+            if not sonando:
+                # Esperar a tener colchon antes de arrancar: si empezamos con
+                # la cola vacia, cualquier demora de red se oye como un corte.
+                while self.cola.qsize() < PRECARGA:
+                    await asyncio.sleep(0.005)
+                    if self.cola.qsize() == 0:
+                        break
+                sonando = True
+                proximo = time.perf_counter()
+
             self.t.enviar_audio(trozo)
-            await asyncio.sleep(RITMO)
+
+            proximo += RITMO
+            falta = proximo - time.perf_counter()
+            if falta > 0:
+                await asyncio.sleep(falta)
+            else:
+                proximo = time.perf_counter()       # nos atrasamos: resincronizar
 
 
 async def _simular(s: "Sesion", segundos: float) -> None:
@@ -417,6 +456,7 @@ async def _correr(simular: float = 0.0, limite: float = 0.0) -> int:
 
 
 def correr(simular: float = 0.0, limite: float = 0.0) -> int:
+    _reloj_fino()
     try:
         return asyncio.run(_correr(simular, limite))
     except KeyboardInterrupt:

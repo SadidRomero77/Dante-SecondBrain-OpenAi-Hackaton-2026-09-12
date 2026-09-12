@@ -376,7 +376,7 @@ void loop() {
         bufI2S[i * 2 + 1] = mono[i];
       }
       size_t esc_n = 0;
-      i2s_channel_write(tx, bufI2S, cuadros * 2 * sizeof(int16_t), &esc_n, 60);
+      i2s_channel_write(tx, bufI2S, cuadros * 2 * sizeof(int16_t), &esc_n, 120);
 
     } else if (tipo == T_CONTROL && largo) {
       marco[largo] = 0;
