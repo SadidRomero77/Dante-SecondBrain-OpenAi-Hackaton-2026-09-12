@@ -16,6 +16,11 @@ import os
 import urllib.error
 import urllib.request
 
+# Importar config carga el .env. Sin esto, este modulo lee variables
+# vacias cuando alguien lo importa antes que a config, y la integracion
+# queda apagada sin que nadie entienda por que.
+from . import config  # noqa: F401
+
 API = "https://api.trigger.dev/api/v1/tasks/{tarea}/trigger"
 
 CLAVE = (os.getenv("TRIGGER_SECRET_KEY") or "").strip()

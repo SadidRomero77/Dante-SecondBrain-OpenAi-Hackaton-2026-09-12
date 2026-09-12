@@ -20,6 +20,11 @@ import time
 import urllib.parse
 import urllib.request
 
+# Importar config carga el .env. Sin esto, este modulo lee variables
+# vacias cuando alguien lo importa antes que a config, y la integracion
+# queda apagada sin que nadie entienda por que.
+from . import config  # noqa: F401
+
 DOMINIO = (os.getenv("AUTH0_DOMAIN") or "").strip().replace("https://", "").rstrip("/")
 CLIENTE = (os.getenv("AUTH0_CLIENT_ID") or "").strip()
 SECRETO = (os.getenv("AUTH0_CLIENT_SECRET") or "").strip()
