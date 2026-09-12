@@ -46,6 +46,19 @@ static const uint8_t DIR_ES8311 = 0x18;
 static const uint8_t DIR_ES7210 = 0x41;
 
 // ---------------------------------------------------------------- audio ----
+/* --- perillas de nivel ---------------------------------------------------
+   GANANCIA_MIC : ganancia analogica del ES7210. 0..14, donde 14 = 37.5 dB.
+   VOLUMEN_DAC  : volumen del ES8311, 0..100.
+   GANANCIA_SW  : multiplicador digital antes de reproducir. Se satura en vez
+                  de dar la vuelta, para que un exceso suene fuerte y no roto.
+   El nivel del microfono importa mas que el del parlante: es lo que se le
+   manda a OpenAI. El parlante solo lo escuchamos nosotros. */
+static const uint8_t GANANCIA_MIC = 10;     // 30 dB. Medido: a 37.5 dB satura
+                                            //  con solo ruido ambiente.
+static const int     VOLUMEN_DAC  = 100;    // aqui estaba el volumen bajo
+static const float   GANANCIA_SW  = 2.0f;   // solo para escuchar la prueba;
+                                            //  a OpenAI le va el audio crudo
+
 static const uint32_t FS         = 24000;   // igual que la Realtime API
 static const int      CANALES    = 2;       // el bus I2S va en estereo
 static const int      SEG_GRABAR = 2;
@@ -226,6 +239,17 @@ static void tono(int hz, int ms) {
   }
 }
 
+/* Multiplica con saturacion: al pasarse se queda en el tope en vez de dar la
+   vuelta y convertirse en un chasquido. */
+static void amplificar(int16_t *d, size_t muestras, float g) {
+  for (size_t i = 0; i < muestras; i++) {
+    float v = d[i] * g;
+    if (v > 32767.0f) v = 32767.0f;
+    else if (v < -32768.0f) v = -32768.0f;
+    d[i] = (int16_t)v;
+  }
+}
+
 static void nivel(const int16_t *d, size_t muestras, int32_t *pico, double *rms) {
   int64_t suma = 0;
   int32_t p = 0;
@@ -263,10 +287,10 @@ void setup() {
   Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 100000);
 
   Serial.print("  ES8311 (parlante) ... ");
-  Serial.println(init_es8311(70) ? "OK" : "FALLO");
+  Serial.println(init_es8311(VOLUMEN_DAC) ? "OK" : "FALLO");
 
   Serial.print("  ES7210 (micros) ..... ");
-  Serial.println(init_es7210(10) ? "OK" : "FALLO");   // 10 = 30 dB
+  Serial.println(init_es7210(GANANCIA_MIC) ? "OK" : "FALLO");
 
   Serial.print("  I2S 24 kHz duplex ... ");
   Serial.println(init_i2s() ? "OK (MCLK 12.288 MHz)" : "FALLO");
@@ -292,16 +316,24 @@ void loop() {
   i2s_channel_read(rx, buffer, BYTES_BUF, &leidos, 5000);
   digitalWrite(PIN_LUZ, HIGH);
 
+  size_t n = leidos / sizeof(int16_t);
   int32_t pico; double rms;
-  nivel(buffer, leidos / sizeof(int16_t), &pico, &rms);
-  Serial.printf("   leidos %u bytes | pico %ld | rms %.0f  %s\n",
-                (unsigned)leidos, (long)pico, rms,
-                pico < 50 ? "<-- el microfono no capta nada"
-                          : (pico > 30000 ? "<-- saturado, baja la ganancia" : "bien"));
+  nivel(buffer, n, &pico, &rms);
+  Serial.printf("   captado   pico %5ld  rms %5.0f   %s\n", (long)pico, rms,
+                pico < 50    ? "<-- el microfono no capta nada"
+                : pico < 800 ? "<-- muy bajo, sube GANANCIA_MIC"
+                : pico > 30000 ? "<-- saturado, baja GANANCIA_MIC"
+                : "bien");
+
+  amplificar(buffer, n, GANANCIA_SW);
+  int32_t pico2; double rms2;
+  nivel(buffer, n, &pico2, &rms2);
+  Serial.printf("   x%.1f       pico %5ld  rms %5.0f   %s\n",
+                GANANCIA_SW, (long)pico2, rms2,
+                pico2 >= 32767 ? "<-- recortando, baja GANANCIA_SW" : "sin recorte");
 
   Serial.println(">> REPRODUCIENDO");
   i2s_channel_write(tx, buffer, leidos, &escritos, 5000);
-  Serial.printf("   escritos %u bytes\n", (unsigned)escritos);
 
   delay(1200);
 }
