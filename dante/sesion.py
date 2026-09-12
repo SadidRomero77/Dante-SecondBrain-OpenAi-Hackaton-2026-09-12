@@ -378,6 +378,14 @@ class Sesion:
         else:
             salida = {"error": f"herramienta desconocida: {nombre}"}
 
+        # Los campos que empiezan con guion bajo son nuestros: costos, tiempos,
+        # diagnostico. Si se los pasamos al modelo, puede decirlos en voz alta.
+        if isinstance(salida, dict):
+            interno = {k: v for k, v in salida.items() if k.startswith("_")}
+            salida = {k: v for k, v in salida.items() if not k.startswith("_")}
+            if interno:
+                print(f"   [interno] {interno}")
+
         await self._ev({
             "type": "conversation.item.create",
             "item": {"type": "function_call_output", "call_id": call_id,
