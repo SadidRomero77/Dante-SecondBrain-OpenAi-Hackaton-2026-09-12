@@ -9,6 +9,8 @@ dependencies = [
     "pyserial>=3.5",
     "python-dotenv>=1.0",
     "numpy>=1.26",
+    # Windows no trae la base de zonas horarias IANA; zoneinfo la necesita.
+    "tzdata>=2024.1",
 ]
 
 [project.scripts]

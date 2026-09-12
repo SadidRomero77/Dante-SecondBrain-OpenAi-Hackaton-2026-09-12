@@ -39,6 +39,10 @@ def main(argv: list[str] | None = None) -> int:
                    help="finge apretar el boton N segundos, para probar sin la placa")
     h.add_argument("--limite", type=float, default=0.0, metavar="SEG",
                    help="salir solo despues de N segundos")
+    h.add_argument("--diario", dest="diario", action="store_true", default=None,
+                   help="forzar el saludo del dia aunque ya lo haya dado")
+    h.add_argument("--sin-diario", dest="diario", action="store_false",
+                   help="arrancar callado")
 
     pu = sub.add_parser("puente", help="prueba el camino completo por USB")
     pu.add_argument("--segundos", type=float, default=60.0)
@@ -69,7 +73,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.comando == "hablar":
         from .sesion import correr as hablar
-        return hablar(simular=args.simular, limite=args.limite)
+        return hablar(simular=args.simular, limite=args.limite,
+                      con_diario=args.diario)
 
     if args.comando == "puente":
         from .puente import correr as puentear

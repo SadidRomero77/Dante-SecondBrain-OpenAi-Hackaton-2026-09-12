@@ -17,7 +17,7 @@ import time
 
 import websockets
 
-from . import config, memoria
+from . import config, consolidar, diario, memoria, mundo
 from .transporte import T_AUDIO, T_CONTROL, T_LOG, TransporteSerie
 
 VID_ESPRESSIF = 0x303A
@@ -122,6 +122,43 @@ HERRAMIENTAS = [
         "name": "agenda",
         "description": "Que hay hoy: medicamentos, citas, visitas.",
         "parameters": {"type": "object", "properties": {}},
+    },
+    {
+        "type": "function",
+        "name": "buscar_web",
+        "description": (
+            "Busca en internet. USALA SOLO para cosas de HOY que no puedes "
+            "saber: noticias, resultados deportivos, precios, el estado de "
+            "algo ahora mismo. NO la uses para conocimiento general (quien "
+            "pinto la Mona Lisa, cuanto mide el Everest): eso ya lo sabes y "
+            "buscarlo mete segundos de silencio en la conversacion."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {"consulta": {"type": "string"}},
+            "required": ["consulta"],
+        },
+    },
+    {
+        "type": "function",
+        "name": "hora_en",
+        "description": ("Que hora y que dia es. Con una ciudad, la hora alli. "
+                        "Sin ciudad, la hora local. Es instantaneo."),
+        "parameters": {
+            "type": "object",
+            "properties": {"lugar": {"type": "string",
+                                     "description": "ciudad o pais. Opcional."}},
+        },
+    },
+    {
+        "type": "function",
+        "name": "clima",
+        "description": "El clima de hoy en una ciudad.",
+        "parameters": {
+            "type": "object",
+            "properties": {"lugar": {"type": "string"}},
+            "required": ["lugar"],
+        },
     },
     {
         "type": "function",
@@ -325,6 +362,19 @@ class Sesion:
             salida = {"registrada": True, "id": id_}
             print(f"   [memoria] persona: {a.get('nombre','')}")
 
+        elif nombre == "buscar_web":
+            q = a.get("consulta", "")
+            print(f"   [mundo] buscando: {q!r}")
+            salida = mundo.buscar_web(q)
+
+        elif nombre == "hora_en":
+            salida = mundo.hora_en(a.get("lugar", ""))
+            print(f"   [mundo] hora {a.get('lugar','aqui')} -> {salida.get('hora','?')}")
+
+        elif nombre == "clima":
+            salida = mundo.clima(a.get("lugar", "Bogota"))
+            print(f"   [mundo] clima {a.get('lugar','')}")
+
         else:
             salida = {"error": f"herramienta desconocida: {nombre}"}
 
@@ -376,6 +426,20 @@ class Sesion:
                 proximo = time.perf_counter()       # nos atrasamos: resincronizar
 
 
+async def _dar_diario(s: "Sesion") -> None:
+    """Dante arranca hablando el. Nadie le pregunto nada."""
+    await asyncio.sleep(1.2)
+    print(">> EL DIARIO")
+    s.t.enviar_control({"t": "emocion", "v": "hablando"})
+    s.respondiendo = True
+    s.t0 = time.time()
+    await s._ev({
+        "type": "response.create",
+        "response": {"instructions": diario.instrucciones(s.db)},
+    })
+    diario.marcar(s.db)
+
+
 async def _simular(s: "Sesion", segundos: float) -> None:
     """Finge que alguien apreta el boton, para poder probar sin tener la placa
     delante. Abre el microfono, espera, y cierra el turno."""
@@ -386,7 +450,8 @@ async def _simular(s: "Sesion", segundos: float) -> None:
     await s._boton(False)
 
 
-async def _correr(simular: float = 0.0, limite: float = 0.0) -> int:
+async def _correr(simular: float = 0.0, limite: float = 0.0,
+                  con_diario: bool | None = None) -> int:
     if not config.API_KEY:
         print("Falta OPENAI_API_KEY en .env. Corre 'dante doctor'.")
         return 1
@@ -432,6 +497,8 @@ async def _correr(simular: float = 0.0, limite: float = 0.0) -> int:
                 asyncio.create_task(s.reproducir()),
             ]
             aparte = []
+            if con_diario if con_diario is not None else diario.toca_hoy(db):
+                aparte.append(asyncio.create_task(_dar_diario(s)))
             if simular:
                 # Fuera del grupo de espera: si estuviera dentro, terminar el
                 # turno simulado cerraria la sesion antes de oir la respuesta.
@@ -450,15 +517,26 @@ async def _correr(simular: float = 0.0, limite: float = 0.0) -> int:
             finally:
                 for x in tareas + aparte:
                     x.cancel()
-                memoria.cerrar_episodio(db, s.episodio, "\n".join(s.dialogo))
+                texto = "\n".join(s.dialogo)
+                memoria.cerrar_episodio(db, s.episodio, texto)
+                if texto.strip():
+                    print("\n  consolidando la conversacion...")
+                    r = consolidar.de_transcripcion(db, texto, s.episodio)
+                    if r.get("resumen"):
+                        print(f"  resumen: {r['resumen']}")
+                    print(f"  hechos nuevos: {r['hechos']}"
+                          + (f", eventos {r['eventos']}" if r.get("eventos") else "")
+                          + (f", repetidos {r['repetidos']}" if r.get("repetidos") else "")
+                          + (f"  ({r['motivo']})" if r.get("motivo") else ""))
                 db.close()
     return 0
 
 
-def correr(simular: float = 0.0, limite: float = 0.0) -> int:
+def correr(simular: float = 0.0, limite: float = 0.0,
+           con_diario: bool | None = None) -> int:
     _reloj_fino()
     try:
-        return asyncio.run(_correr(simular, limite))
+        return asyncio.run(_correr(simular, limite, con_diario))
     except KeyboardInterrupt:
         print("\nhasta luego")
         return 0
