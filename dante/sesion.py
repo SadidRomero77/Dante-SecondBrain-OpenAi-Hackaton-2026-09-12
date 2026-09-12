@@ -782,6 +782,11 @@ async def _vigilar_recordatorios(s: "Sesion") -> None:
                             "en una o dos frases, como quien se acuerda en voz "
                             "alta. No pidas permiso para hablar ni preguntes "
                             "si te puede escuchar: simplemente dilo.\n\n"
+                            "NO busques nada en tu memoria: el recordatorio te "
+                            "lo estoy dando entero aqui abajo, y es cierto. "
+                            "Buscarlo y no encontrarlo te haria empezar "
+                            "diciendo que no lo tienes anotado, que es "
+                            "justo lo contrario de lo que pasa.\n\n"
                             f"Lo que toca ahora: {e['que']}"}})
         except Exception as err:
             print(f"  aviso: no pude dar un recordatorio ({err})")
