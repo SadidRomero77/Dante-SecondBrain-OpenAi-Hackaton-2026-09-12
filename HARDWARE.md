@@ -124,6 +124,15 @@ Orientación: `MIRROR_X`, `SWAP_XY`.
    suena claramente más limpia que el izquierdo o el derecho solos. Para
    mandarle audio mono a OpenAI, promediar los dos canales — no tomar uno.
 
-5. **Nunca hacer eco continuo micrófono → parlante para probar.** Se realimenta
+5. **El buffer de recepcion del USB CDC es de 256 bytes por defecto.** Un marco
+   de audio de 964 bytes no cabe nunca, así que esperar a tenerlo completo con
+   `Serial.available()` falla siempre y el audio se descarta en silencio: el
+   aparato parece mudo aunque todo lo demás funcione. Hay que llamar a
+   `Serial.setRxBufferSize(16384)` **antes** de `Serial.begin()`, y armar los
+   marcos por partes en vez de esperar el paquete entero.
+
+6. **La pantalla va con `setRotation(3)`**, no 1. Con 1 queda cabeza abajo.
+
+7. **Nunca hacer eco continuo micrófono → parlante para probar.** Se realimenta
    y chilla. Grabar un rato y reproducir después prueba las mismas dos rutas,
    sin acople, y además es como va a funcionar de verdad con el botón.

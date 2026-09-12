@@ -144,7 +144,7 @@ static void tarea_pantalla(void *) {
 static void init_pantalla() {
   spiLCD.begin(PIN_LCD_SCK, -1, PIN_LCD_MOSI, PIN_LCD_CS);
   tft.init(240, 320);
-  tft.setRotation(1);              // apaisada: MIRROR_X + SWAP_XY
+  tft.setRotation(3);              // apaisada, al derecho
   tft.fillScreen(ST77XX_BLACK);
   digitalWrite(PIN_LUZ, HIGH);
   xTaskCreatePinnedToCore(tarea_pantalla, "pantalla", 4096, nullptr, 1, nullptr, 0);
@@ -161,32 +161,58 @@ static void enviar(uint8_t tipo, const void *carga, uint16_t largo) {
 
 static void log_pc(const char *txt) { enviar(T_LOG, txt, strlen(txt)); }
 
-/* Lee un marco entrante sin bloquear. Devuelve el tipo, o 0 si no hay nada
-   completo todavia. Si se pierde la sincronia, descarta hasta el proximo
-   0xA5 con un largo creible. */
-static uint8_t recibir(uint8_t *destino, uint16_t tope, uint16_t *largo_out) {
-  static uint8_t cab[4];
-  static int tengo = 0;
+/* Arma marcos entrantes por partes.
 
+   ANTES esperabamos a que estuvieran disponibles los 964 bytes completos de
+   un marco de audio. El buffer de recepcion del USB CDC en Arduino es de 256
+   bytes por defecto, asi que esa condicion NUNCA se cumplia y todo el audio
+   que mandaba el PC se descartaba en silencio.
+
+   Ahora se acumula lo que va llegando, byte a byte si hace falta, y el buffer
+   se agranda al arrancar. Si se pierde la sincronia, se descarta hasta el
+   proximo 0xA5 con una cabecera creible. */
+static uint8_t marco[4096];
+static uint16_t marco_largo = 0;      // cuanto de la carga ya llego
+static uint16_t marco_espera = 0;     // cuanto mide la carga
+static uint8_t  marco_tipo = 0;
+static uint8_t  cab[4];
+static int      cab_tengo = 0;
+
+static uint8_t recibir(uint16_t *largo_out) {
   while (Serial.available()) {
-    if (tengo < 4) {
+    if (cab_tengo < 4) {
       int b = Serial.read();
       if (b < 0) return 0;
-      if (tengo == 0 && b != MAGIA) continue;           // resincronizar
-      cab[tengo++] = (uint8_t)b;
-      if (tengo == 4) {
-        uint16_t l = cab[2] | (cab[3] << 8);
-        if (l > 4096 || cab[1] > T_LOG) { tengo = 0; }  // cabecera absurda
+      if (cab_tengo == 0 && b != MAGIA) continue;      // resincronizar
+      cab[cab_tengo++] = (uint8_t)b;
+      if (cab_tengo == 4) {
+        marco_tipo = cab[1];
+        marco_espera = cab[2] | (cab[3] << 8);
+        marco_largo = 0;
+        if (marco_espera > sizeof(marco) || marco_tipo == 0 || marco_tipo > T_LOG) {
+          cab_tengo = 0;                                // cabecera absurda
+        } else if (marco_espera == 0) {
+          cab_tengo = 0;
+          *largo_out = 0;
+          return marco_tipo;
+        }
       }
       continue;
     }
-    uint16_t largo = cab[2] | (cab[3] << 8);
-    if (largo > tope) { tengo = 0; return 0; }
-    if ((uint16_t)Serial.available() < largo) return 0;  // todavia no llego
-    Serial.readBytes(destino, largo);
-    tengo = 0;
-    *largo_out = largo;
-    return cab[1];
+
+    // cabecera lista: ir juntando la carga con lo que haya
+    int hay = Serial.available();
+    int falta = marco_espera - marco_largo;
+    int tomar = hay < falta ? hay : falta;
+    if (tomar > 0) {
+      marco_largo += Serial.readBytes(marco + marco_largo, tomar);
+    }
+    if (marco_largo >= marco_espera) {
+      cab_tengo = 0;
+      *largo_out = marco_espera;
+      return marco_tipo;
+    }
+    return 0;                                           // seguimos esperando
   }
   return 0;
 }
@@ -267,6 +293,9 @@ static bool init_i2s() {
 
 // ----------------------------------------------------------------- setup ---
 void setup() {
+  // Sin esto el buffer de entrada es de 256 bytes y un marco de audio de
+  // 964 no cabe nunca. Es lo que hacia que Dante no sonara.
+  Serial.setRxBufferSize(16384);
   Serial.begin(115200);
   pinMode(PIN_LUZ, OUTPUT);   digitalWrite(PIN_LUZ, HIGH);
   pinMode(PIN_PA_EN, OUTPUT); digitalWrite(PIN_PA_EN, LOW);
@@ -331,33 +360,38 @@ void loop() {
     enviar(T_AUDIO, bufCable, cuadros * sizeof(int16_t));
   }
 
-  // 3. PC -> parlante
-  static uint8_t entrada[4096];
-  uint16_t largo = 0;
-  uint8_t tipo = recibir(entrada, sizeof(entrada), &largo);
-  if (tipo == T_AUDIO && largo) {
-    const int16_t *mono = (const int16_t *)entrada;
-    size_t cuadros = largo / sizeof(int16_t);
-    for (size_t i = 0; i < cuadros && i < CUADROS; i++) {
-      bufI2S[i * 2] = mono[i];
-      bufI2S[i * 2 + 1] = mono[i];
-    }
-    size_t esc_n = 0;
-    i2s_channel_write(tx, bufI2S, cuadros * 2 * sizeof(int16_t), &esc_n, 60);
-  } else if (tipo == T_CONTROL && largo) {
-    entrada[largo] = 0;
-    char *em = strstr((char *)entrada, "\"emocion\"");
-    if (em) {
-      if (strstr(em, "escuchando"))      estado = ESCUCHANDO;
-      else if (strstr(em, "pensando"))   estado = PENSANDO;
-      else if (strstr(em, "hablando"))   estado = HABLANDO;
-      else                               estado = LISTO;
-    } else if (strstr((char *)entrada, "\"hola?\"")) {
-      saludar(ok_dac, ok_adc, ok_i2s);
-    } else if (strstr((char *)entrada, "\"parar\"")) {
-      i2s_channel_disable(tx);
-      i2s_channel_enable(tx);
-      log_pc("cola de audio vaciada");
+  // 3. PC -> parlante. Varios marcos por vuelta: el PC manda uno cada 18 ms
+  //    y esta vuelta puede tardar mas, asi que hay que poder alcanzarlo.
+  for (int k = 0; k < 8; k++) {
+    uint16_t largo = 0;
+    uint8_t tipo = recibir(&largo);
+    if (!tipo) break;
+
+    if (tipo == T_AUDIO && largo) {
+      const int16_t *mono = (const int16_t *)marco;
+      size_t cuadros = largo / sizeof(int16_t);
+      if (cuadros > CUADROS) cuadros = CUADROS;
+      for (size_t i = 0; i < cuadros; i++) {
+        bufI2S[i * 2] = mono[i];
+        bufI2S[i * 2 + 1] = mono[i];
+      }
+      size_t esc_n = 0;
+      i2s_channel_write(tx, bufI2S, cuadros * 2 * sizeof(int16_t), &esc_n, 60);
+
+    } else if (tipo == T_CONTROL && largo) {
+      marco[largo] = 0;
+      char *em = strstr((char *)marco, "\"emocion\"");
+      if (em) {
+        if (strstr(em, "escuchando"))      estado = ESCUCHANDO;
+        else if (strstr(em, "pensando"))   estado = PENSANDO;
+        else if (strstr(em, "hablando"))   estado = HABLANDO;
+        else                               estado = LISTO;
+      } else if (strstr((char *)marco, "\"hola?\"")) {
+        saludar(ok_dac, ok_adc, ok_i2s);
+      } else if (strstr((char *)marco, "\"parar\"")) {
+        i2s_channel_disable(tx);
+        i2s_channel_enable(tx);
+      }
     }
   }
 }
