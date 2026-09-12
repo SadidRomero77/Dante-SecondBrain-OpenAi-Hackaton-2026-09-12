@@ -53,10 +53,11 @@ static const uint8_t DIR_ES7210 = 0x41;
                   de dar la vuelta, para que un exceso suene fuerte y no roto.
    El nivel del microfono importa mas que el del parlante: es lo que se le
    manda a OpenAI. El parlante solo lo escuchamos nosotros. */
-static const uint8_t GANANCIA_MIC = 10;     // 30 dB. Medido: a 37.5 dB satura
-                                            //  con solo ruido ambiente.
-static const int     VOLUMEN_DAC  = 100;    // aqui estaba el volumen bajo
-static const float   GANANCIA_SW  = 2.0f;   // solo para escuchar la prueba;
+static const uint8_t GANANCIA_MIC = 12;     // 34.5 dB. La "saturacion" que medi
+                                            //  antes era la senal de referencia
+                                            //  del parlante, no el microfono.
+static const int     VOLUMEN_DAC  = 78;     // 100 quedaba demasiado fuerte
+static const float   GANANCIA_SW  = 1.5f;   // solo para escuchar la prueba;
                                             //  a OpenAI le va el audio crudo
 
 static const uint32_t FS         = 24000;   // igual que la Realtime API
@@ -239,6 +240,30 @@ static void tono(int hz, int ms) {
   }
 }
 
+/* El ES7210 entrega dos canales, pero en esta placa NO son dos microfonos.
+   El config.h de LAFVIN trae AUDIO_INPUT_REFERENCE en true: el canal derecho
+   lleva la senal de referencia del parlante, la que usaria el cancelador de
+   eco. Reproducir los dos mezclados suena a ruido. Nos quedamos con el
+   izquierdo y lo duplicamos. */
+static void solo_microfono(int16_t *d, size_t muestras) {
+  for (size_t i = 0; i + 1 < muestras; i += 2) d[i + 1] = d[i];
+}
+
+/* Cuenta silencios sospechosamente largos en el canal del microfono.
+   Un hueco de mas de 1 ms de ceros seguidos no es voz baja: es la DMA
+   quedandose sin datos, que es exactamente lo que se oye entrecortado. */
+static int huecos(const int16_t *d, size_t muestras) {
+  int cortes = 0, seguidos = 0;
+  for (size_t i = 0; i < muestras; i += 2) {
+    if (d[i] == 0) {
+      if (++seguidos == 24) cortes++;   // 24 muestras = 1 ms a 24 kHz
+    } else {
+      seguidos = 0;
+    }
+  }
+  return cortes;
+}
+
 /* Multiplica con saturacion: al pasarse se queda en el tope en vez de dar la
    vuelta y convertirse en un chasquido. */
 static void amplificar(int16_t *d, size_t muestras, float g) {
@@ -303,12 +328,32 @@ void setup() {
   tono(440, 1000);
   Serial.println("  (si no lo escuchaste, el problema esta en la salida)");
   Serial.println();
+  Serial.println("  >>> ahora 2 s de tono DESDE EL BUFFER GRANDE <<<");
+  Serial.println("      misma ruta que la reproduccion de tu voz.");
+  {
+    float fase = 0.0f;
+    const float paso = 2.0f * PI * 440.0f / FS;
+    for (size_t i = 0; i < MUESTRAS; i += 2) {
+      int16_t v = (int16_t)(sinf(fase) * 8000);
+      buffer[i] = v; buffer[i + 1] = v;
+      fase += paso;
+      if (fase > 2.0f * PI) fase -= 2.0f * PI;
+    }
+    size_t esc;
+    i2s_channel_write(tx, buffer, BYTES_BUF, &esc, 5000);
+  }
+  Serial.println("      Si ESE tono sono limpio, la salida esta bien y el");
+  Serial.println("      problema esta en la grabacion. Si sono entrecortado,");
+  Serial.println("      el problema es la salida.");
+  Serial.println();
   Serial.println("Ahora: graba 2 s, reproduce 2 s, en bucle. HABLA CERCA.");
 }
 
 // ------------------------------------------------------------------ loop ---
 void loop() {
   size_t leidos = 0, escritos = 0;
+
+  static bool primera = true;
 
   Serial.println();
   Serial.println(">> GRABANDO 2 s ... habla ahora");
@@ -317,6 +362,17 @@ void loop() {
   digitalWrite(PIN_LUZ, HIGH);
 
   size_t n = leidos / sizeof(int16_t);
+
+  if (primera) {
+    primera = false;
+    Serial.println("   (primera vuelta descartada: transitorio del ES7210)");
+    delay(300);
+    return;
+  }
+
+  int cortes = huecos(buffer, n);
+  solo_microfono(buffer, n);
+
   int32_t pico; double rms;
   nivel(buffer, n, &pico, &rms);
   Serial.printf("   captado   pico %5ld  rms %5.0f   %s\n", (long)pico, rms,
@@ -324,6 +380,10 @@ void loop() {
                 : pico < 800 ? "<-- muy bajo, sube GANANCIA_MIC"
                 : pico > 30000 ? "<-- saturado, baja GANANCIA_MIC"
                 : "bien");
+
+  Serial.printf("   huecos    %d  %s\n", cortes,
+                cortes == 0 ? "sin cortes de DMA"
+                            : "<-- la DMA se queda sin datos: eso es lo entrecortado");
 
   amplificar(buffer, n, GANANCIA_SW);
   int32_t pico2; double rms2;
