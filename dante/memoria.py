@@ -459,6 +459,12 @@ def cerrar_episodio(c: sqlite3.Connection, id_: int, transcripcion: str) -> None
 # ------------------------------------------------------------- senales ----
 # Categorias que vale la pena que la familia sepa. Deliberadamente cortas y
 # sin nada clinico: describen lo que la persona DIJO, no lo que le pasa.
+# Nombre corto de cada senal, para frases donde la descripcion larga no cabe.
+SENALES_CORTO = {
+    "dolor": "dolor", "caida": "caídas", "confusion": "desorientación",
+    "animo": "tristeza", "sueno": "problemas para dormir", "apetito": "falta de apetito",
+}
+
 SENALES = {
     "dolor":     "mencionó dolor o molestia",
     "caida":     "mencionó una caída o un tropiezo",
@@ -500,6 +506,93 @@ def senales_recientes(c: sqlite3.Connection, dias: int = 7) -> list[dict]:
             "ejemplos": [t.strip() for t in (f["textos"] or "").split("|")][:3],
         })
     return salida
+
+
+def _semana(c: sqlite3.Connection, desde: str, hasta: str) -> dict:
+    """Numeros crudos de una semana. Sin interpretar nada."""
+    eps = c.execute("SELECT transcripcion FROM episodios "
+                    "WHERE inicio >= ? AND inicio < ?", (desde, hasta)).fetchall()
+    suyo = 0
+    for e in eps:
+        for linea in (e["transcripcion"] or "").splitlines():
+            if linea.startswith("Usuario:"):
+                suyo += len(linea) - 9
+    sen = c.execute("SELECT tipo, count(*) n FROM senales "
+                    "WHERE fecha >= ? AND fecha < ? GROUP BY tipo",
+                    (desde, hasta)).fetchall()
+    return {"charlas": len(eps), "dijo": suyo,
+            "senales": {f["tipo"]: f["n"] for f in sen}}
+
+
+def cambios(c: sqlite3.Connection, semanas: int = 4) -> list[dict]:
+    """Que cambio esta semana respecto de las anteriores.
+
+    Esto es lo que un hijo que vive lejos no puede ver: no lo que dijo un
+    dia, sino que hable menos que hace un mes, o que algo se repita mas.
+
+    Dos reglas que no se negocian. Devuelve NUMEROS, nunca conclusiones: un
+    "hablo un 40% menos" es un dato; un "esta decayendo" es un diagnostico, y
+    esto no diagnostica. Y calla cuando no tiene con que comparar: con dos
+    conversaciones sueltas cualquier variacion es ruido, y un aviso falso a
+    una familia asustada cuesta mas que no avisar.
+    """
+    from datetime import timedelta
+    hoy = date.today()
+    esta = _semana(c, (hoy - timedelta(days=7)).isoformat(),
+                   (hoy + timedelta(days=1)).isoformat())
+    antes = [_semana(c, (hoy - timedelta(days=7 * (i + 2))).isoformat(),
+                     (hoy - timedelta(days=7 * (i + 1))).isoformat())
+             for i in range(semanas)]
+    previas = [s for s in antes if s["charlas"]]
+    if len(previas) < 2 or esta["charlas"] < 2:
+        return []          # sin base para comparar, mejor no decir nada
+
+    def media(f):
+        return sum(f(s) for s in previas) / len(previas)
+
+    fuera = []
+
+    def comparar(ahora, antes_, texto_mas, texto_menos, unidad=""):
+        # Un tercio arriba o abajo. Menos que eso es el ruido normal de una
+        # semana con un feriado o una visita.
+        if antes_ < 1 or abs(ahora - antes_) / antes_ < 0.33:
+            return
+        pct = round(abs(ahora - antes_) / antes_ * 100)
+
+        def con_unidad(n):
+            n = round(n)
+            if not unidad:
+                return str(n)
+            if n == 1 and unidad == " veces":
+                return "1 vez"
+            if n == 1 and unidad == " palabras":
+                return "1 palabra"
+            return f"{n}{unidad}"
+
+        fuera.append({
+            "que": texto_mas if ahora > antes_ else texto_menos,
+            "cuanto": f"{pct}%",
+            "esta_semana": con_unidad(ahora),
+            "antes": con_unidad(antes_) + " por semana",
+        })
+
+    comparar(esta["charlas"], media(lambda s: s["charlas"]),
+             "Conversó más veces que de costumbre",
+             "Conversó menos veces que de costumbre")
+    # De caracteres a palabras. "Hablo 210" no le dice nada a nadie; el
+    # numero solo sirve si esta en una unidad que una familia entiende.
+    comparar(esta["dijo"] / 5.5, media(lambda s: s["dijo"] / 5.5),
+             "Habló más de lo habitual", "Habló menos de lo habitual",
+             " palabras")
+
+    for tipo in set(esta["senales"]) | {t for s in previas for t in s["senales"]}:
+        corto = SENALES_CORTO.get(tipo, tipo)
+        comparar(esta["senales"].get(tipo, 0),
+                 media(lambda s, t=tipo: s["senales"].get(t, 0)),
+                 f"Habló de {corto} más veces que de costumbre",
+                 f"Habló de {corto} menos veces que de costumbre",
+                 " veces")
+    return fuera
 
 
 # ------------------------------------------------------------- mensajes ---

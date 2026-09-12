@@ -43,6 +43,11 @@ def main(argv: list[str] | None = None) -> int:
     se.add_argument("--borrar", action="store_true", help="vaciar antes de sembrar")
     sub.add_parser("memoria", help="ver que recuerda Dante")
 
+    rs = sub.add_parser("resumen", help="el resumen semanal para la familia")
+    rs.add_argument("--enviar", action="store_true",
+                    help="mandarselo de verdad. Sin esto solo lo muestra")
+    rs.add_argument("--dias", type=int, default=7, help="cuantos dias mirar")
+
     ol = sub.add_parser("olvidar", help="sacar de la memoria lo que quedo de "
                                         "una prueba o de otra persona")
     ol.add_argument("que", nargs="?", default="",
@@ -94,6 +99,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.comando == "semilla":
         from .semilla import correr as sembrar
         return sembrar(borrar=args.borrar)
+
+    if args.comando == "resumen":
+        from .semanal import correr as resumir
+        return resumir(enviar=args.enviar, dias=args.dias)
 
     if args.comando == "olvidar":
         from .olvidar import correr as olvidar, vaciar

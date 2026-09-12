@@ -341,6 +341,26 @@ form{display:flex;flex-direction:column;gap:16px}
     </div>
     <div id="senales"><div class="pad ayuda">Sin novedades. Eso es buena señal.</div></div>
   </div>
+
+  <div class="caja" style="max-width:760px;margin:18px auto 0">
+    <h2>Qué cambió <small id="n-cam"></small></h2>
+    <div class="pad" style="padding-bottom:6px">
+      <p class="ayuda">Comparado con las semanas anteriores. <b>Dante no saca
+      conclusiones</b>: te da el número para que decidas tú. Y se calla cuando
+      no tiene suficiente con qué comparar.</p>
+    </div>
+    <div id="cambios"></div>
+  </div>
+
+  <div class="caja" style="max-width:760px;margin:18px auto 0">
+    <h2>La nota para la familia</h2>
+    <div class="pad">
+      <p class="ayuda">Esto es lo que reciben sus hijos. Lo escribe Dante con
+      lo de arriba, sin copiar sus conversaciones.</p>
+      <button class="pri" id="b-resumen">Ver el de esta semana</button>
+      <div id="resumen" style="margin-top:12px"></div>
+    </div>
+  </div>
 </main>
 
 <!-- ============ AJUSTES ============ -->
@@ -753,6 +773,7 @@ $('#btn-cara').onclick = async () => {
 async function cargarSenales(){
   const c = $('#senales'), r = await (await fetch('/api/senales')).json();
   $('#n-sen').textContent = r.senales.length ? r.senales.length+' cosas' : '';
+  pintarCambios(r.cambios||[]);
   if (!r.senales.length){ c.innerHTML='<div class="pad ayuda">Sin novedades. Eso es buena señal.</div>'; return; }
   c.innerHTML='';
   r.senales.forEach(s => {
@@ -766,6 +787,32 @@ async function cargarSenales(){
     c.appendChild(d);
   });
 }
+
+function pintarCambios(lista){
+  const c = $('#cambios');
+  $('#n-cam').textContent = lista.length ? lista.length+' cosas' : '';
+  if (!lista.length){
+    c.innerHTML = '<div class="pad ayuda">Nada distinto de lo habitual, '
+                + 'o todavía no hay suficientes semanas para comparar.</div>'; return; }
+  c.innerHTML = '';
+  lista.forEach(x => {
+    const d = document.createElement('div'); d.className = 'ficha';
+    d.innerHTML = `<div style="flex:1"><b>${x.que}</b>
+      <div class="ayuda">esta semana <b>${x.esta_semana}</b> · antes ${x.antes}</div></div>
+      <div class="veces">${x.cuanto}</div>`;
+    c.appendChild(d);
+  });
+}
+$('#b-resumen').onclick = async () => {
+  const caja = $('#resumen');
+  caja.innerHTML = '<span class="ayuda">Dante lo está escribiendo…</span>';
+  const r = await (await fetch('/api/resumen')).json();
+  caja.innerHTML = r.hay
+    ? `<div class="pad" style="background:var(--hueso);border-radius:12px">
+         <div class="ayuda" style="margin-bottom:6px">del ${r.desde} al ${r.hasta}</div>
+         ${r.nota}</div>`
+    : '<span class="ayuda">No hubo conversaciones esta semana. No hay nada que contar.</span>';
+};
 
 /* ---------- mensajes de voz ---------- */
 let grabandoVoz=false, trozos=[], desde=0, cronometro;
@@ -1049,7 +1096,21 @@ def crear_app(sesion, bucle):
     def ver_senales():
         c = memoria.abrir()
         try:
-            return {"senales": memoria.senales_recientes(c, 7)}
+            return {"senales": memoria.senales_recientes(c, 7),
+                    "cambios": memoria.cambios(c)}
+        finally:
+            c.close()
+
+    @app.get("/api/resumen")
+    def ver_resumen():
+        from . import semanal
+        c = memoria.abrir()
+        try:
+            datos = semanal._datos(c)
+            if not datos["conversaciones"]:
+                return {"hay": False}
+            return {"hay": True, "nota": semanal.redactar(datos),
+                    "desde": datos["desde"], "hasta": datos["hasta"]}
         finally:
             c.close()
 
