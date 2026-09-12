@@ -615,7 +615,10 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
             cable = TransporteSerie(puerto)
             print(f"  cable: {puerto}")
         except Exception as e:
-            print(f"  cable: no pude abrir {puerto} ({e})")
+            corto = str(e).split(":")[-1].strip()[:60]
+            print(f"  cable: {puerto} no responde ({corto})")
+    else:
+        print("  cable: sin aparato conectado")
 
     red = TransporteWebSocket(config.PUERTO_WS)
     try:
@@ -670,7 +673,15 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
             t.enviar_control({"t": "hola?"})
             t.enviar_control({"t": "emocion", "v": "idle"})
 
-            print("Manten apretado el boton BOOT, habla, y sueltalo.")
+            hay_aparato = not isinstance(t, TransporteNulo) and cable is not None
+            if hay_aparato:
+                print("Manten apretado el boton BOOT del aparato, habla, y sueltalo.")
+            if con_panel:
+                print("En el panel: manten la barra espaciadora para hablar, "
+                      "o escribile.")
+            if not hay_aparato and not con_panel:
+                print("Sin aparato y sin panel no hay por donde hablarle. "
+                      "Usa --panel.")
             print("Ctrl-C para salir.\n")
 
             tareas = [
