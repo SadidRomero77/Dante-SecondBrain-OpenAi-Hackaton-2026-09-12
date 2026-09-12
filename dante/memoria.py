@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS personas (
     nombre        TEXT NOT NULL,
     relacion      TEXT,
     notas         TEXT,
+    cara          BLOB,          -- vector SFace de 128 numeros, opcional
     ultima_visita TEXT,
     creado        TEXT NOT NULL
 );
@@ -63,6 +64,10 @@ def abrir() -> sqlite3.Connection:
     c = sqlite3.connect(config.DB)
     c.row_factory = sqlite3.Row
     c.executescript(ESQUEMA)
+    # Bases creadas antes de que existiera el reconocimiento de caras.
+    if "cara" not in {f[1] for f in c.execute("PRAGMA table_info(personas)")}:
+        c.execute("ALTER TABLE personas ADD COLUMN cara BLOB")
+        c.commit()
     return c
 
 

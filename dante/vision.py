@@ -99,111 +99,121 @@ class Camara:
             self.cap.release()
 
 
-class Rostros:
-    """Detecta caras y reconoce las que estan registradas.
+MODELOS = config.RAIZ / "data" / "modelos"
+YUNET = MODELOS / "yunet.onnx"
+SFACE = MODELOS / "sface.onnx"
 
-    Detector: Haar, que viene dentro de opencv. Reconocedor: LBPH, de
-    opencv-contrib. Los dos corren en el PC: ni una llamada a la red, asi que
-    saber quien esta enfrente no cuesta ni dinero ni segundos.
+URLS = {
+    YUNET: "https://github.com/opencv/opencv_zoo/raw/main/models/"
+           "face_detection_yunet/face_detection_yunet_2023mar.onnx",
+    SFACE: "https://github.com/opencv/opencv_zoo/raw/main/models/"
+           "face_recognition_sface/face_recognition_sface_2021dec.onnx",
+}
+
+
+def descargar_modelos() -> bool:
+    """Baja los dos modelos si faltan. Son 38 MB y no van al repositorio."""
+    import urllib.request
+
+    MODELOS.mkdir(parents=True, exist_ok=True)
+    for destino, url in URLS.items():
+        if destino.exists() and destino.stat().st_size > 1000:
+            continue
+        print(f"  bajando {destino.name}...")
+        urllib.request.urlretrieve(url, destino)
+    return all(p.exists() for p in URLS)
+
+
+class Rostros:
+    """Detecta caras con YuNet y las identifica con SFace.
+
+    SFace devuelve un vector de 128 numeros por cara. Dos vectores de la misma
+    persona se parecen; de personas distintas, no. Eso permite guardar la cara
+    como un dato mas en la base, junto al nombre, en vez de tener que
+    reentrenar un modelo cada vez que se registra a alguien.
     """
+
+    # Umbral de coseno recomendado por opencv para SFace. Deliberadamente
+    # exigente: ante duda preferimos decir que no sabemos quien es antes que
+    # equivocarnos de persona, que con este usuario es una equivocacion cara.
+    UMBRAL = 0.363
 
     def __init__(self):
         import cv2
 
-        self.detector = cv2.CascadeClassifier(
-            cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-        self.reconocedor = cv2.face.LBPHFaceRecognizer_create()
-        self.etiquetas: dict[int, str] = {}
-        self.entrenado = False
+        if not (YUNET.exists() and SFACE.exists()):
+            descargar_modelos()
+        self.detector = cv2.FaceDetectorYN.create(str(YUNET), "", (320, 320), 0.8, 0.3, 5000)
+        self.identificador = cv2.FaceRecognizerSF.create(str(SFACE), "")
+        self.conocidas: list[tuple[str, np.ndarray]] = []
         self.cargar()
 
     # ---------------------------------------------------------- registro --
-    def guardar_muestra(self, cuadro, nombre: str) -> int:
-        """Recorta la cara mas grande del cuadro y la guarda como muestra."""
-        import cv2
+    def cargar(self) -> int:
+        """Trae de la base los vectores de las caras ya registradas."""
+        c = memoria.abrir()
+        self.conocidas = []
+        for f in c.execute("SELECT nombre, cara FROM personas WHERE cara IS NOT NULL"):
+            self.conocidas.append((f["nombre"], np.frombuffer(f["cara"], dtype="float32")))
+        c.close()
+        return len(self.conocidas)
 
-        caras = self.detectar(cuadro)
-        if not caras:
-            return 0
-        x, y, w, h = max(caras, key=lambda r: r[2] * r[3])
-        gris = cv2.cvtColor(cuadro, cv2.COLOR_BGR2GRAY)
-        recorte = cv2.resize(gris[y:y + h, x:x + w], (200, 200))
+    def registrar(self, cuadro, nombre: str) -> dict:
+        """Guarda el vector de la cara mas grande del cuadro, contra un nombre."""
+        caras = self._detectar_crudo(cuadro)
+        if caras is None or len(caras) == 0:
+            return {"ok": False, "motivo": "no veo ninguna cara"}
+        if len(caras) > 1:
+            return {"ok": False, "motivo": f"veo {len(caras)} caras; que quede una sola"}
 
-        carpeta = CARAS / _limpio(nombre)
-        carpeta.mkdir(parents=True, exist_ok=True)
-        n = len(list(carpeta.glob("*.png")))
-        cv2.imwrite(str(carpeta / f"{n:03d}.png"), recorte)
-        return n + 1
-
-    def entrenar(self) -> int:
-        import cv2
-
-        muestras, etiquetas = [], []
-        self.etiquetas = {}
-        for i, carpeta in enumerate(sorted(p for p in CARAS.glob("*") if p.is_dir())):
-            self.etiquetas[i] = carpeta.name.replace("_", " ")
-            for f in carpeta.glob("*.png"):
-                img = cv2.imread(str(f), cv2.IMREAD_GRAYSCALE)
-                if img is not None:
-                    muestras.append(img)
-                    etiquetas.append(i)
-
-        if len(set(etiquetas)) < 1 or not muestras:
-            self.entrenado = False
-            return 0
-
-        self.reconocedor.train(muestras, np.array(etiquetas))
-        MODELO_CARAS.parent.mkdir(parents=True, exist_ok=True)
-        self.reconocedor.write(str(MODELO_CARAS))
-        (CARAS / "etiquetas.txt").write_text(
-            "\n".join(f"{k}\t{v}" for k, v in self.etiquetas.items()), encoding="utf-8")
-        self.entrenado = True
-        return len(muestras)
-
-    def cargar(self) -> bool:
-        if not MODELO_CARAS.exists():
-            return False
-        try:
-            self.reconocedor.read(str(MODELO_CARAS))
-            f = CARAS / "etiquetas.txt"
-            if f.exists():
-                for linea in f.read_text(encoding="utf-8").splitlines():
-                    if "\t" in linea:
-                        k, v = linea.split("\t", 1)
-                        self.etiquetas[int(k)] = v
-            self.entrenado = True
-            return True
-        except Exception:
-            return False
+        v = self._vector(cuadro, caras[0])
+        c = memoria.abrir()
+        memoria.registrar_persona(c, nombre)
+        c.execute("UPDATE personas SET cara=? WHERE lower(nombre)=lower(?)",
+                  (v.tobytes(), nombre.strip()))
+        c.commit()
+        c.close()
+        self.cargar()
+        return {"ok": True, "nombre": nombre, "registradas": len(self.conocidas)}
 
     # ------------------------------------------------------------- mirar --
-    def detectar(self, cuadro) -> list[tuple[int, int, int, int]]:
-        import cv2
+    def _detectar_crudo(self, cuadro):
+        h, w = cuadro.shape[:2]
+        self.detector.setInputSize((w, h))
+        _, caras = self.detector.detect(cuadro)
+        return caras
 
-        gris = cv2.cvtColor(cuadro, cv2.COLOR_BGR2GRAY)
-        gris = cv2.equalizeHist(gris)
-        caras = self.detector.detectMultiScale(gris, 1.15, 6, minSize=(80, 80))
-        return [tuple(int(v) for v in c) for c in caras]
+    def _vector(self, cuadro, cara) -> np.ndarray:
+        alineada = self.identificador.alignCrop(cuadro, cara)
+        return self.identificador.feature(alineada).flatten().astype("float32")
+
+    def detectar(self, cuadro) -> list[tuple[int, int, int, int]]:
+        caras = self._detectar_crudo(cuadro)
+        if caras is None:
+            return []
+        return [tuple(int(v) for v in c[:4]) for c in caras]
 
     def quien(self, cuadro) -> list[dict]:
-        """Caras en el cuadro, con nombre cuando hay confianza suficiente."""
-        import cv2
+        """Caras del cuadro, con nombre cuando el parecido es suficiente."""
+        caras = self._detectar_crudo(cuadro)
+        if caras is None:
+            return []
 
         salida = []
-        caras = self.detectar(cuadro)
-        if not caras:
-            return salida
-
-        gris = cv2.cvtColor(cuadro, cv2.COLOR_BGR2GRAY)
-        for (x, y, w, h) in caras:
+        for cara in caras:
+            x, y, w, h = (int(v) for v in cara[:4])
             item = {"caja": [x, y, w, h], "nombre": None, "certeza": 0.0}
-            if self.entrenado:
+            if self.conocidas:
                 try:
-                    recorte = cv2.resize(gris[y:y + h, x:x + w], (200, 200))
-                    etiqueta, distancia = self.reconocedor.predict(recorte)
-                    if distancia <= UMBRAL:
-                        item["nombre"] = self.etiquetas.get(etiqueta)
-                        item["certeza"] = round(max(0.0, 1.0 - distancia / 100.0), 2)
+                    v = self._vector(cuadro, cara)
+                    mejor, punto = None, -1.0
+                    for nombre, ref in self.conocidas:
+                        d = float(v @ ref / (np.linalg.norm(v) * np.linalg.norm(ref)))
+                        if d > punto:
+                            mejor, punto = nombre, d
+                    if punto >= self.UMBRAL:
+                        item["nombre"] = mejor
+                        item["certeza"] = round(punto, 3)
                 except Exception:
                     pass
             salida.append(item)

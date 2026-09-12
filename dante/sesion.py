@@ -17,7 +17,7 @@ import time
 
 import websockets
 
-from . import config, consolidar, diario, memoria, mundo
+from . import config, consolidar, diario, memoria, mundo, vision
 from .transporte import T_AUDIO, T_CONTROL, T_LOG, TransporteSerie
 
 VID_ESPRESSIF = 0x303A
@@ -53,9 +53,10 @@ Como hablas:
 
 Que puedes afirmar, en orden de importancia:
 
-1. NO TIENES OJOS. No hay camara conectada. Nunca digas que ves algo, ni \
-describas un lugar, una persona o una escena. Si te preguntan que ves, di que \
-por ahora solo escuchas.
+1. NO INVENTES LO QUE VES. Tienes camara, pero solo ves cuando usas las \
+herramientas mirar o quien_esta. Nunca describas un lugar, una persona ni una \
+escena sin haber usado una de las dos. Si la herramienta dice que no hay \
+camara, di que por ahora solo escuchas.
 
 2. Si no entendiste el audio, o solo se oia ruido, DILO. "No te escuche bien, \
 me lo repites?" Jamas rellenes el silencio inventando algo.
@@ -122,6 +123,45 @@ HERRAMIENTAS = [
         "name": "agenda",
         "description": "Que hay hoy: medicamentos, citas, visitas.",
         "parameters": {"type": "object", "properties": {}},
+    },
+    {
+        "type": "function",
+        "name": "quien_esta",
+        "description": (
+            "Mira por la camara y dice quien esta enfrente. Usala cuando "
+            "pregunten quien esta, quien llego, o si te saluda alguien que no "
+            "identificas. Si devuelve una cara desconocida, NO adivines quien "
+            "es: pregunta el nombre y ofrece registrarla."
+        ),
+        "parameters": {"type": "object", "properties": {}},
+    },
+    {
+        "type": "function",
+        "name": "mirar",
+        "description": (
+            "Toma una foto de lo que hay enfrente y la pone en la conversacion "
+            "para que puedas verla. Usala cuando pregunten que ves, que es "
+            "esto, de que color es algo, o que dice un papel."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {"pregunta": {
+                "type": "string",
+                "description": "que hay que mirar en la imagen"}},
+        },
+    },
+    {
+        "type": "function",
+        "name": "recordar_cara",
+        "description": (
+            "Registra la cara de quien esta enfrente con su nombre, para "
+            "reconocerla la proxima vez. Solo con una persona en cuadro."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {"nombre": {"type": "string"}},
+            "required": ["nombre"],
+        },
     },
     {
         "type": "function",
@@ -203,6 +243,7 @@ class Sesion:
         self.ws = ws
         self.db = db
         self.episodio = memoria.abrir_episodio(db)
+        self.ojos = vision.Ojos()
         self.dialogo: list[str] = []
         self.cola = asyncio.Queue()      # audio hacia el parlante, ya troceado
         self.hablando_usuario = False
@@ -362,6 +403,36 @@ class Sesion:
             salida = {"registrada": True, "id": id_}
             print(f"   [memoria] persona: {a.get('nombre','')}")
 
+        elif nombre == "quien_esta":
+            salida = self.ojos.quien_esta()
+            print(f"   [vision] {salida}")
+
+        elif nombre == "recordar_cara":
+            cuadro = self.ojos.camara.ultimo() if self.ojos.activa else None
+            if cuadro is None:
+                salida = {"ok": False, "motivo": "no hay camara"}
+            else:
+                salida = self.ojos.rostros.registrar(cuadro, a.get("nombre", ""))
+            print(f"   [vision] registrar cara -> {salida}")
+
+        elif nombre == "mirar":
+            b64 = self.ojos.cuadro_base64()
+            if not b64:
+                salida = {"veo": False, "motivo": self.ojos.motivo or "sin camara"}
+            else:
+                # La imagen entra como un mensaje mas de la conversacion: el
+                # modelo de voz acepta imagenes en el mismo socket, asi que no
+                # hace falta un segundo modelo ni una segunda llamada.
+                await self._ev({
+                    "type": "conversation.item.create",
+                    "item": {"type": "message", "role": "user", "content": [
+                        {"type": "input_image",
+                         "image_url": f"data:image/jpeg;base64,{b64}"}]},
+                })
+                salida = {"veo": True,
+                          "nota": "la foto ya esta en la conversacion, describela"}
+                print(f"   [vision] foto enviada ({len(b64)} caracteres)")
+
         elif nombre == "buscar_web":
             q = a.get("consulta", "")
             print(f"   [mundo] buscando: {q!r}")
@@ -492,6 +563,11 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
 
         async with ws:
             s = Sesion(t, ws, db)
+            if s.ojos.arrancar():
+                n = len(s.ojos.rostros.conocidas)
+                print(f"  camara: activa, {n} cara(s) registrada(s)\n")
+            else:
+                print(f"  camara: {s.ojos.motivo}\n")
             await s.configurar()
             t.enviar_control({"t": "hola?"})
             t.enviar_control({"t": "emocion", "v": "idle"})
@@ -526,6 +602,7 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
                 for x in tareas + aparte:
                     x.cancel()
                 texto = "\n".join(s.dialogo)
+                s.ojos.parar()
                 memoria.cerrar_episodio(db, s.episodio, texto)
                 if texto.strip():
                     print("\n  consolidando la conversacion...")
