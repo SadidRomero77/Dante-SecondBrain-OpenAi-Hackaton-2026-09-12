@@ -1,0 +1,301 @@
+<title>Cableado de Dante</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#0e1318; --panel:#161d24; --panel2:#1d262f; --linea:#2a3742;
+    --tinta:#e8eef4; --tinta2:#98a8b6; --tinta3:#6b7c8a;
+    --v33:#4fc3f7; --v5:#ff8a5c; --gnd:#8b98a5;
+    --reloj:#c792ea; --datos:#7ee787; --ctrl:#ffd166; --peligro:#ff5c5c;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#f4f6f8; --panel:#ffffff; --panel2:#eef2f6; --linea:#d5dde5;
+      --tinta:#16202a; --tinta2:#53646f; --tinta3:#7d8b96;
+      --v33:#0277bd; --v5:#c2410c; --gnd:#5b6770;
+      --reloj:#7b3fbf; --datos:#1a7f37; --ctrl:#b06a00; --peligro:#c62828;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#f4f6f8; --panel:#ffffff; --panel2:#eef2f6; --linea:#d5dde5;
+    --tinta:#16202a; --tinta2:#53646f; --tinta3:#7d8b96;
+    --v33:#0277bd; --v5:#c2410c; --gnd:#5b6770;
+    --reloj:#7b3fbf; --datos:#1a7f37; --ctrl:#b06a00; --peligro:#c62828;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--tinta);
+    font:15px/1.6 "IBM Plex Sans",system-ui,sans-serif;margin:0}
+  .wrap{max-width:1080px;margin:0 auto;padding:34px 22px 80px}
+  h1{font-size:clamp(1.7rem,4vw,2.4rem);margin:0 0 6px;letter-spacing:-.02em}
+  .sub{color:var(--tinta2);margin:0 0 28px;max-width:62ch}
+  h2{font-size:1.05rem;margin:34px 0 14px;letter-spacing:-.01em;
+     display:flex;align-items:center;gap:10px}
+  h2::before{content:"";width:3px;height:17px;background:var(--v33);border-radius:2px}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  code{font-family:"IBM Plex Mono",monospace;font-size:.88em;
+    background:var(--panel2);border:1px solid var(--linea);
+    border-radius:4px;padding:.08em .38em}
+
+  .alerta{background:color-mix(in srgb,var(--peligro) 12%,transparent);
+    border:1px solid color-mix(in srgb,var(--peligro) 45%,transparent);
+    border-left:4px solid var(--peligro);border-radius:9px;
+    padding:16px 20px;margin:0 0 28px}
+  .alerta b{color:var(--peligro)}
+  .alerta p{margin:0 0 8px}
+  .alerta p:last-child{margin:0}
+
+  figure{margin:0 0 10px}
+  .lienzo{background:var(--panel);border:1px solid var(--linea);
+    border-radius:12px;padding:18px 14px;overflow-x:auto}
+  .lienzo svg{display:block;min-width:820px;max-width:100%;height:auto;color:var(--tinta)}
+  figcaption{color:var(--tinta3);font-size:.85rem;margin-top:10px;max-width:70ch}
+
+  .leyenda{display:flex;flex-wrap:wrap;gap:8px 18px;margin:14px 0 0;
+    font:500 12px "IBM Plex Mono",monospace}
+  .leyenda span{display:flex;align-items:center;gap:7px;color:var(--tinta2)}
+  .leyenda i{width:15px;height:3px;border-radius:2px;display:block}
+
+  .tabla{border:1px solid var(--linea);border-radius:11px;overflow:hidden;
+    background:var(--panel);margin-bottom:8px}
+  table{border-collapse:collapse;width:100%;font-size:.92rem}
+  th{background:var(--panel2);text-align:left;padding:10px 15px;
+    font:600 10.5px "IBM Plex Mono",monospace;text-transform:uppercase;
+    letter-spacing:.1em;color:var(--tinta3);border-bottom:1px solid var(--linea)}
+  td{padding:10px 15px;border-bottom:1px solid var(--linea);color:var(--tinta2)}
+  tr:last-child td{border-bottom:none}
+  td.pin{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--tinta)}
+  .punto{display:inline-block;width:9px;height:9px;border-radius:50%;
+    margin-right:8px;vertical-align:middle}
+  .ojo{color:var(--peligro);font-weight:600}
+
+  .lista{background:var(--panel);border:1px solid var(--linea);
+    border-radius:11px;padding:6px 6px 6px 0;margin:0}
+  .lista li{margin:0;padding:11px 18px 11px 8px;border-bottom:1px solid var(--linea);
+    color:var(--tinta2)}
+  .lista li:last-child{border-bottom:none}
+  .lista li b{color:var(--tinta)}
+  ol.lista{counter-reset:n;list-style:none;padding-left:0}
+  ol.lista li{counter-increment:n;display:flex;gap:13px;padding-left:18px}
+  ol.lista li::before{content:counter(n);font:600 11px "IBM Plex Mono",monospace;
+    color:var(--v33);background:var(--panel2);border:1px solid var(--linea);
+    width:21px;height:21px;border-radius:50%;display:grid;place-items:center;flex:none;margin-top:1px}
+
+  .libres{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:12px;margin-bottom:8px}
+  .libre{background:var(--panel);border:1px solid var(--linea);
+    border-radius:10px;padding:14px 16px}
+  .libre b{font-family:"IBM Plex Mono",monospace;font-size:.9rem}
+  .libre p{margin:5px 0 0;font-size:.86rem;color:var(--tinta2)}
+</style>
+
+<div class="wrap">
+<h1>Cableado de Dante</h1>
+<p class="sub">INMP441 y MAX98357A sobre el shield LAFVIN, en el zócalo donde estaba el códec original. Los dos módulos son I2S puro: sin configuración por I2C y sin MCLK.</p>
+
+<div class="alerta">
+  <p><b>El INMP441 no tolera 5 V.</b> Y el pin <code>VCC</code> del zócalo del códec es de 5 V, porque así lo pedía el módulo viejo.</p>
+  <p>El micrófono va al pin <b>3V3</b> de la placa ESP32-S3, <b>nunca</b> al <code>VCC</code> del zócalo. El amplificador sí puede usarlo, y a 5 V suena más fuerte.</p>
+</div>
+
+<figure>
+<div class="lienzo">
+<svg viewBox="0 0 900 470" role="img" aria-label="El micrófono INMP441 se alimenta de 3.3 voltios y manda datos por GPIO12; el amplificador MAX98357A se alimenta de 5 voltios y recibe datos por GPIO45; ambos comparten el reloj BCLK en GPIO14 y el word select en GPIO13.">
+  <defs>
+    <marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <!-- ============ zocalo del shield ============ -->
+  <rect x="316" y="40" width="268" height="392" rx="11" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55"/>
+  <text x="450" y="30" text-anchor="middle" font-size="12.5" font-weight="600" fill="currentColor">ZÓCALO DEL CÓDEC · shield LAFVIN</text>
+
+  <!-- filas del zocalo -->
+  <g font-family="IBM Plex Mono, monospace" font-size="12">
+    <rect x="330" y="56" width="240" height="30" rx="6" fill="none" stroke="#ff8a5c" stroke-width="1.4"/>
+    <text x="344" y="76" fill="#ff8a5c" font-weight="600">VCC</text>
+    <text x="556" y="76" text-anchor="end" fill="currentColor" opacity=".6">5 V</text>
+
+    <rect x="330" y="94" width="240" height="30" rx="6" fill="none" stroke="#8b98a5" stroke-width="1.4"/>
+    <text x="344" y="114" fill="#8b98a5" font-weight="600">GND</text>
+
+    <rect x="330" y="132" width="240" height="30" rx="6" fill="none" stroke="#ffd166" stroke-width="1.4"/>
+    <text x="344" y="152" fill="#ffd166" font-weight="600">PA_EN</text>
+    <text x="556" y="152" text-anchor="end" fill="currentColor" opacity=".6">GPIO48</text>
+
+    <rect x="330" y="170" width="240" height="30" rx="6" fill="none" stroke="#7ee787" stroke-width="1.4"/>
+    <text x="344" y="190" fill="#7ee787" font-weight="600">DOUT</text>
+    <text x="556" y="190" text-anchor="end" fill="currentColor" opacity=".6">GPIO45</text>
+
+    <rect x="330" y="208" width="240" height="30" rx="6" fill="none" stroke="#7ee787" stroke-width="1.4"/>
+    <text x="344" y="228" fill="#7ee787" font-weight="600">DIN</text>
+    <text x="556" y="228" text-anchor="end" fill="currentColor" opacity=".6">GPIO12</text>
+
+    <rect x="330" y="246" width="240" height="30" rx="6" fill="none" stroke="#c792ea" stroke-width="1.4"/>
+    <text x="344" y="266" fill="#c792ea" font-weight="600">WS</text>
+    <text x="556" y="266" text-anchor="end" fill="currentColor" opacity=".6">GPIO13</text>
+
+    <rect x="330" y="284" width="240" height="30" rx="6" fill="none" stroke="#c792ea" stroke-width="1.4"/>
+    <text x="344" y="304" fill="#c792ea" font-weight="600">BCLK</text>
+    <text x="556" y="304" text-anchor="end" fill="currentColor" opacity=".6">GPIO14</text>
+
+    <rect x="330" y="322" width="240" height="30" rx="6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4" opacity=".35"/>
+    <text x="344" y="342" fill="currentColor" opacity=".45" font-weight="600">MCLK</text>
+    <text x="556" y="342" text-anchor="end" fill="currentColor" opacity=".35">sin usar</text>
+
+    <rect x="330" y="360" width="240" height="30" rx="6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4" opacity=".35"/>
+    <text x="344" y="380" fill="currentColor" opacity=".45" font-weight="600">SCL</text>
+    <text x="556" y="380" text-anchor="end" fill="currentColor" opacity=".35">libre</text>
+
+    <rect x="330" y="398" width="240" height="30" rx="6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4" opacity=".35"/>
+    <text x="344" y="418" fill="currentColor" opacity=".45" font-weight="600">SDA</text>
+    <text x="556" y="418" text-anchor="end" fill="currentColor" opacity=".35">libre</text>
+  </g>
+
+  <!-- pin 3V3 aparte -->
+  <rect x="330" y="-2" width="240" height="0" fill="none"/>
+  <rect x="130" y="18" width="120" height="30" rx="6" fill="none" stroke="#4fc3f7" stroke-width="1.6"/>
+  <text x="144" y="38" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="#4fc3f7">3V3</text>
+  <text x="238" y="38" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".55">placa</text>
+
+  <!-- ============ INMP441 ============ -->
+  <rect x="24" y="76" width="196" height="176" rx="10" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="122" y="98" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">INMP441</text>
+  <text x="122" y="114" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">micrófono · 3.3 V</text>
+  <g font-family="IBM Plex Mono, monospace" font-size="11.5">
+    <text x="200" y="136" text-anchor="end" fill="#4fc3f7" font-weight="600">VDD</text>
+    <text x="200" y="158" text-anchor="end" fill="#8b98a5" font-weight="600">GND</text>
+    <text x="200" y="180" text-anchor="end" fill="#c792ea" font-weight="600">SCK</text>
+    <text x="200" y="202" text-anchor="end" fill="#c792ea" font-weight="600">WS</text>
+    <text x="200" y="224" text-anchor="end" fill="#7ee787" font-weight="600">SD</text>
+    <text x="200" y="246" text-anchor="end" fill="#8b98a5" font-weight="600">L/R</text>
+  </g>
+
+  <!-- ============ MAX98357A ============ -->
+  <rect x="24" y="272" width="196" height="180" rx="10" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <text x="122" y="294" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">MAX98357A</text>
+  <text x="122" y="310" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">amplificador · 5 V</text>
+  <g font-family="IBM Plex Mono, monospace" font-size="11.5">
+    <text x="200" y="332" text-anchor="end" fill="#ff8a5c" font-weight="600">VIN</text>
+    <text x="200" y="352" text-anchor="end" fill="#8b98a5" font-weight="600">GND</text>
+    <text x="200" y="372" text-anchor="end" fill="#c792ea" font-weight="600">BCLK</text>
+    <text x="200" y="392" text-anchor="end" fill="#c792ea" font-weight="600">LRC</text>
+    <text x="200" y="412" text-anchor="end" fill="#7ee787" font-weight="600">DIN</text>
+    <text x="200" y="432" text-anchor="end" fill="#ffd166" font-weight="600">SD</text>
+  </g>
+  <text x="122" y="452" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".45">GAIN sin conectar = 9 dB</text>
+
+  <!-- ============ cables ============ -->
+  <!-- mic VDD -> 3V3 -->
+  <path d="M204 132 H 268 V 33 H 128" fill="none" stroke="#4fc3f7" stroke-width="2" marker-end="url(#f)"/>
+  <!-- mic GND -->
+  <path d="M204 154 H 292 V 109 H 328" fill="none" stroke="#8b98a5" stroke-width="1.8" marker-end="url(#f)"/>
+  <!-- mic SCK -> BCLK -->
+  <path d="M204 176 H 246 V 299 H 328" fill="none" stroke="#c792ea" stroke-width="2" marker-end="url(#f)"/>
+  <!-- mic WS -->
+  <path d="M204 198 H 258 V 261 H 328" fill="none" stroke="#c792ea" stroke-width="2" marker-end="url(#f)"/>
+  <!-- mic SD -> DIN -->
+  <path d="M204 220 H 304 V 223 H 328" fill="none" stroke="#7ee787" stroke-width="2.2" marker-end="url(#f)"/>
+  <!-- mic L/R -> GND -->
+  <path d="M204 242 H 236 V 109 H 328" fill="none" stroke="#8b98a5" stroke-width="1.6" stroke-dasharray="5 3" marker-end="url(#f)"/>
+  <text x="228" y="258" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#8b98a5">a GND = izquierdo</text>
+
+  <!-- amp VIN -> VCC -->
+  <path d="M204 328 H 282 V 71 H 328" fill="none" stroke="#ff8a5c" stroke-width="2" marker-end="url(#f)"/>
+  <!-- amp GND -->
+  <path d="M204 348 H 296 V 109 H 328" fill="none" stroke="#8b98a5" stroke-width="1.8" marker-end="url(#f)"/>
+  <!-- amp BCLK -->
+  <path d="M204 368 H 252 V 299 H 328" fill="none" stroke="#c792ea" stroke-width="2" marker-end="url(#f)"/>
+  <!-- amp LRC -->
+  <path d="M204 388 H 264 V 261 H 328" fill="none" stroke="#c792ea" stroke-width="2" marker-end="url(#f)"/>
+  <!-- amp DIN -> DOUT -->
+  <path d="M204 408 H 310 V 185 H 328" fill="none" stroke="#7ee787" stroke-width="2.2" marker-end="url(#f)"/>
+  <!-- amp SD -> PA_EN -->
+  <path d="M204 428 H 318 V 147 H 328" fill="none" stroke="#ffd166" stroke-width="2" marker-end="url(#f)"/>
+
+  <!-- parlante -->
+  <rect x="640" y="360" width="150" height="58" rx="9" fill="none" stroke="currentColor" stroke-width="1.4"/>
+  <text x="715" y="384" text-anchor="middle" font-size="12" fill="currentColor">Parlante</text>
+  <text x="715" y="401" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".55">4Ω u 8Ω · 3W</text>
+  <path d="M122 452 V 466 H 640 V 400" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".55" marker-end="url(#f)"/>
+  <text x="400" y="463" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".5">bornera + y − · polaridad indistinta</text>
+
+  <!-- nota MCLK -->
+  <text x="620" y="342" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".45">estos módulos generan</text>
+  <text x="620" y="356" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".45">su reloj del BCLK</text>
+</svg>
+</div>
+<div class="leyenda">
+  <span><i style="background:var(--v33)"></i>3.3 V</span>
+  <span><i style="background:var(--v5)"></i>5 V</span>
+  <span><i style="background:var(--gnd)"></i>tierra</span>
+  <span><i style="background:var(--reloj)"></i>reloj — compartido</span>
+  <span><i style="background:var(--datos)"></i>datos de audio</span>
+  <span><i style="background:var(--ctrl)"></i>control</span>
+</div>
+<figcaption>Las líneas moradas van a los dos módulos: comparten reloj. Las verdes no se cruzan nunca — el micrófono manda por GPIO12 y el amplificador recibe por GPIO45. Las tres filas punteadas del zócalo quedan sin usar.</figcaption>
+</figure>
+
+<h2>INMP441 · el micrófono</h2>
+<div class="tabla"><table>
+<thead><tr><th>Pin</th><th>Va a</th><th>Nota</th></tr></thead>
+<tbody>
+<tr><td class="pin"><span class="punto" style="background:var(--v33)"></span>VDD</td><td class="pin">3V3</td><td class="ojo">pin de la placa, NO el VCC del zócalo</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--gnd)"></span>GND</td><td class="pin">GND</td><td>del zócalo</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--reloj)"></span>SCK</td><td class="pin">GPIO14</td><td>BCLK del zócalo</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--reloj)"></span>WS</td><td class="pin">GPIO13</td><td>WS del zócalo</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--datos)"></span>SD</td><td class="pin">GPIO12</td><td>DIN del zócalo — la voz entra por aquí</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--gnd)"></span>L/R</td><td class="pin">GND</td><td>a tierra = canal izquierdo</td></tr>
+</tbody></table></div>
+
+<h2>MAX98357A · el amplificador</h2>
+<div class="tabla"><table>
+<thead><tr><th>Pin</th><th>Va a</th><th>Nota</th></tr></thead>
+<tbody>
+<tr><td class="pin"><span class="punto" style="background:var(--v5)"></span>VIN</td><td class="pin">5V</td><td>VCC del zócalo — a 5 V suena más fuerte</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--gnd)"></span>GND</td><td class="pin">GND</td><td>del zócalo</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--reloj)"></span>BCLK</td><td class="pin">GPIO14</td><td>compartido con el micrófono</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--reloj)"></span>LRC</td><td class="pin">GPIO13</td><td>compartido con el micrófono</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--datos)"></span>DIN</td><td class="pin">GPIO45</td><td>DOUT del zócalo — la voz sale por aquí</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--ctrl)"></span>SD</td><td class="pin">GPIO48</td><td>PA_EN del zócalo — enciende y elige canal</td></tr>
+<tr><td class="pin">GAIN</td><td class="pin">—</td><td>sin conectar deja 9 dB, que está bien</td></tr>
+<tr><td class="pin">+ −</td><td class="pin">parlante</td><td>polaridad indistinta</td></tr>
+</tbody></table></div>
+
+<h2>Por qué SD reutiliza PA_EN</h2>
+<div class="tabla"><table>
+<thead><tr><th>Voltaje en SD</th><th>Qué hace el amplificador</th></tr></thead>
+<tbody>
+<tr><td class="pin">0 V · GPIO48 en bajo</td><td>apagado, silencio total</td></tr>
+<tr><td class="pin">3.3 V · GPIO48 en alto</td><td>encendido, canal izquierdo</td></tr>
+</tbody></table></div>
+<p class="sub" style="margin-top:10px">Ese pin hace dos cosas a la vez: enciende y elige canal. Con 3.3 V queda en el izquierdo, que es justo donde manda el micrófono. Y el firmware conserva la misma línea de silencio de siempre.</p>
+
+<h2>Lo que ya no hace falta</h2>
+<div class="libres">
+  <div class="libre"><b>MCLK · GPIO38</b><p>Sin usar. El ES7210 obligaba a 512 × fs; estos módulos generan su reloj del BCLK. Se acabó la tabla de coeficientes.</p></div>
+  <div class="libre"><b>SCL · GPIO2</b><p>Libre. Queda para una cámara DVP más adelante.</p></div>
+  <div class="libre"><b>SDA · GPIO1</b><p>Libre. Ninguno de los dos módulos lleva I2C.</p></div>
+</div>
+
+<h2>Antes de dar corriente</h2>
+<ol class="lista">
+  <li><b>VDD del micrófono no está en 5 V.</b> Es lo único que puede romper algo hoy.</li>
+  <li><b>Todas las tierras unidas</b> — las de los dos módulos y la del shield.</li>
+  <li><b>BCLK y WS llegan a los dos módulos.</b> Si le falta a uno, ese queda mudo.</li>
+  <li><b>GPIO12 y GPIO45 no se cruzan.</b> El micrófono manda por uno y el amplificador recibe por el otro.</li>
+  <li><b>El parlante va en la bornera del amplificador</b>, no en el shield.</li>
+</ol>
+
+<h2>Si algo no suena</h2>
+<div class="tabla"><table>
+<thead><tr><th>Síntoma</th><th>Dónde mirar</th></tr></thead>
+<tbody>
+<tr><td>Silencio total</td><td class="pin">SD del amplificador — sin 3.3 V está apagado</td></tr>
+<tr><td>Suena, pero el micrófono da cero</td><td class="pin">L/R del micrófono, y que SD vaya a GPIO12</td></tr>
+<tr><td>Zumbido o ruido de fondo</td><td class="pin">tierras sin unir, o el micrófono a 5 V (ya dañado)</td></tr>
+<tr><td>Se oye entrecortado</td><td class="pin">BCLK o WS mal conectados en uno de los dos</td></tr>
+<tr><td>El amplificador se calienta</td><td class="pin">parlante de menos de 4 Ω, o + y − en corto</td></tr>
+</tbody></table></div>
+</div>

@@ -109,8 +109,9 @@ uv run dante hablar --panel --diario
 ## Correr con hardware
 
 Kit **LAFVIN AI Chatbot** (ESP32-S3). Los datos medidos de la placa están en
-[`HARDWARE.md`](HARDWARE.md) y el contrato con el aparato en
-[`PROTOCOL.md`](PROTOCOL.md).
+[`HARDWARE.md`](HARDWARE.md), el contrato con el aparato en
+[`PROTOCOL.md`](PROTOCOL.md), y el cableado de los módulos de audio en
+[`WIRING.md`](WIRING.md).
 
 ### 1. Flashear
 
