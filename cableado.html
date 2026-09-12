@@ -108,1189 +108,583 @@
 </tbody></table></div>
 <p class="sub" style="margin-top:12px">La pantalla va por <b>SPI</b> y el audio por <b>I2S</b>: son buses distintos y no se estorban. Lo único que comparten es la alimentación y la tierra.</p>
 
-<h2>El montaje, hueco por hueco</h2>
-<p class="sub" style="margin-bottom:14px"><b>Sin cables dibujados a propósito.</b> Cada hueco que hay que usar lleva un número; las tablas de abajo dicen qué va en cada uno. Así no hay que seguir ninguna línea con la vista ni adivinar por dónde pasa.</p>
+<h2>1 · Cómo va la placa</h2>
+<p class="sub" style="margin-bottom:14px">Metela en la protoboard <b>tapando el canal del medio</b>, con los <b>dos USB apuntando hacia la derecha</b> y el pin 1 empezando en la <b>columna 4</b>. Con esa posición, cada pin cae en la columna que dice el recuadro de color.</p>
 
 <figure>
 <div class="lienzo">
-<svg viewBox="0 0 1560 860" role="img" aria-label="Montaje en dos protoboards con cada hueco a usar marcado con un numero. La tabla de abajo dice que va en cada numero, asi no hay que seguir ningun cable con la vista.">
-<rect x="30" y="150" width="848.0" height="330" rx="10" fill="none" stroke="currentColor" stroke-width="1.8" opacity=".45"/>
-<text x="46" y="138" font-size="14" font-weight="700" fill="currentColor">PROTOBOARD 1</text>
-<line x1="52" y1="176" x2="856.0" y2="176" stroke="#ef5350" stroke-width="1.2" opacity=".35"/>
-<text x="40" y="181" font-size="15" font-weight="700" fill="#ef5350">+</text>
-<circle cx="77.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="103.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="129.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="155.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="181.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="207.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="233.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="259.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="285.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="311.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="337.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="363.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="389.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="415.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="441.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="467.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="493.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="519.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="545.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="571.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="597.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="623.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="649.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="675.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="701.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="727.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="753.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="779.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="805.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="831.0" cy="176" r="3" fill="currentColor" opacity=".22"/>
-<line x1="52" y1="196" x2="856.0" y2="196" stroke="#42a5f5" stroke-width="1.2" opacity=".35"/>
-<text x="40" y="201" font-size="15" font-weight="700" fill="#42a5f5">−</text>
-<circle cx="77.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="103.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="129.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="155.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="181.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="207.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="233.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="259.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="285.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="311.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="337.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="363.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="389.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="415.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="441.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="467.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="493.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="519.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="545.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="571.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="597.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="623.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="649.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="675.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="701.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="727.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="753.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="779.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="805.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="831.0" cy="196" r="3" fill="currentColor" opacity=".22"/>
-<line x1="52" y1="434" x2="856.0" y2="434" stroke="#42a5f5" stroke-width="1.2" opacity=".35"/>
-<text x="40" y="439" font-size="15" font-weight="700" fill="#42a5f5">−</text>
-<circle cx="77.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="103.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="129.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="155.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="181.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="207.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="233.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="259.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="285.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="311.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="337.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="363.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="389.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="415.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="441.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="467.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="493.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="519.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="545.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="571.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="597.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="623.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="649.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="675.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="701.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="727.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="753.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="779.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="805.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="831.0" cy="434" r="3" fill="currentColor" opacity=".22"/>
-<line x1="52" y1="454" x2="856.0" y2="454" stroke="#ef5350" stroke-width="1.2" opacity=".35"/>
-<text x="40" y="459" font-size="15" font-weight="700" fill="#ef5350">+</text>
-<circle cx="77.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="103.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="129.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="155.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="181.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="207.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="233.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="259.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="285.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="311.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="337.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="363.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="389.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="415.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="441.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="467.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="493.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="519.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="545.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="571.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="597.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="623.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="649.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="675.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="701.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="727.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="753.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="779.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="805.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="831.0" cy="454" r="3" fill="currentColor" opacity=".22"/>
-<rect x="52" y="334.0" width="804.0" height="18" fill="currentColor" opacity=".08"/>
-<text x="454.0" y="347.0" text-anchor="middle" font-size="9" fill="currentColor" opacity=".4" font-family="IBM Plex Mono, monospace">canal del medio</text>
-<text x="42" y="236.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">a</text>
-<text x="860.0" y="236.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">a</text>
-<circle cx="77.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="232.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="256.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">b</text>
-<text x="860.0" y="256.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">b</text>
-<circle cx="77.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="252.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="276.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">c</text>
-<text x="860.0" y="276.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">c</text>
-<circle cx="77.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="272.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="296.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">d</text>
-<text x="860.0" y="296.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">d</text>
-<circle cx="77.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="292.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="316.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">e</text>
-<text x="860.0" y="316.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">e</text>
-<circle cx="77.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="312.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="360.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">f</text>
-<text x="860.0" y="360.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">f</text>
-<circle cx="77.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="356.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="380.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">g</text>
-<text x="860.0" y="380.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">g</text>
-<circle cx="77.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="376.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="400.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">h</text>
-<text x="860.0" y="400.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">h</text>
-<circle cx="77.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="396.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="420.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">i</text>
-<text x="860.0" y="420.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">i</text>
-<circle cx="77.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="416.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="440.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">j</text>
-<text x="860.0" y="440.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">j</text>
-<circle cx="77.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="436.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="77.0" y="224" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">1</text>
-<text x="77.0" y="424" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">1</text>
-<text x="181.0" y="224" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">5</text>
-<text x="181.0" y="424" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">5</text>
-<text x="311.0" y="224" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">10</text>
-<text x="311.0" y="424" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">10</text>
-<text x="441.0" y="224" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">15</text>
-<text x="441.0" y="424" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">15</text>
-<text x="571.0" y="224" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">20</text>
-<text x="571.0" y="424" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">20</text>
-<text x="701.0" y="224" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">25</text>
-<text x="701.0" y="424" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">25</text>
-<text x="831.0" y="224" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">30</text>
-<text x="831.0" y="424" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">30</text>
-<rect x="30" y="540" width="848.0" height="330" rx="10" fill="none" stroke="currentColor" stroke-width="1.8" opacity=".45"/>
-<text x="46" y="528" font-size="14" font-weight="700" fill="currentColor">PROTOBOARD 2</text>
-<line x1="52" y1="566" x2="856.0" y2="566" stroke="#ef5350" stroke-width="1.2" opacity=".35"/>
-<text x="40" y="571" font-size="15" font-weight="700" fill="#ef5350">+</text>
-<circle cx="77.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="103.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="129.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="155.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="181.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="207.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="233.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="259.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="285.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="311.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="337.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="363.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="389.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="415.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="441.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="467.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="493.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="519.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="545.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="571.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="597.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="623.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="649.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="675.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="701.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="727.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="753.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="779.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="805.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="831.0" cy="566" r="3" fill="currentColor" opacity=".22"/>
-<line x1="52" y1="586" x2="856.0" y2="586" stroke="#42a5f5" stroke-width="1.2" opacity=".35"/>
-<text x="40" y="591" font-size="15" font-weight="700" fill="#42a5f5">−</text>
-<circle cx="77.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="103.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="129.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="155.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="181.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="207.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="233.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="259.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="285.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="311.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="337.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="363.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="389.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="415.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="441.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="467.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="493.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="519.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="545.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="571.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="597.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="623.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="649.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="675.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="701.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="727.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="753.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="779.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="805.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="831.0" cy="586" r="3" fill="currentColor" opacity=".22"/>
-<line x1="52" y1="824" x2="856.0" y2="824" stroke="#42a5f5" stroke-width="1.2" opacity=".35"/>
-<text x="40" y="829" font-size="15" font-weight="700" fill="#42a5f5">−</text>
-<circle cx="77.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="103.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="129.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="155.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="181.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="207.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="233.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="259.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="285.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="311.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="337.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="363.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="389.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="415.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="441.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="467.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="493.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="519.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="545.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="571.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="597.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="623.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="649.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="675.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="701.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="727.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="753.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="779.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="805.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="831.0" cy="824" r="3" fill="currentColor" opacity=".22"/>
-<line x1="52" y1="844" x2="856.0" y2="844" stroke="#ef5350" stroke-width="1.2" opacity=".35"/>
-<text x="40" y="849" font-size="15" font-weight="700" fill="#ef5350">+</text>
-<circle cx="77.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="103.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="129.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="155.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="181.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="207.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="233.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="259.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="285.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="311.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="337.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="363.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="389.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="415.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="441.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="467.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="493.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="519.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="545.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="571.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="597.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="623.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="649.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="675.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="701.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="727.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="753.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="779.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="805.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<circle cx="831.0" cy="844" r="3" fill="currentColor" opacity=".22"/>
-<rect x="52" y="724.0" width="804.0" height="18" fill="currentColor" opacity=".08"/>
-<text x="454.0" y="737.0" text-anchor="middle" font-size="9" fill="currentColor" opacity=".4" font-family="IBM Plex Mono, monospace">canal del medio</text>
-<text x="42" y="626.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">a</text>
-<text x="860.0" y="626.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">a</text>
-<circle cx="77.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="622.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="646.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">b</text>
-<text x="860.0" y="646.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">b</text>
-<circle cx="77.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="642.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="666.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">c</text>
-<text x="860.0" y="666.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">c</text>
-<circle cx="77.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="662.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="686.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">d</text>
-<text x="860.0" y="686.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">d</text>
-<circle cx="77.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="682.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="706.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">e</text>
-<text x="860.0" y="706.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">e</text>
-<circle cx="77.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="702.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="750.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">f</text>
-<text x="860.0" y="750.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">f</text>
-<circle cx="77.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="746.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="770.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">g</text>
-<text x="860.0" y="770.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">g</text>
-<circle cx="77.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="766.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="790.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">h</text>
-<text x="860.0" y="790.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">h</text>
-<circle cx="77.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="786.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="810.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">i</text>
-<text x="860.0" y="810.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">i</text>
-<circle cx="77.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="806.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="42" y="830.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">j</text>
-<text x="860.0" y="830.0" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".45">j</text>
-<circle cx="77.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="103.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="129.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="155.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="181.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="207.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="233.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="259.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="285.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="311.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="337.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="363.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="389.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="415.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="441.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="467.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="493.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="519.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="545.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="571.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="597.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="623.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="649.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="675.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="701.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="727.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="753.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="779.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="805.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<circle cx="831.0" cy="826.0" r="3" fill="currentColor" opacity=".2"/>
-<text x="77.0" y="614" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">1</text>
-<text x="77.0" y="814" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">1</text>
-<text x="181.0" y="614" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">5</text>
-<text x="181.0" y="814" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">5</text>
-<text x="311.0" y="614" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">10</text>
-<text x="311.0" y="814" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">10</text>
-<text x="441.0" y="614" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">15</text>
-<text x="441.0" y="814" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">15</text>
-<text x="571.0" y="614" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">20</text>
-<text x="571.0" y="814" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">20</text>
-<text x="701.0" y="614" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">25</text>
-<text x="701.0" y="814" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">25</text>
-<text x="831.0" y="614" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">30</text>
-<text x="831.0" y="814" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".55">30</text>
-<rect x="144" y="220" width="568" height="228" rx="8" fill="currentColor" opacity=".15" stroke="currentColor" stroke-width="1.6"/>
-<text x="428" y="318" text-anchor="middle" font-size="16" font-weight="700" fill="currentColor">ESP32-S3</text>
-<text x="428" y="338" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" fill="currentColor" opacity=".5">tapando el canal · los cables salen por las filas libres de cada pin</text>
-<rect x="92" y="811" width="152" height="30" rx="6" fill="currentColor" opacity=".17" stroke="currentColor" stroke-width="1.5"/>
-<text x="168" y="804" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">INMP441</text>
-<circle cx="103.0" cy="826.0" r="4.5" fill="#29b6f6"/>
-<text x="103.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#29b6f6">VDD</text>
-<circle cx="129.0" cy="826.0" r="4.5" fill="#90a4ae"/>
-<text x="129.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#90a4ae">GND</text>
-<circle cx="155.0" cy="826.0" r="4.5" fill="#ba68c8"/>
-<text x="155.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ba68c8">SCK</text>
-<circle cx="181.0" cy="826.0" r="4.5" fill="#ba68c8"/>
-<text x="181.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ba68c8">WS</text>
-<circle cx="207.0" cy="826.0" r="4.5" fill="#66bb6a"/>
-<text x="207.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#66bb6a">SD</text>
-<circle cx="233.0" cy="826.0" r="4.5" fill="#90a4ae"/>
-<text x="233.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#90a4ae">L/R</text>
-<rect x="300" y="811" width="178" height="30" rx="6" fill="currentColor" opacity=".17" stroke="currentColor" stroke-width="1.5"/>
-<text x="389" y="804" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">MAX98357A</text>
-<circle cx="311.0" cy="826.0" r="4.5" fill="#ff7043"/>
-<text x="311.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ff7043">VIN</text>
-<circle cx="337.0" cy="826.0" r="4.5" fill="#90a4ae"/>
-<text x="337.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#90a4ae">GND</text>
-<circle cx="363.0" cy="826.0" r="4.5" fill="#66bb6a"/>
-<text x="363.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#66bb6a">DIN</text>
-<circle cx="389.0" cy="826.0" r="4.5" fill="#ba68c8"/>
-<text x="389.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ba68c8">BCLK</text>
-<circle cx="415.0" cy="826.0" r="4.5" fill="#ba68c8"/>
-<text x="415.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ba68c8">LRC</text>
-<circle cx="441.0" cy="826.0" r="4.5" fill="#90a4ae"/>
-<text x="441.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#90a4ae">GAIN</text>
-<circle cx="467.0" cy="826.0" r="4.5" fill="#ffca28"/>
-<text x="467.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ffca28">SD</text>
-<rect x="560" y="811" width="204" height="30" rx="6" fill="currentColor" opacity=".17" stroke="currentColor" stroke-width="1.5"/>
-<text x="662" y="804" text-anchor="middle" font-size="12" font-weight="700" fill="currentColor">PANTALLA</text>
-<circle cx="571.0" cy="826.0" r="4.5" fill="#90a4ae"/>
-<text x="571.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#90a4ae">GND</text>
-<circle cx="597.0" cy="826.0" r="4.5" fill="#29b6f6"/>
-<text x="597.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#29b6f6">VCC</text>
-<circle cx="623.0" cy="826.0" r="4.5" fill="#26a69a"/>
-<text x="623.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#26a69a">DC</text>
-<circle cx="649.0" cy="826.0" r="4.5" fill="#26a69a"/>
-<text x="649.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#26a69a">CS</text>
-<circle cx="675.0" cy="826.0" r="4.5" fill="#26a69a"/>
-<text x="675.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#26a69a">CLK</text>
-<circle cx="701.0" cy="826.0" r="4.5" fill="#26a69a"/>
-<text x="701.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#26a69a">SDA</text>
-<circle cx="727.0" cy="826.0" r="4.5" fill="#90a4ae"/>
-<text x="727.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#90a4ae">RES</text>
-<circle cx="753.0" cy="826.0" r="4.5" fill="#26a69a"/>
-<text x="753.0" y="860" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#26a69a">BLK</text>
-<rect x="743" y="284" width="46" height="100" rx="6" fill="#ef5350" opacity=".2" stroke="#ef5350" stroke-width="1.6"/>
-<text x="766" y="276" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ef5350">HABLAR</text>
-<rect x="795" y="284" width="46" height="100" rx="6" fill="#ffca28" opacity=".2" stroke="#ffca28" stroke-width="1.6"/>
-<text x="818" y="276" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ffca28">DIARIO</text>
-<circle cx="753.0" cy="252.0" r="9.5" fill="#29b6f6"/>
-<circle cx="753.0" cy="252.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="753.0" y="255.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">1</text>
-<circle cx="779.0" cy="252.0" r="9.5" fill="#ff7043"/>
-<circle cx="779.0" cy="252.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="779.0" y="255.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">2</text>
-<circle cx="727.0" cy="252.0" r="9.5" fill="#90a4ae"/>
-<circle cx="727.0" cy="252.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="727.0" y="255.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">3</text>
-<circle cx="753.0" cy="376.0" r="9.5" fill="#ba68c8"/>
-<circle cx="753.0" cy="376.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="753.0" y="379.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">4</text>
-<circle cx="779.0" cy="376.0" r="9.5" fill="#ba68c8"/>
-<circle cx="779.0" cy="376.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="779.0" y="379.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">5</text>
-<circle cx="727.0" cy="376.0" r="9.5" fill="#66bb6a"/>
-<circle cx="727.0" cy="376.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="727.0" y="379.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">6</text>
-<circle cx="727.0" cy="396.0" r="9.5" fill="#66bb6a"/>
-<circle cx="727.0" cy="396.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="727.0" y="399.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">7</text>
-<circle cx="753.0" cy="396.0" r="9.5" fill="#ffca28"/>
-<circle cx="753.0" cy="396.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="753.0" y="399.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">8</text>
-<circle cx="129.0" cy="252.0" r="9.5" fill="#26a69a"/>
-<circle cx="129.0" cy="252.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="129.0" y="255.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">9</text>
-<circle cx="103.0" cy="252.0" r="9.5" fill="#26a69a"/>
-<circle cx="103.0" cy="252.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="103.0" y="255.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">10</text>
-<circle cx="77.0" cy="252.0" r="9.5" fill="#26a69a"/>
-<circle cx="77.0" cy="252.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="77.0" y="255.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">11</text>
-<circle cx="103.0" cy="272.0" r="9.5" fill="#26a69a"/>
-<circle cx="103.0" cy="272.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="103.0" y="275.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">12</text>
-<circle cx="77.0" cy="272.0" r="9.5" fill="#26a69a"/>
-<circle cx="77.0" cy="272.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="77.0" y="275.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">13</text>
-<circle cx="129.0" cy="272.0" r="9.5" fill="#90a4ae"/>
-<circle cx="129.0" cy="272.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="129.0" y="275.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">14</text>
-<circle cx="753.0" cy="416.0" r="9.5" fill="#ef5350"/>
-<circle cx="753.0" cy="416.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="753.0" y="419.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">15</text>
-<circle cx="805.0" cy="416.0" r="9.5" fill="#ffca28"/>
-<circle cx="805.0" cy="416.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="805.0" y="419.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">16</text>
-<circle cx="779.0" cy="416.0" r="9.5" fill="#90a4ae"/>
-<circle cx="779.0" cy="416.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="779.0" y="419.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">17</text>
-<circle cx="831.0" cy="416.0" r="9.5" fill="#90a4ae"/>
-<circle cx="831.0" cy="416.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="831.0" y="419.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">18</text>
-<circle cx="77.0" cy="196.0" r="9.5" fill="#90a4ae"/>
-<circle cx="77.0" cy="196.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="77.0" y="199.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">19</text>
-<circle cx="77.0" cy="434.0" r="9.5" fill="#90a4ae"/>
-<circle cx="77.0" cy="434.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="77.0" y="437.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">20</text>
-<circle cx="103.0" cy="806.0" r="9.5" fill="#29b6f6"/>
-<circle cx="103.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="103.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">21</text>
-<circle cx="129.0" cy="806.0" r="9.5" fill="#90a4ae"/>
-<circle cx="129.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="129.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">22</text>
-<circle cx="233.0" cy="806.0" r="9.5" fill="#90a4ae"/>
-<circle cx="233.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="233.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">23</text>
-<circle cx="155.0" cy="806.0" r="9.5" fill="#ba68c8"/>
-<circle cx="155.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="155.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">24</text>
-<circle cx="181.0" cy="806.0" r="9.5" fill="#ba68c8"/>
-<circle cx="181.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="181.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">25</text>
-<circle cx="207.0" cy="806.0" r="9.5" fill="#66bb6a"/>
-<circle cx="207.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="207.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">26</text>
-<circle cx="311.0" cy="806.0" r="9.5" fill="#ff7043"/>
-<circle cx="311.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="311.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">27</text>
-<circle cx="337.0" cy="806.0" r="9.5" fill="#90a4ae"/>
-<circle cx="337.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="337.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">28</text>
-<circle cx="363.0" cy="806.0" r="9.5" fill="#66bb6a"/>
-<circle cx="363.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="363.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">29</text>
-<circle cx="389.0" cy="806.0" r="9.5" fill="#ba68c8"/>
-<circle cx="389.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="389.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">30</text>
-<circle cx="415.0" cy="806.0" r="9.5" fill="#ba68c8"/>
-<circle cx="415.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="415.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">31</text>
-<circle cx="441.0" cy="806.0" r="9.5" fill="#90a4ae"/>
-<circle cx="441.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="441.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">32</text>
-<circle cx="467.0" cy="806.0" r="9.5" fill="#ffca28"/>
-<circle cx="467.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="467.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">33</text>
-<circle cx="571.0" cy="806.0" r="9.5" fill="#90a4ae"/>
-<circle cx="571.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="571.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">34</text>
-<circle cx="597.0" cy="806.0" r="9.5" fill="#29b6f6"/>
-<circle cx="597.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="597.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">35</text>
-<circle cx="623.0" cy="806.0" r="9.5" fill="#26a69a"/>
-<circle cx="623.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="623.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">36</text>
-<circle cx="649.0" cy="806.0" r="9.5" fill="#26a69a"/>
-<circle cx="649.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="649.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">37</text>
-<circle cx="675.0" cy="806.0" r="9.5" fill="#26a69a"/>
-<circle cx="675.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="675.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">38</text>
-<circle cx="701.0" cy="806.0" r="9.5" fill="#26a69a"/>
-<circle cx="701.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="701.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">39</text>
-<circle cx="727.0" cy="806.0" r="9.5" fill="#90a4ae"/>
-<circle cx="727.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="727.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">40</text>
-<circle cx="753.0" cy="806.0" r="9.5" fill="#26a69a"/>
-<circle cx="753.0" cy="806.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="753.0" y="809.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">41</text>
-<circle cx="77.0" cy="566.0" r="9.5" fill="#29b6f6"/>
-<circle cx="77.0" cy="566.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="77.0" y="569.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">42</text>
-<circle cx="77.0" cy="586.0" r="9.5" fill="#90a4ae"/>
-<circle cx="77.0" cy="586.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="77.0" y="589.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">43</text>
-<circle cx="77.0" cy="844.0" r="9.5" fill="#ff7043"/>
-<circle cx="77.0" cy="844.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="77.0" y="847.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">44</text>
-<circle cx="77.0" cy="824.0" r="9.5" fill="#90a4ae"/>
-<circle cx="77.0" cy="824.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="77.0" y="827.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">45</text>
-<circle cx="831.0" cy="586.0" r="9.5" fill="#90a4ae"/>
-<circle cx="831.0" cy="586.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="831.0" y="589.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">46</text>
-<circle cx="831.0" cy="824.0" r="9.5" fill="#90a4ae"/>
-<circle cx="831.0" cy="824.0" r="9.5" fill="none" stroke="#0e1318" stroke-width="1.6"/>
-<text x="831.0" y="827.6" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">47</text>
+<svg viewBox="0 0 1160 620" role="img" aria-label="La placa ESP32-S3 vista desde arriba con los conectores USB abajo. Cada pin lleva su nombre y la columna de la protoboard donde cae.">
+<rect x="116" y="80" width="688" height="380" rx="12" fill="currentColor" opacity=".1" stroke="currentColor" stroke-width="2"/>
+<rect x="170" y="208" width="520" height="84" rx="6" fill="currentColor" opacity=".14"/>
+<text x="410" y="256" text-anchor="middle" font-size="17" font-weight="700" fill="currentColor">ESP32-S3</text>
+<rect x="756" y="206" width="46" height="30" rx="5" fill="currentColor" opacity=".3"/>
+<text x="822" y="226" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".75">USB nativo</text>
+<rect x="756" y="258" width="46" height="30" rx="5" fill="currentColor" opacity=".3"/>
+<text x="822" y="278" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="600" fill="currentColor" opacity=".75">USB serie</text>
+<text x="780" y="320" text-anchor="middle" font-size="12" font-weight="700" fill="#ef5350">↑ los USB van de este lado ↑</text>
+<rect x="34" y="239" width="912" height="22" fill="currentColor" opacity=".07"/>
+<text x="55.0" y="58" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">1</text>
+<text x="55.0" y="516" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">1</text>
+<text x="175.0" y="58" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">5</text>
+<text x="175.0" y="516" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">5</text>
+<text x="325.0" y="58" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">10</text>
+<text x="325.0" y="516" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">10</text>
+<text x="475.0" y="58" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">15</text>
+<text x="475.0" y="516" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">15</text>
+<text x="625.0" y="58" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">20</text>
+<text x="625.0" y="516" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">20</text>
+<text x="775.0" y="58" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">25</text>
+<text x="775.0" y="516" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">25</text>
+<text x="925.0" y="58" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">30</text>
+<text x="925.0" y="516" text-anchor="middle" font-size="13" font-family="IBM Plex Mono, monospace" font-weight="700" fill="currentColor" opacity=".55">30</text>
+<circle cx="55.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="55.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="55.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="55.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="55.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="55.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="55.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="55.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="55.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="55.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="85.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="85.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="85.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="85.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="85.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="85.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="85.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="85.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="85.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="85.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="115.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="115.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="115.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="115.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="115.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="115.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="115.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="115.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="115.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="115.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="145.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="145.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="145.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="145.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="145.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="145.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="145.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="145.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="145.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="145.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="175.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="175.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="175.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="175.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="175.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="175.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="175.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="175.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="175.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="175.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="205.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="205.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="205.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="205.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="205.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="205.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="205.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="205.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="205.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="205.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="235.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="235.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="235.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="235.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="235.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="235.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="235.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="235.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="235.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="235.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="265.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="265.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="265.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="265.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="265.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="265.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="265.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="265.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="265.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="265.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="295.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="295.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="295.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="295.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="295.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="295.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="295.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="295.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="295.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="295.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="325.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="325.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="325.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="325.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="325.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="325.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="325.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="325.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="325.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="325.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="355.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="355.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="355.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="355.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="355.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="355.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="355.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="355.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="355.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="355.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="385.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="385.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="385.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="385.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="385.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="385.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="385.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="385.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="385.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="385.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="415.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="415.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="415.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="415.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="415.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="415.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="415.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="415.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="415.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="415.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="445.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="445.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="445.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="445.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="445.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="445.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="445.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="445.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="445.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="445.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="475.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="475.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="475.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="475.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="475.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="475.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="475.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="475.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="475.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="475.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="505.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="505.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="505.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="505.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="505.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="505.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="505.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="505.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="505.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="505.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="535.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="535.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="535.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="535.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="535.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="535.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="535.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="535.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="535.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="535.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="565.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="565.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="565.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="565.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="565.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="565.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="565.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="565.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="565.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="565.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="595.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="595.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="595.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="595.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="595.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="595.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="595.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="595.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="595.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="595.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="625.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="625.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="625.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="625.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="625.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="625.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="625.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="625.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="625.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="625.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="655.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="655.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="655.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="655.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="655.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="655.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="655.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="655.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="655.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="655.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="685.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="685.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="685.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="685.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="685.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="685.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="685.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="685.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="685.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="685.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="715.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="715.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="715.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="715.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="715.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="715.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="715.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="715.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="715.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="715.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="745.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="745.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="745.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="745.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="745.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="745.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="745.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="745.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="745.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="745.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="775.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="775.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="775.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="775.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="775.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="775.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="775.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="775.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="775.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="775.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="805.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="805.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="805.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="805.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="805.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="805.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="805.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="805.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="805.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="805.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="835.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="835.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="835.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="835.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="835.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="835.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="835.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="835.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="835.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="835.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="865.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="865.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="865.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="865.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="865.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="865.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="865.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="865.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="865.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="865.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="895.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="895.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="895.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="895.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="895.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="895.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="895.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="895.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="895.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="895.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="925.0" cy="90.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="925.0" cy="112.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="925.0" cy="134.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="925.0" cy="156.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="925.0" cy="178.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="925.0" cy="284.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="925.0" cy="306.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="925.0" cy="328.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="925.0" cy="350.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="925.0" cy="372.0" r="3.4" fill="currentColor" opacity=".2"/>
+<circle cx="145.0" cy="120.0" r="7" fill="#29b6f6" opacity="1"/>
+<text x="145.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#29b6f6" opacity="1" transform="rotate(-70 145.0 104.0)">3V3</text>
+<rect x="132" y="47" width="26" height="18" rx="4" fill="#29b6f6"/>
+<text x="145.0" y="60.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">4</text>
+<line x1="145.0" y1="113.0" x2="145.0" y2="69.0" stroke="#29b6f6" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="175.0" cy="120.0" r="7" fill="#29b6f6" opacity="1"/>
+<text x="175.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#29b6f6" opacity="1" transform="rotate(-70 175.0 104.0)">3V3</text>
+<rect x="162" y="47" width="26" height="18" rx="4" fill="#29b6f6"/>
+<text x="175.0" y="60.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">5</text>
+<line x1="175.0" y1="113.0" x2="175.0" y2="69.0" stroke="#29b6f6" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="205.0" cy="120.0" r="7" fill="#90a4ae" opacity="1"/>
+<text x="205.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#90a4ae" opacity="1" transform="rotate(-70 205.0 104.0)">RST</text>
+<rect x="192" y="47" width="26" height="18" rx="4" fill="#90a4ae"/>
+<text x="205.0" y="60.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">6</text>
+<line x1="205.0" y1="113.0" x2="205.0" y2="69.0" stroke="#90a4ae" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="235.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="235.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 235.0 104.0)">4</text>
+<circle cx="265.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="265.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 265.0 104.0)">5</text>
+<circle cx="295.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="295.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 295.0 104.0)">6</text>
+<circle cx="325.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="325.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 325.0 104.0)">7</text>
+<circle cx="355.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="355.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 355.0 104.0)">15</text>
+<circle cx="385.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="385.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 385.0 104.0)">16</text>
+<circle cx="415.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="415.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 415.0 104.0)">17</text>
+<circle cx="445.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="445.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 445.0 104.0)">18</text>
+<circle cx="475.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="475.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 475.0 104.0)">8</text>
+<circle cx="505.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="505.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 505.0 104.0)">3</text>
+<circle cx="535.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="535.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 535.0 104.0)">46</text>
+<circle cx="565.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="565.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 565.0 104.0)">9</text>
+<circle cx="595.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="595.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 595.0 104.0)">10</text>
+<circle cx="625.0" cy="120.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="625.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(-70 625.0 104.0)">11</text>
+<circle cx="655.0" cy="120.0" r="7" fill="#66bb6a" opacity="1"/>
+<text x="655.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#66bb6a" opacity="1" transform="rotate(-70 655.0 104.0)">12</text>
+<rect x="642" y="47" width="26" height="18" rx="4" fill="#66bb6a"/>
+<text x="655.0" y="60.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">21</text>
+<line x1="655.0" y1="113.0" x2="655.0" y2="69.0" stroke="#66bb6a" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="685.0" cy="120.0" r="7" fill="#ba68c8" opacity="1"/>
+<text x="685.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ba68c8" opacity="1" transform="rotate(-70 685.0 104.0)">13</text>
+<rect x="672" y="47" width="26" height="18" rx="4" fill="#ba68c8"/>
+<text x="685.0" y="60.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">22</text>
+<line x1="685.0" y1="113.0" x2="685.0" y2="69.0" stroke="#ba68c8" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="715.0" cy="120.0" r="7" fill="#ba68c8" opacity="1"/>
+<text x="715.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ba68c8" opacity="1" transform="rotate(-70 715.0 104.0)">14</text>
+<rect x="702" y="47" width="26" height="18" rx="4" fill="#ba68c8"/>
+<text x="715.0" y="60.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">23</text>
+<line x1="715.0" y1="113.0" x2="715.0" y2="69.0" stroke="#ba68c8" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="745.0" cy="120.0" r="7" fill="#ff7043" opacity="1"/>
+<text x="745.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ff7043" opacity="1" transform="rotate(-70 745.0 104.0)">5V</text>
+<rect x="732" y="47" width="26" height="18" rx="4" fill="#ff7043"/>
+<text x="745.0" y="60.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">24</text>
+<line x1="745.0" y1="113.0" x2="745.0" y2="69.0" stroke="#ff7043" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="775.0" cy="120.0" r="7" fill="#90a4ae" opacity="1"/>
+<text x="775.0" y="104.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#90a4ae" opacity="1" transform="rotate(-70 775.0 104.0)">GND</text>
+<rect x="762" y="47" width="26" height="18" rx="4" fill="#90a4ae"/>
+<text x="775.0" y="60.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">25</text>
+<line x1="775.0" y1="113.0" x2="775.0" y2="69.0" stroke="#90a4ae" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="145.0" cy="420.0" r="7" fill="#90a4ae" opacity="1"/>
+<text x="145.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#90a4ae" opacity="1" transform="rotate(70 145.0 436.0)">GND</text>
+<rect x="132" y="471" width="26" height="18" rx="4" fill="#90a4ae"/>
+<text x="145.0" y="484.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">4</text>
+<line x1="145.0" y1="427.0" x2="145.0" y2="471.0" stroke="#90a4ae" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="175.0" cy="420.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="175.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(70 175.0 436.0)">TX 43</text>
+<circle cx="205.0" cy="420.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="205.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(70 205.0 436.0)">RX 44</text>
+<circle cx="235.0" cy="420.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="235.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(70 235.0 436.0)">1</text>
+<circle cx="265.0" cy="420.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="265.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(70 265.0 436.0)">2</text>
+<circle cx="295.0" cy="420.0" r="7" fill="#26a69a" opacity="1"/>
+<text x="295.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#26a69a" opacity="1" transform="rotate(70 295.0 436.0)">42</text>
+<rect x="282" y="471" width="26" height="18" rx="4" fill="#26a69a"/>
+<text x="295.0" y="484.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">9</text>
+<line x1="295.0" y1="427.0" x2="295.0" y2="471.0" stroke="#26a69a" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="325.0" cy="420.0" r="7" fill="#26a69a" opacity="1"/>
+<text x="325.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#26a69a" opacity="1" transform="rotate(70 325.0 436.0)">41</text>
+<rect x="312" y="471" width="26" height="18" rx="4" fill="#26a69a"/>
+<text x="325.0" y="484.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">10</text>
+<line x1="325.0" y1="427.0" x2="325.0" y2="471.0" stroke="#26a69a" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="355.0" cy="420.0" r="7" fill="#26a69a" opacity="1"/>
+<text x="355.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#26a69a" opacity="1" transform="rotate(70 355.0 436.0)">40</text>
+<rect x="342" y="471" width="26" height="18" rx="4" fill="#26a69a"/>
+<text x="355.0" y="484.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">11</text>
+<line x1="355.0" y1="427.0" x2="355.0" y2="471.0" stroke="#26a69a" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="385.0" cy="420.0" r="7" fill="#26a69a" opacity="1"/>
+<text x="385.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#26a69a" opacity="1" transform="rotate(70 385.0 436.0)">39</text>
+<rect x="372" y="471" width="26" height="18" rx="4" fill="#26a69a"/>
+<text x="385.0" y="484.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">12</text>
+<line x1="385.0" y1="427.0" x2="385.0" y2="471.0" stroke="#26a69a" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="415.0" cy="420.0" r="7" fill="#ffca28" opacity="1"/>
+<text x="415.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ffca28" opacity="1" transform="rotate(70 415.0 436.0)">38</text>
+<rect x="402" y="471" width="26" height="18" rx="4" fill="#ffca28"/>
+<text x="415.0" y="484.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">13</text>
+<line x1="415.0" y1="427.0" x2="415.0" y2="471.0" stroke="#ffca28" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="445.0" cy="420.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="445.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(70 445.0 436.0)">37</text>
+<circle cx="475.0" cy="420.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="475.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(70 475.0 436.0)">36</text>
+<circle cx="505.0" cy="420.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="505.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(70 505.0 436.0)">35</text>
+<circle cx="535.0" cy="420.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="535.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(70 535.0 436.0)">0</text>
+<circle cx="565.0" cy="420.0" r="7" fill="#66bb6a" opacity="1"/>
+<text x="565.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#66bb6a" opacity="1" transform="rotate(70 565.0 436.0)">45</text>
+<rect x="552" y="471" width="26" height="18" rx="4" fill="#66bb6a"/>
+<text x="565.0" y="484.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">18</text>
+<line x1="565.0" y1="427.0" x2="565.0" y2="471.0" stroke="#66bb6a" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="595.0" cy="420.0" r="7" fill="#ffca28" opacity="1"/>
+<text x="595.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ffca28" opacity="1" transform="rotate(70 595.0 436.0)">48</text>
+<rect x="582" y="471" width="26" height="18" rx="4" fill="#ffca28"/>
+<text x="595.0" y="484.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">19</text>
+<line x1="595.0" y1="427.0" x2="595.0" y2="471.0" stroke="#ffca28" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="625.0" cy="420.0" r="7" fill="#26a69a" opacity="1"/>
+<text x="625.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#26a69a" opacity="1" transform="rotate(70 625.0 436.0)">47</text>
+<rect x="612" y="471" width="26" height="18" rx="4" fill="#26a69a"/>
+<text x="625.0" y="484.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">20</text>
+<line x1="625.0" y1="427.0" x2="625.0" y2="471.0" stroke="#26a69a" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="655.0" cy="420.0" r="7" fill="#ef5350" opacity="1"/>
+<text x="655.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#ef5350" opacity="1" transform="rotate(70 655.0 436.0)">21</text>
+<rect x="642" y="471" width="26" height="18" rx="4" fill="#ef5350"/>
+<text x="655.0" y="484.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">21</text>
+<line x1="655.0" y1="427.0" x2="655.0" y2="471.0" stroke="#ef5350" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="685.0" cy="420.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="685.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(70 685.0 436.0)">20</text>
+<circle cx="715.0" cy="420.0" r="4.5" fill="currentColor" opacity="0.35"/>
+<text x="715.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="400" fill="currentColor" opacity="0.4" transform="rotate(70 715.0 436.0)">19</text>
+<circle cx="745.0" cy="420.0" r="7" fill="#90a4ae" opacity="1"/>
+<text x="745.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#90a4ae" opacity="1" transform="rotate(70 745.0 436.0)">GND</text>
+<rect x="732" y="471" width="26" height="18" rx="4" fill="#90a4ae"/>
+<text x="745.0" y="484.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">24</text>
+<line x1="745.0" y1="427.0" x2="745.0" y2="471.0" stroke="#90a4ae" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<circle cx="775.0" cy="420.0" r="7" fill="#90a4ae" opacity="1"/>
+<text x="775.0" y="436.0" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#90a4ae" opacity="1" transform="rotate(70 775.0 436.0)">GND</text>
+<rect x="762" y="471" width="26" height="18" rx="4" fill="#90a4ae"/>
+<text x="775.0" y="484.0" text-anchor="middle" font-size="11" font-family="IBM Plex Mono, monospace" font-weight="700" fill="#0e1318">25</text>
+<line x1="775.0" y1="427.0" x2="775.0" y2="471.0" stroke="#90a4ae" stroke-width="1.6" opacity=".55" stroke-dasharray="3 2"/>
+<text x="40" y="32" font-size="12" font-weight="700" fill="currentColor" opacity=".6">columna de la protoboard ↓</text>
+<text x="40" y="544" font-size="12" font-weight="700" fill="currentColor" opacity=".6">columna de la protoboard ↑</text>
 </svg>
 </div>
-<figcaption>Los círculos numerados son <b>los huecos exactos</b> donde va cada punta de cable. Recordá que cada columna de cinco huecos está unida por dentro: el pin del módulo ocupa la fila <b>j</b> y el número te marca dónde pinchar en la misma columna.</figcaption>
+<figcaption>Vista desde arriba, con los USB a la derecha. Los pines en color son los que usamos; el número dentro del recuadro es <b>la columna de la protoboard</b> donde cae ese pin. Los grises no se tocan.</figcaption>
 </figure>
 
-<h2>Cables entre las dos protoboards</h2>
+<div class="alerta" style="border-left-color:var(--v33);background:color-mix(in srgb,var(--v33) 10%,transparent);border-color:color-mix(in srgb,var(--v33) 40%,transparent)">
+  <p><b style="color:var(--v33)">Lo que hay que entender de la protoboard:</b> cada columna de cinco huecos está unida por dentro. El pin de la placa ocupa <b>uno solo</b> de esos cinco, y los otros cuatro quedan libres <b>conectados a ese mismo pin</b>.</p>
+  <p>Así que «conectar un cable a GPIO14» significa: <b>pinchar el cable en cualquier hueco libre de la columna 23</b>, del lado de arriba. No hay que soldar ni compartir el hueco del pin.</p>
+</div>
+
+<h2>2 · Dónde cae cada pin que usamos</h2>
 <div class="tabla"><table>
-<thead><tr><th>#</th><th>Una punta</th><th>#</th><th>La otra punta</th><th></th></tr></thead>
+<thead><tr><th>Pin de la placa</th><th>Columna</th><th>Lado</th><th>Para qué</th></tr></thead>
 <tbody>
-<tr><td class="pin">1</td><td>3V3 de la placa</td><td class="pin">42</td><td>riel + arriba de la 2</td><td><span class="punto" style="background:var(--v33)"></span></td></tr>
-<tr><td class="pin">2</td><td>5V de la placa</td><td class="pin">44</td><td>riel + abajo de la 2</td><td><span class="punto" style="background:var(--v5)"></span></td></tr>
-<tr><td class="pin">3</td><td>GND de la placa</td><td class="pin">43</td><td>riel − arriba de la 2</td><td><span class="punto" style="background:var(--gnd)"></span></td></tr>
-<tr><td class="pin">—</td><td>46 riel − arriba de la 2</td><td class="pin">47</td><td>riel − abajo de la 2</td><td><span class="punto" style="background:var(--gnd)"></span></td></tr>
-<tr><td class="pin">—</td><td>19 riel − arriba de la 1</td><td class="pin">20</td><td>riel − abajo de la 1</td><td><span class="punto" style="background:var(--gnd)"></span></td></tr>
-<tr><td class="pin">4</td><td>GPIO14 de la placa</td><td class="pin">24</td><td>col. 4 — SCK del micrófono</td><td><span class="punto" style="background:var(--reloj)"></span></td></tr>
-<tr><td class="pin">5</td><td>GPIO14 de la placa</td><td class="pin">30</td><td>col. 13 — BCLK del amplificador</td><td><span class="punto" style="background:var(--reloj)"></span></td></tr>
-<tr><td class="pin">—</td><td>GPIO13 de la placa</td><td class="pin">25</td><td>col. 5 — WS del micrófono</td><td><span class="punto" style="background:var(--reloj)"></span></td></tr>
-<tr><td class="pin">—</td><td>GPIO13 de la placa</td><td class="pin">31</td><td>col. 14 — LRC del amplificador</td><td><span class="punto" style="background:var(--reloj)"></span></td></tr>
-<tr><td class="pin">6</td><td>GPIO12 de la placa</td><td class="pin">26</td><td>col. 6 — SD del micrófono</td><td><span class="punto" style="background:var(--datos)"></span></td></tr>
-<tr><td class="pin">7</td><td>GPIO45 de la placa</td><td class="pin">29</td><td>col. 12 — DIN del amplificador</td><td><span class="punto" style="background:var(--datos)"></span></td></tr>
-<tr><td class="pin">8</td><td>GPIO48 de la placa</td><td class="pin">33</td><td>col. 16 — SD del amplificador</td><td><span class="punto" style="background:var(--ctrl)"></span></td></tr>
-<tr><td class="pin">9</td><td>GPIO39 de la placa</td><td class="pin">36</td><td>col. 22 — DC de la pantalla</td><td><span class="punto" style="background:#26a69a"></span></td></tr>
-<tr><td class="pin">10</td><td>GPIO47 de la placa</td><td class="pin">37</td><td>col. 23 — CS</td><td><span class="punto" style="background:#26a69a"></span></td></tr>
-<tr><td class="pin">11</td><td>GPIO41 de la placa</td><td class="pin">38</td><td>col. 24 — CLK</td><td><span class="punto" style="background:#26a69a"></span></td></tr>
-<tr><td class="pin">12</td><td>GPIO40 de la placa</td><td class="pin">39</td><td>col. 25 — SDA</td><td><span class="punto" style="background:#26a69a"></span></td></tr>
-<tr><td class="pin">13</td><td>GPIO42 de la placa</td><td class="pin">41</td><td>col. 27 — BLK</td><td><span class="punto" style="background:#26a69a"></span></td></tr>
-<tr><td class="pin">14</td><td>RST de la placa</td><td class="pin">40</td><td>col. 26 — RES</td><td><span class="punto" style="background:var(--gnd)"></span></td></tr>
-<tr><td class="pin">15</td><td>GPIO21 de la placa</td><td class="pin">—</td><td>una pata del botón HABLAR</td><td><span class="punto" style="background:#ef5350"></span></td></tr>
-<tr><td class="pin">16</td><td>GPIO38 de la placa</td><td class="pin">—</td><td>una pata del botón DIARIO</td><td><span class="punto" style="background:var(--ctrl)"></span></td></tr>
-<tr><td class="pin">17</td><td>otra pata de HABLAR</td><td class="pin">20</td><td>riel − de la protoboard 1</td><td><span class="punto" style="background:var(--gnd)"></span></td></tr>
-<tr><td class="pin">18</td><td>otra pata de DIARIO</td><td class="pin">20</td><td>riel − de la protoboard 1</td><td><span class="punto" style="background:var(--gnd)"></span></td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--v33)"></span>3V3</td><td class="pin">4</td><td>arriba · filas a-e</td><td>alimenta micrófono y pantalla</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--v5)"></span>5V</td><td class="pin">24</td><td>arriba · filas a-e</td><td>alimenta el amplificador</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--gnd)"></span>GND</td><td class="pin">25</td><td>arriba · filas a-e</td><td>tierra</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--datos)"></span>GPIO12</td><td class="pin">21</td><td>arriba · filas a-e</td><td>SD del micrófono</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--reloj)"></span>GPIO13</td><td class="pin">22</td><td>arriba · filas a-e</td><td>WS · va a los dos módulos</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--reloj)"></span>GPIO14</td><td class="pin">23</td><td>arriba · filas a-e</td><td>BCLK · va a los dos módulos</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--gnd)"></span>RST</td><td class="pin">6</td><td>arriba · filas a-e</td><td>RES de la pantalla</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--datos)"></span>GPIO45</td><td class="pin">18</td><td>abajo · filas f-j</td><td>DIN del amplificador</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--ctrl)"></span>GPIO48</td><td class="pin">19</td><td>abajo · filas f-j</td><td>SD del amplificador</td></tr>
+<tr><td class="pin"><span class="punto" style="background:#26a69a"></span>GPIO47</td><td class="pin">20</td><td>abajo · filas f-j</td><td>CS de la pantalla</td></tr>
+<tr><td class="pin"><span class="punto" style="background:#ef5350"></span>GPIO21</td><td class="pin">21</td><td>abajo · filas f-j</td><td>botón HABLAR</td></tr>
+<tr><td class="pin"><span class="punto" style="background:var(--ctrl)"></span>GPIO38</td><td class="pin">13</td><td>abajo · filas f-j</td><td>botón DIARIO</td></tr>
+<tr><td class="pin"><span class="punto" style="background:#26a69a"></span>GPIO39</td><td class="pin">12</td><td>abajo · filas f-j</td><td>DC de la pantalla</td></tr>
+<tr><td class="pin"><span class="punto" style="background:#26a69a"></span>GPIO40</td><td class="pin">11</td><td>abajo · filas f-j</td><td>SDA de la pantalla</td></tr>
+<tr><td class="pin"><span class="punto" style="background:#26a69a"></span>GPIO41</td><td class="pin">10</td><td>abajo · filas f-j</td><td>CLK de la pantalla</td></tr>
+<tr><td class="pin"><span class="punto" style="background:#26a69a"></span>GPIO42</td><td class="pin">9</td><td>abajo · filas f-j</td><td>BLK de la pantalla</td></tr>
+</tbody></table></div>
+<p class="sub" style="margin-top:12px"><b>Fijate qué bien caen:</b> el 12, 13 y 14 quedan pegados en las columnas 21, 22 y 23, con el 5V y el GND justo al lado. Y los cinco de la pantalla quedan seguidos del 9 al 12. Casi no hay que buscar.</p>
+
+<h2>3 · Los cables, uno por uno</h2>
+<p class="sub" style="margin-bottom:14px">Cada línea es <b>un cable</b>. «col. 23 arriba» significa cualquier hueco libre de la columna 23, del lado de arriba del canal.</p>
+
+<h3 style="font-size:.98rem;margin:20px 0 10px;color:var(--tinta)">Primero la alimentación</h3>
+<div class="tabla"><table>
+<thead><tr><th>#</th><th>Una punta</th><th>La otra punta</th></tr></thead>
+<tbody>
+<tr><td class="pin">1</td><td>col. <b>4</b> arriba · 3V3</td><td>riel <b>+ de arriba</b> de la protoboard 2</td></tr>
+<tr><td class="pin">2</td><td>col. <b>24</b> arriba · 5V</td><td>riel <b>+ de abajo</b> de la protoboard 2</td></tr>
+<tr><td class="pin">3</td><td>col. <b>25</b> arriba · GND</td><td>riel <b>− de arriba</b> de la protoboard 2</td></tr>
+<tr><td class="pin">4</td><td>riel <b>− de arriba</b> de la 2</td><td>riel <b>− de abajo</b> de la 2 <span class="ojo">← sin esto nada funciona</span></td></tr>
+<tr><td class="pin">5</td><td>col. <b>4</b> abajo · GND</td><td>riel <b>− de abajo</b> de la protoboard 1 (para los botones)</td></tr>
 </tbody></table></div>
 
-<h2>Cables cortos, dentro de la protoboard 2</h2>
-<p class="sub" style="margin-bottom:14px">Estos van de la columna del módulo a un riel, sin cruzar a la otra placa.</p>
+<h3 style="font-size:.98rem;margin:24px 0 10px;color:var(--tinta)">El audio</h3>
 <div class="tabla"><table>
-<thead><tr><th>#</th><th>Desde</th><th>#</th><th>Hasta</th><th>Para qué</th></tr></thead>
+<thead><tr><th>#</th><th>Una punta</th><th>La otra punta</th></tr></thead>
 <tbody>
-<tr><td class="pin">21</td><td>col. 2 — VDD del micrófono</td><td class="pin">42</td><td>riel + arriba</td><td>3.3 V</td></tr>
-<tr><td class="pin">22</td><td>col. 3 — GND del micrófono</td><td class="pin">43</td><td>riel − arriba</td><td></td></tr>
-<tr><td class="pin">23</td><td>col. 7 — L/R del micrófono</td><td class="pin">43</td><td>riel − arriba</td><td>a tierra = canal izquierdo</td></tr>
-<tr><td class="pin">27</td><td>col. 10 — VIN del amplificador</td><td class="pin">44</td><td>riel + abajo</td><td>5 V</td></tr>
-<tr><td class="pin">28</td><td>col. 11 — GND del amplificador</td><td class="pin">45</td><td>riel − abajo</td><td></td></tr>
-<tr><td class="pin">32</td><td>col. 15 — GAIN del amplificador</td><td class="pin">45</td><td>riel − abajo</td><td>a tierra = 12 dB</td></tr>
-<tr><td class="pin">34</td><td>col. 20 — GND de la pantalla</td><td class="pin">43</td><td>riel − arriba</td><td></td></tr>
-<tr><td class="pin">35</td><td>col. 21 — VCC de la pantalla</td><td class="pin">42</td><td>riel + arriba</td><td>3.3 V</td></tr>
+<tr><td class="pin">6</td><td>col. <b>23</b> arriba · GPIO14</td><td>col. <b>4</b> de la protoboard 2 — SCK del micrófono</td></tr>
+<tr><td class="pin">7</td><td>col. <b>23</b> arriba · GPIO14</td><td>col. <b>13</b> de la protoboard 2 — BCLK del amplificador</td></tr>
+<tr><td class="pin">8</td><td>col. <b>22</b> arriba · GPIO13</td><td>col. <b>5</b> de la protoboard 2 — WS del micrófono</td></tr>
+<tr><td class="pin">9</td><td>col. <b>22</b> arriba · GPIO13</td><td>col. <b>14</b> de la protoboard 2 — LRC del amplificador</td></tr>
+<tr><td class="pin">10</td><td>col. <b>21</b> arriba · GPIO12</td><td>col. <b>6</b> de la protoboard 2 — SD del micrófono</td></tr>
+<tr><td class="pin">11</td><td>col. <b>18</b> abajo · GPIO45</td><td>col. <b>12</b> de la protoboard 2 — DIN del amplificador</td></tr>
+<tr><td class="pin">12</td><td>col. <b>19</b> abajo · GPIO48</td><td>col. <b>16</b> de la protoboard 2 — SD del amplificador</td></tr>
+</tbody></table></div>
+<p class="sub" style="margin-top:10px">Los cables 6 y 7 salen <b>de la misma columna 23</b>: por eso no hace falta empalmar nada. La columna ya está unida por dentro, así que caben los dos.</p>
+
+<h3 style="font-size:.98rem;margin:24px 0 10px;color:var(--tinta)">La pantalla</h3>
+<div class="tabla"><table>
+<thead><tr><th>#</th><th>Una punta</th><th>La otra punta</th></tr></thead>
+<tbody>
+<tr><td class="pin">13</td><td>col. <b>12</b> abajo · GPIO39</td><td>col. <b>22</b> de la protoboard 2 — DC</td></tr>
+<tr><td class="pin">14</td><td>col. <b>20</b> abajo · GPIO47</td><td>col. <b>23</b> de la protoboard 2 — CS</td></tr>
+<tr><td class="pin">15</td><td>col. <b>10</b> abajo · GPIO41</td><td>col. <b>24</b> de la protoboard 2 — CLK</td></tr>
+<tr><td class="pin">16</td><td>col. <b>11</b> abajo · GPIO40</td><td>col. <b>25</b> de la protoboard 2 — SDA</td></tr>
+<tr><td class="pin">17</td><td>col. <b>6</b> arriba · RST</td><td>col. <b>26</b> de la protoboard 2 — RES</td></tr>
+<tr><td class="pin">18</td><td>col. <b>9</b> abajo · GPIO42</td><td>col. <b>27</b> de la protoboard 2 — BLK</td></tr>
 </tbody></table></div>
 
-<h2>Dónde va cada módulo</h2>
+<h3 style="font-size:.98rem;margin:24px 0 10px;color:var(--tinta)">Los botones</h3>
+<div class="tabla"><table>
+<thead><tr><th>#</th><th>Una punta</th><th>La otra punta</th></tr></thead>
+<tbody>
+<tr><td class="pin">19</td><td>col. <b>21</b> abajo · GPIO21</td><td>una pata del botón <b>HABLAR</b></td></tr>
+<tr><td class="pin">20</td><td>otra pata de HABLAR</td><td>riel − de la protoboard 1</td></tr>
+<tr><td class="pin">21</td><td>col. <b>13</b> abajo · GPIO38</td><td>una pata del botón <b>DIARIO</b></td></tr>
+<tr><td class="pin">22</td><td>otra pata de DIARIO</td><td>riel − de la protoboard 1</td></tr>
+</tbody></table></div>
+
+<h3 style="font-size:.98rem;margin:24px 0 10px;color:var(--tinta)">Cables cortos, dentro de la protoboard 2</h3>
+<div class="tabla"><table>
+<thead><tr><th>#</th><th>Desde</th><th>Hasta</th><th>Para qué</th></tr></thead>
+<tbody>
+<tr><td class="pin">23</td><td>col. <b>2</b> — VDD del micrófono</td><td>riel + arriba</td><td>3.3 V</td></tr>
+<tr><td class="pin">24</td><td>col. <b>3</b> — GND del micrófono</td><td>riel − arriba</td><td></td></tr>
+<tr><td class="pin">25</td><td>col. <b>7</b> — L/R del micrófono</td><td>riel − arriba</td><td><b>canal izquierdo</b></td></tr>
+<tr><td class="pin">26</td><td>col. <b>10</b> — VIN del amplificador</td><td>riel + abajo</td><td>5 V</td></tr>
+<tr><td class="pin">27</td><td>col. <b>11</b> — GND del amplificador</td><td>riel − abajo</td><td></td></tr>
+<tr><td class="pin">28</td><td>col. <b>15</b> — GAIN del amplificador</td><td>riel − abajo</td><td><b>12 dB</b></td></tr>
+<tr><td class="pin">29</td><td>col. <b>20</b> — GND de la pantalla</td><td>riel − arriba</td><td></td></tr>
+<tr><td class="pin">30</td><td>col. <b>21</b> — VCC de la pantalla</td><td>riel + arriba</td><td>3.3 V</td></tr>
+</tbody></table></div>
+
+<h2>4 · Dónde va cada módulo en la protoboard 2</h2>
 <div class="tabla"><table>
 <thead><tr><th>Módulo</th><th>Columnas</th><th>Fila</th><th>Pines, de izquierda a derecha</th></tr></thead>
 <tbody>
