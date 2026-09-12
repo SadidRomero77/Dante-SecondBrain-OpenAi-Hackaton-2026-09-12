@@ -53,9 +53,9 @@ static const uint8_t DIR_ES7210 = 0x41;
                   de dar la vuelta, para que un exceso suene fuerte y no roto.
    El nivel del microfono importa mas que el del parlante: es lo que se le
    manda a OpenAI. El parlante solo lo escuchamos nosotros. */
-static const uint8_t GANANCIA_MIC = 12;     // 34.5 dB. La "saturacion" que medi
-                                            //  antes era la senal de referencia
-                                            //  del parlante, no el microfono.
+static const uint8_t GANANCIA_MIC = 10;     // 30 dB. Medido con el canal ya
+                                            //  limpio: a 34.5 dB satura con solo
+                                            //  ruido ambiente.
 static const int     VOLUMEN_DAC  = 78;     // 100 quedaba demasiado fuerte
 static const float   GANANCIA_SW  = 1.5f;   // solo para escuchar la prueba;
                                             //  a OpenAI le va el audio crudo
