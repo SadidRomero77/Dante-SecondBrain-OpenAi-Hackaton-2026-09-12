@@ -132,6 +132,22 @@ HERRAMIENTAS = [
     },
     {
         "type": "function",
+        "name": "mover_oreja",
+        "description": (
+            "Mueve la oreja del perrito. Usala cuando saludes, cuando te "
+            "alegres de algo, o cuando quieras llamar su atencion antes de "
+            "decir algo importante. Con moderacion: si se mueve todo el rato, "
+            "deja de significar nada."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {"gesto": {"type": "string",
+                                     "enum": ["saludo", "atencion", "duda"]}},
+            "required": ["gesto"],
+        },
+    },
+    {
+        "type": "function",
         "name": "terminar_presentacion",
         "description": ("Usala solo la primera vez, cuando ya sepas el nombre "
                         "de la persona y el de alguien cercano."),
@@ -559,6 +575,13 @@ class Sesion:
                 salida = {"veo": True,
                           "nota": "la foto ya esta en la conversacion, describela"}
                 print(f"   [vision] foto enviada ({len(b64)} caracteres)")
+
+        elif nombre == "mover_oreja":
+            g = a.get("gesto", "saludo")
+            self.t.enviar_control({"t": "gesto", "v": g})
+            self.avisar("gesto", v=g)
+            salida = {"ok": True}
+            print(f"   [oreja] {g}")
 
         elif nombre == "terminar_presentacion":
             ajustes.guardar(self.db, {"nombre_usuario": a.get("nombre", ""),

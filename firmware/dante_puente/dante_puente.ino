@@ -36,6 +36,14 @@ static const int PIN_PA_EN = 48,   PIN_LUZ = 42,       PIN_BOTON = 0;
    El 38 era el MCLK, que con estos modulos ya no hace falta. */
 static const int PIN_HABLAR = 21;
 static const int PIN_DIARIO = 38;
+
+/* Servo de la oreja. GPIO10 esta libre: no lo usan ni el audio, ni la
+   pantalla, ni los botones, ni la flash, ni la PSRAM, ni los pines que quedan
+   reservados por si algun dia se conecta la camara. */
+static const int PIN_SERVO = 10;
+static const int SERVO_CANAL = 4;        // canal LEDC propio, sin librerias
+static const int SERVO_REPOSO = 80;      // grados con la oreja caida
+static const int SERVO_ARRIBA = 135;     // grados con la oreja levantada
 static const int PIN_LCD_CS = 47,  PIN_LCD_DC = 39,    PIN_LCD_SCK = 41,
                  PIN_LCD_MOSI = 40;
 
@@ -102,6 +110,9 @@ static uint16_t COLOR, FONDO;
 static volatile Estado estado = ARRANCANDO;
 static volatile int nivel_mic = 0;
 static volatile bool redibujar = true;
+// 0 nada, 1 saludo, 2 atencion, 3 duda. Lo pide quien sea y lo ejecuta la
+// tarea del nucleo 0, para que ninguna espera del servo toque el audio.
+static volatile int gesto_pedido = 0;
 
 // Texto que Dante muestra: recordatorios, confirmaciones, lo que sea.
 static char txt_titulo[40] = "";
@@ -237,6 +248,12 @@ static void tarea_pantalla(void *) {
   for (;;) {
     uint32_t ahora = millis();
 
+    if (gesto_pedido) {
+      int g = gesto_pedido;
+      gesto_pedido = 0;
+      hacer_gesto(g);
+    }
+
     // --- modo texto: manda sobre todo lo demas ---
     if (txt_nuevo) {
       txt_nuevo = false;
@@ -315,6 +332,50 @@ static void init_pantalla() {
   tft.fillScreen(FONDO);
   digitalWrite(PIN_LUZ, HIGH);
   xTaskCreatePinnedToCore(tarea_pantalla, "pantalla", 6144, nullptr, 1, nullptr, 0);
+}
+
+// ------------------------------------------------------------------ oreja --
+/* El servo se maneja con LEDC directo: 50 Hz, y el ancho del pulso entre 0.5 y
+   2.5 ms decide el angulo. No hace falta ninguna libreria.
+
+   Los movimientos corren en el nucleo 0, junto con la pantalla, para que
+   ninguna espera toque el audio, que vive en el nucleo 1. */
+
+static void servo_grados(int g) {
+  if (g < 0) g = 0; else if (g > 180) g = 180;
+  // 0.5 ms a 2.5 ms sobre un periodo de 20 ms, en 16 bits.
+  uint32_t us = 500 + (uint32_t)g * 2000 / 180;
+  ledcWrite(PIN_SERVO, (uint32_t)((uint64_t)us * 65535 / 20000));
+}
+
+static void init_servo() {
+  ledcAttach(PIN_SERVO, 50, 16);
+  servo_grados(SERVO_REPOSO);
+  delay(300);
+  ledcWrite(PIN_SERVO, 0);               // soltar: quieto no consume ni zumba
+}
+
+/* Mueve la oreja y la suelta. Soltarla importa: un servo mantenido en
+   posicion zumba y consume, y ese zumbido se cuela por el parlante. */
+static void hacer_gesto(int cual) {
+  switch (cual) {
+    case 1:                              // saludo: dos movimientos alegres
+      for (int i = 0; i < 2; i++) {
+        servo_grados(SERVO_ARRIBA); vTaskDelay(pdMS_TO_TICKS(230));
+        servo_grados(SERVO_REPOSO); vTaskDelay(pdMS_TO_TICKS(230));
+      }
+      break;
+    case 2:                              // atencion: la levanta y la sostiene
+      servo_grados(SERVO_ARRIBA); vTaskDelay(pdMS_TO_TICKS(900));
+      servo_grados(SERVO_REPOSO); vTaskDelay(pdMS_TO_TICKS(250));
+      break;
+    case 3:                              // duda: media oreja
+      servo_grados((SERVO_REPOSO + SERVO_ARRIBA) / 2);
+      vTaskDelay(pdMS_TO_TICKS(700));
+      servo_grados(SERVO_REPOSO); vTaskDelay(pdMS_TO_TICKS(250));
+      break;
+  }
+  ledcWrite(PIN_SERVO, 0);
 }
 
 static void mostrar_texto(const char *titulo, const char *cuerpo, uint32_t seg) {
@@ -510,6 +571,7 @@ void setup() {
   pinMode(PIN_DIARIO, INPUT_PULLUP);
 
   init_pantalla();
+  init_servo();
 
   // Ya no hay nada que configurar por I2C: los modulos nuevos solo se conectan.
   bool c = init_i2s();

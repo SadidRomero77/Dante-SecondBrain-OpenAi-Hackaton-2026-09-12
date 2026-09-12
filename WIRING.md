@@ -110,6 +110,44 @@ sitio —`DIN`, `DOUT`, `PA_EN` y todo el SPI de la pantalla— van directas.
 > la protoboard hay que soldarles esa tira: 6 y 7 puntos. Si ya vienen con los
 > pines puestos, no hay nada que soldar en todo el montaje.
 
+## El servo de la oreja
+
+Tres cables. Los colores del servo son estándar:
+
+| Cable del servo | Va a | Ojo |
+|---|---|---|
+| **naranja o amarillo** — señal | `GPIO10` | el único cable de datos |
+| **rojo** — alimentación | **5 V** | ⚠️ nunca a 3.3 V |
+| **marrón o negro** — tierra | `GND` | al riel `−` |
+
+`GPIO10` está libre: no lo usan ni el audio, ni la pantalla, ni los botones, ni
+la flash, ni la PSRAM, ni los pines reservados para la cámara.
+
+### Dos cosas que hay que cuidar
+
+**Un servo mete ruido en la alimentación.** El amplificador está en el mismo
+riel de 5 V, así que un tirón de corriente del servo puede oírse como un chasquido
+por el parlante. Si pasa, poné un **condensador electrolítico de 470 µF o
+1000 µF** entre el `+` y el `−` del riel de abajo, con la patita larga al `+`.
+Cuesta mil pesos y absorbe el golpe.
+
+**El servo se suelta después de moverse.** Mantenerlo en posición hace que zumbe
+y consuma todo el tiempo, y ese zumbido se cuela por el parlante. El firmware le
+corta la señal en cuanto termina el gesto, así que queda quieto y callado.
+
+> Un SG90 acepta señal de 3.3 V sin problema aunque se alimente con 5 V.
+
+### Los tres gestos
+
+| Gesto | Cuándo |
+|---|---|
+| **saludo** | dos movimientos alegres — al saludar o alegrarse |
+| **atención** | la levanta y la sostiene — al escuchar o llamar la atención |
+| **duda** | media oreja — mientras piensa |
+
+Se disparan solos con el estado, y Dante también puede pedirlos a propósito con
+la herramienta `mover_oreja`.
+
 ## Los dos botones
 
 Van en la protoboard de la placa, en las columnas libres del final, montados a
