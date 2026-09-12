@@ -46,18 +46,86 @@ async def _enviar(ws, evento: dict) -> None:
     await ws.send(json.dumps(evento))
 
 
-async def _probar_modelo(modelo: str, key: str) -> bool:
+# Motivos de cierre que sabemos explicar en cristiano.
+EXPLICACIONES = {
+    "billing_not_active": (
+        "la cuenta no tiene facturacion activa",
+        "Carga credito en https://platform.openai.com/settings/organization/billing\n"
+        "        La API se paga aparte de ChatGPT Plus. Con 5 USD sobra para el hackaton.",
+    ),
+    "insufficient_quota": (
+        "se acabo el credito o el tope de gasto",
+        "Revisa https://platform.openai.com/settings/organization/limits",
+    ),
+    "invalid_api_key": (
+        "la llave no es valida",
+        "Genera otra en https://platform.openai.com/api-keys y pegala en .env",
+    ),
+    "model_not_found": (
+        "ese modelo no existe para tu cuenta",
+        "Probamos con otro automaticamente.",
+    ),
+}
+
+
+def _explicar(texto: str) -> tuple[str, str] | None:
+    for clave, par in EXPLICACIONES.items():
+        if clave in texto:
+            return par
+    return None
+
+
+async def _probar_modelo(modelo: str, key: str) -> tuple[bool, str]:
+    """Conecta de verdad: espera el primer evento del servidor.
+
+    El handshake solo no prueba nada — la API acepta el WebSocket y recien
+    despues rechaza por facturacion o por modelo inexistente.
+    """
     try:
         ws = await _abrir(modelo, key)
     except Exception as e:
-        print(f"  [no]  {modelo:20s} {type(e).__name__}: {str(e)[:70]}")
-        return False
-    await ws.close()
-    print(f"  [SI]  {modelo:20s} conecta")
-    return True
+        motivo = f"{type(e).__name__}: {str(e)[:60]}"
+        print(f"  [no]  {modelo:20s} {motivo}")
+        return False, motivo
+
+    try:
+        crudo = await asyncio.wait_for(ws.recv(), timeout=15)
+        ev = json.loads(crudo)
+        _apuntar("<-", ev)
+        if ev.get("type") == "error":
+            motivo = str(ev.get("error", {}).get("message", "error"))[:70]
+            print(f"  [no]  {modelo:20s} {motivo}")
+            return False, motivo
+        print(f"  [SI]  {modelo:20s} sesion abierta ({ev.get('type')})")
+        return True, ""
+    except asyncio.TimeoutError:
+        print(f"  [no]  {modelo:20s} no contesto en 15 s")
+        return False, "sin respuesta"
+    except Exception as e:
+        motivo = str(e)[:90]
+        print(f"  [no]  {modelo:20s} {motivo}")
+        return False, motivo
+    finally:
+        await ws.close()
 
 
 async def _conversar(modelo: str, key: str, con_audio: bool) -> int:
+    try:
+        return await _conversar_inner(modelo, key, con_audio)
+    except websockets.exceptions.ConnectionClosed as e:
+        texto = str(e)
+        print(f"\n  [MAL] El servidor cerro la conexion.")
+        par = _explicar(texto)
+        if par:
+            causa, arreglo = par
+            print(f"        Causa: {causa}.")
+            print(f"        Que hacer: {arreglo}")
+        else:
+            print(f"        {texto[:160]}")
+        return 1
+
+
+async def _conversar_inner(modelo: str, key: str, con_audio: bool) -> int:
     modalidades = ["audio"] if con_audio else ["text"]
     print(f"\nAbriendo sesion con {modelo}, respuesta en {modalidades[0]}...")
 
@@ -158,12 +226,25 @@ async def _correr(con_audio: bool) -> int:
     print("1) Buscando que modelo de voz existe en tu cuenta:")
 
     candidatos = [config.MODELO_VOZ] + [c for c in CANDIDATOS if c != config.MODELO_VOZ]
-    disponibles = [m for m in candidatos if await _probar_modelo(m, config.API_KEY)]
+    disponibles: list[str] = []
+    motivos: list[str] = []
+    for m in candidatos:
+        sirve, motivo = await _probar_modelo(m, config.API_KEY)
+        if sirve:
+            disponibles.append(m)
+        else:
+            motivos.append(motivo)
 
     if not disponibles:
-        print("\n  [MAL] Ninguno conecta. Puede ser la llave, la facturacion, "
-              "o que los IDs cambiaron.")
-        print(f"        Registro completo en {LOG}")
+        print("\n  [MAL] Ningun modelo de voz quedo utilizable.")
+        par = _explicar(" ".join(motivos))
+        if par:
+            causa, arreglo = par
+            print(f"\n  Causa: {causa}.")
+            print(f"  Que hacer: {arreglo}")
+        else:
+            print("        Puede ser la llave, la facturacion, o que los IDs cambiaron.")
+        print(f"\n  Registro completo en {LOG}")
         return 1
 
     elegido = disponibles[0]
