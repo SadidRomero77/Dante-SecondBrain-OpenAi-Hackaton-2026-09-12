@@ -13,6 +13,8 @@ Comandos de Dante:
   dante monitor        Reinicia el aparato y muestra lo que imprime por serie.
   dante puente         Microfono -> PC -> parlante. Aprieta BOOT y habla.
   dante hablar         Dante conversando. Aprieta BOOT, habla, suelta.
+  dante semilla        Carga una persona de ejemplo con su pasado.
+  dante memoria        Muestra que recuerda Dante ahora mismo.
 """
 
 
@@ -27,6 +29,10 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("smoke", help="prueba la Realtime API")
     s.add_argument("--audio", action="store_true",
                    help="pedir la respuesta hablada y guardarla en WAV")
+
+    se = sub.add_parser("semilla", help="cargar datos de ejemplo")
+    se.add_argument("--borrar", action="store_true", help="vaciar antes de sembrar")
+    sub.add_parser("memoria", help="ver que recuerda Dante")
 
     h = sub.add_parser("hablar", help="conversar con Dante")
     h.add_argument("--simular", type=float, default=0.0, metavar="SEG",
@@ -52,6 +58,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.comando == "smoke":
         from .smoke import correr
         return correr(con_audio=args.audio)
+
+    if args.comando == "semilla":
+        from .semilla import correr as sembrar
+        return sembrar(borrar=args.borrar)
+
+    if args.comando == "memoria":
+        from .semilla import mostrar
+        return mostrar()
 
     if args.comando == "hablar":
         from .sesion import correr as hablar

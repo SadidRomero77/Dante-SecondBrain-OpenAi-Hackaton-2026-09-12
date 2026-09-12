@@ -17,7 +17,7 @@ import time
 
 import websockets
 
-from . import config
+from . import config, memoria
 from .transporte import T_AUDIO, T_CONTROL, T_LOG, TransporteSerie
 
 VID_ESPRESSIF = 0x303A
@@ -58,6 +58,74 @@ falsa es peor que decir que no sabes.
 """
 
 
+HERRAMIENTAS = [
+    {
+        "type": "function",
+        "name": "recordar",
+        "description": (
+            "Busca en la memoria de esta persona. USALA SIEMPRE antes de "
+            "responder cualquier cosa sobre su vida, su familia, su pasado o "
+            "sus rutinas. Devuelve cada hecho con la fecha en que se anoto y "
+            "de donde salio. Si vuelve vacia, di que no lo tienes anotado: "
+            "nunca completes con algo que suene razonable."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "consulta": {
+                    "type": "string",
+                    "description": "Que estas buscando, en lenguaje natural.",
+                }
+            },
+            "required": ["consulta"],
+        },
+    },
+    {
+        "type": "function",
+        "name": "anotar",
+        "description": (
+            "Guarda un hecho nuevo sobre la vida de esta persona, para "
+            "recordarlo en proximas conversaciones. Usala cuando te cuenten "
+            "algo que valga la pena conservar, o cuando te lo pidan."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "hecho": {
+                    "type": "string",
+                    "description": "El hecho en una frase corta y clara, en tercera persona.",
+                },
+                "sujeto": {
+                    "type": "string",
+                    "description": "De quien trata, si es de otra persona. Opcional.",
+                },
+            },
+            "required": ["hecho"],
+        },
+    },
+    {
+        "type": "function",
+        "name": "agenda",
+        "description": "Que hay hoy: medicamentos, citas, visitas.",
+        "parameters": {"type": "object", "properties": {}},
+    },
+    {
+        "type": "function",
+        "name": "registrar_persona",
+        "description": "Da de alta a alguien nuevo en la memoria, con su relacion.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "nombre": {"type": "string"},
+                "relacion": {"type": "string",
+                             "description": "hija, vecino, medico..."},
+            },
+            "required": ["nombre"],
+        },
+    },
+]
+
+
 def _puerto() -> str | None:
     from serial.tools import list_ports
 
@@ -79,9 +147,12 @@ async def _abrir_ws(modelo: str, key: str):
 
 
 class Sesion:
-    def __init__(self, t: TransporteSerie, ws):
+    def __init__(self, t: TransporteSerie, ws, db):
         self.t = t
         self.ws = ws
+        self.db = db
+        self.episodio = memoria.abrir_episodio(db)
+        self.dialogo: list[str] = []
         self.cola = asyncio.Queue()      # audio hacia el parlante, ya troceado
         self.hablando_usuario = False
         self.enviados = 0
@@ -94,11 +165,17 @@ class Sesion:
         await self.ws.send(json.dumps(obj))
 
     async def configurar(self) -> None:
+        # La tarjeta va al final y no cambia entre turnos: es lo que el cache
+        # de prompt puede reusar.
+        instrucciones = PERSONALIDAD + "\n\n--- LO QUE RECUERDAS ---\n" + \
+            memoria.tarjeta_de_perfil(self.db)
         await self._ev({
             "type": "session.update",
             "session": {
                 "type": "realtime",
-                "instructions": PERSONALIDAD,
+                "instructions": instrucciones,
+                "tools": HERRAMIENTAS,
+                "tool_choice": "auto",
                 "output_modalities": ["audio"],
                 "audio": {
                     "input": {
@@ -186,13 +263,63 @@ class Sesion:
                 for i in range(0, len(pcm), TROZO):
                     await self.cola.put(pcm[i:i + TROZO])
 
+            elif tipo == "response.function_call_arguments.done":
+                await self._herramienta(ev.get("name", ""),
+                                        ev.get("arguments", "{}"),
+                                        ev.get("call_id", ""))
+
             elif tipo == "response.output_audio_transcript.done":
-                print(f"   Dante: {ev.get('transcript', '').strip()}")
+                txt = ev.get("transcript", "").strip()
+                print(f"   Dante: {txt}")
+                self.dialogo.append(f"Dante: {txt}")
 
             elif tipo == "response.done":
                 self.respondiendo = False
                 self.recibidos = 0
                 await self.cola.put(None)     # marca de fin
+
+    async def _herramienta(self, nombre: str, argumentos: str, call_id: str) -> None:
+        """Ejecuta una herramienta y le devuelve el resultado al modelo.
+
+        Todo lo que Dante puede afirmar sobre la vida de la persona pasa por
+        aqui. Si esto devuelve vacio, la respuesta correcta es "no lo tengo
+        anotado", no una suposicion.
+        """
+        try:
+            a = json.loads(argumentos or "{}")
+        except ValueError:
+            a = {}
+
+        if nombre == "recordar":
+            r = memoria.recordar(self.db, a.get("consulta", ""))
+            salida = {"encontrados": len(r), "hechos": r}
+            print(f"   [memoria] recordar({a.get('consulta','')!r}) -> {len(r)}")
+
+        elif nombre == "anotar":
+            id_ = memoria.anotar(self.db, a.get("hecho", ""), a.get("sujeto", ""))
+            salida = {"guardado": True, "id": id_}
+            print(f"   [memoria] anotado: {a.get('hecho','')}")
+
+        elif nombre == "agenda":
+            e = memoria.agenda_de(self.db, "hoy")
+            salida = {"hoy": e}
+            print(f"   [memoria] agenda -> {len(e)}")
+
+        elif nombre == "registrar_persona":
+            id_ = memoria.registrar_persona(self.db, a.get("nombre", ""),
+                                            a.get("relacion", ""))
+            salida = {"registrada": True, "id": id_}
+            print(f"   [memoria] persona: {a.get('nombre','')}")
+
+        else:
+            salida = {"error": f"herramienta desconocida: {nombre}"}
+
+        await self._ev({
+            "type": "conversation.item.create",
+            "item": {"type": "function_call_output", "call_id": call_id,
+                     "output": json.dumps(salida, ensure_ascii=False)},
+        })
+        await self._ev({"type": "response.create", "response": {}})
 
     # ---------------------------------------------------- reproduccion ----
     async def reproducir(self) -> None:
@@ -246,8 +373,13 @@ async def _correr(simular: float = 0.0, limite: float = 0.0) -> int:
             print(f"No pude conectar con OpenAI: {e}")
             return 1
 
+        db = memoria.abrir()
+        r = memoria.resumen(db)
+        print(f"  memoria: {r['personas']} personas, {r['hechos']} hechos, "
+              f"usuario {r['usuario']}\n")
+
         async with ws:
-            s = Sesion(t, ws)
+            s = Sesion(t, ws, db)
             await s.configurar()
             t.enviar_control({"t": "hola?"})
             t.enviar_control({"t": "emocion", "v": "idle"})
@@ -279,6 +411,8 @@ async def _correr(simular: float = 0.0, limite: float = 0.0) -> int:
             finally:
                 for x in tareas + aparte:
                     x.cancel()
+                memoria.cerrar_episodio(db, s.episodio, "\n".join(s.dialogo))
+                db.close()
     return 0
 
 
