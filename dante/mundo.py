@@ -122,6 +122,77 @@ def clima(lugar: str = "Bogota") -> dict:
         return {"error": f"no pude consultar el clima: {type(e).__name__}"}
 
 
+# Como debe sonar una respuesta buscada, dicha en voz alta a una persona mayor.
+GUIA_VOZ = (
+    "Responde en espanol, en dos o tres frases cortas, para leerlas en voz alta "
+    "a una persona mayor. Nada de listas, vinetas, comillas ni simbolos. Si el "
+    "dato tiene fecha, dila. Si las fuentes se contradicen o no hay informacion "
+    "clara, dilo en vez de elegir una."
+)
+
+
+def _para_voz(texto: str) -> str:
+    """Deja el texto listo para decirlo en voz alta.
+
+    Los buscadores devuelven markdown con enlaces incrustados. Si eso llega al
+    modelo de voz, lo lee: "parentesis el pais punto com corchete http dos
+    puntos barra barra...". Las fuentes se mandan aparte, en su propio campo.
+    """
+    import re
+
+    t = texto or ""
+    t = re.sub(r"\[([^\]]*)\]\((?:https?://)?[^)]*\)", r"\1", t)  # [texto](url) -> texto
+    t = re.sub(r"\(?\s*https?://\S+\s*\)?", "", t)                  # urls sueltas
+    t = re.sub(r"[*_`#>]+", "", t)                                    # restos de markdown
+    t = re.sub(r"\(\s*\)", "", t)                                    # parentesis vacios
+    t = re.sub(r"\s{2,}", " ", t)
+    t = re.sub(r"\s+([,.;:])", r"\1", t)
+    return t.strip()
+
+
+def _exa(consulta: str) -> dict:
+    """Endpoint /answer de Exa: respuesta ya sintetizada, con citas y fechas.
+
+    Usamos /answer y no /search porque para voz una lista de paginas no sirve:
+    habria que resumirla con otra llamada y sumar otro par de segundos de
+    silencio. El modelo exa-fast va por la latencia, que es lo que se nota en
+    una conversacion hablada.
+    """
+    r = _pedir(
+        "https://api.exa.ai/answer",
+        {"x-api-key": config.EXA_API_KEY},
+        {"query": consulta, "model": "exa-fast", "stream": False, "text": False,
+         "systemPrompt": GUIA_VOZ, "userLocation": "CO"},
+        segundos=20.0,
+    )
+    fuentes = []
+    for c in (r.get("citations") or [])[:3]:
+        f = {"titulo": c.get("title") or "", "url": c.get("url") or ""}
+        if c.get("publishedDate"):
+            f["fecha"] = str(c["publishedDate"])[:10]
+        fuentes.append(f)
+
+    salida = {"buscador": "exa", "respuesta": _para_voz(r.get("answer") or "")}
+    if fuentes:
+        salida["fuentes"] = fuentes
+    costo = (r.get("costDollars") or {}).get("total")
+    if costo is not None:
+        salida["_costo_usd"] = costo
+    return salida
+
+
+def _openai_busca(consulta: str) -> dict:
+    from openai import OpenAI
+
+    c = OpenAI(api_key=config.API_KEY)
+    r = c.responses.create(
+        model=config.MODELO_TEXTO,
+        tools=[{"type": "web_search"}],
+        input=f"{consulta}\n\n{GUIA_VOZ}",
+    )
+    return {"buscador": "openai", "respuesta": _para_voz(r.output_text)}
+
+
 def buscar_web(consulta: str) -> dict:
     """Busca en la web. Exa si hay llave; si no, el buscador de OpenAI.
 
@@ -131,28 +202,11 @@ def buscar_web(consulta: str) -> dict:
     """
     if config.EXA_API_KEY:
         try:
-            r = _pedir("https://api.exa.ai/search",
-                       {"x-api-key": config.EXA_API_KEY},
-                       {"query": consulta, "numResults": 3, "type": "auto",
-                        "contents": {"summary": True}})
-            res = [{"titulo": x.get("title", ""),
-                    "resumen": (x.get("summary") or "")[:400],
-                    "fuente": x.get("url", "")}
-                   for x in r.get("results", [])[:3]]
-            return {"buscador": "exa", "resultados": res}
+            return _exa(consulta)
         except Exception as e:
-            print(f"   [mundo] Exa fallo ({type(e).__name__}), uso OpenAI")
+            print(f"   [mundo] Exa fallo ({type(e).__name__}), voy con OpenAI")
 
     try:
-        from openai import OpenAI
-        c = OpenAI(api_key=config.API_KEY)
-        r = c.responses.create(
-            model=config.MODELO_TEXTO,
-            tools=[{"type": "web_search"}],
-            input=(f"{consulta}\n\nResponde en espanol, en dos o tres frases "
-                   f"cortas, como para leerlas en voz alta. Nada de listas ni "
-                   f"simbolos. Si el dato tiene fecha, dila."),
-        )
-        return {"buscador": "openai", "respuesta": r.output_text}
+        return _openai_busca(consulta)
     except Exception as e:
         return {"error": f"no pude buscar: {type(e).__name__}"}
