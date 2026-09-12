@@ -136,9 +136,25 @@ header{display:flex;align-items:center;gap:16px;padding:16px 22px;
 
 .ojo{transition:all .25s cubic-bezier(.34,1.56,.64,1)}
 
-h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.02em}
+.marca-kibo{display:flex;flex-direction:column;justify-content:center;gap:1px;min-width:0}
 
-.animo{font-size:13px;color:var(--tinta2);font-weight:600;margin-top:-2px}
+.kibo-word{display:flex;align-items:center;font:800 32px/1 Nunito,sans-serif;letter-spacing:-.04em}
+
+.kibo-k{position:relative;color:#ee9c2a;padding-left:14px}
+
+.kibo-ib{color:#4a2c1a}
+
+.kibo-o{width:24px;height:24px;margin-left:2px;flex:none}
+
+.kibo-o svg{display:block;width:100%;height:100%}
+
+.kibo-raya{position:absolute;background:#ee9c2a;border-radius:99px}
+
+.kibo-raya.a{width:11px;height:5px;left:0;top:2px;transform:rotate(-38deg)}
+
+.kibo-raya.b{width:9px;height:4.5px;left:-2px;top:12px;transform:rotate(-52deg)}
+
+.lema{margin:0;padding-left:14px;font-size:12.5px;font-weight:700;color:#5c3d28;letter-spacing:.01em}
 
 .tabs{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
 
@@ -542,9 +558,11 @@ header{padding:18px clamp(16px,4vw,48px);gap:14px;
 
 .carita{width:72px;height:52px;border-radius:18px;box-shadow:0 9px 20px rgba(91,70,54,.2)}
 
-h1{font-size:22px;letter-spacing:-.04em}
+.kibo-word{font-size:34px}
 
-.animo{font-size:12px;letter-spacing:.01em}
+.kibo-o{width:26px;height:26px}
+
+.lema{font-size:13px}
 
 .tabs{gap:6px;align-items:center}
 
@@ -684,7 +702,11 @@ button:active{transform:translateY(0) scale(.98)}
 
   .carita svg{transform:scale(.84)}
 
-  h1{font-size:19px}
+  .kibo-word{font-size:26px}
+
+  .kibo-o{width:20px;height:20px}
+
+  .lema{font-size:11.5px}
 
   main{padding:14px 12px 34px}
 
@@ -1055,12 +1077,20 @@ button:active{transform:translateY(0) scale(.98)}
       </g>
     </svg>
   </div>
-  <div>
-
-    <h1 id="titulo">Dante</h1>
-
-    <div class="animo" id="animo">conectando…</div>
-
+  <div class="marca-kibo">
+    <div class="kibo-word" aria-label="Kibo">
+      <span class="kibo-k"><span class="kibo-raya a"></span><span class="kibo-raya b"></span>K</span><span class="kibo-ib">ib</span><span class="kibo-o">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <circle cx="24" cy="24" r="24" fill="#4a2c1a"/>
+          <ellipse cx="24" cy="28" rx="7.2" ry="8.2" fill="#f0c45c"/>
+          <circle cx="14.2" cy="19" r="4.1" fill="#f0c45c"/>
+          <circle cx="23.2" cy="15.2" r="4.1" fill="#f0c45c"/>
+          <circle cx="33.4" cy="19" r="4.1" fill="#f0c45c"/>
+          <circle cx="35.2" cy="28.2" r="3.5" fill="#f0c45c"/>
+        </svg>
+      </span>
+    </div>
+    <p class="lema">Tu compañero. Tu memoria.</p>
   </div>
 
   <nav class="tabs">
@@ -1546,7 +1576,7 @@ button:active{transform:translateY(0) scale(.98)}
 <script>
 
 const $ = (s) => document.querySelector(s);
-const charla = $('#charla'), animo = $('#animo');
+const charla = $('#charla');
 const danteBox = $('#dante-avatar-box');
 const parpadoIzq = $('#parpado-izq'), parpadoDer = $('#parpado-der');
 const pupilaIzq = $('#pupila-izq'), pupilaDer = $('#pupila-der');
@@ -1570,8 +1600,7 @@ const NOMBRES_EMOCION = {
 
 function pintarCara(e) {
   estadoActual = e || 'idle';
-  const texto = NOMBRES_EMOCION[estadoActual] || 'listo';
-  if (animo) animo.textContent = texto;
+
 
   if (!danteBox) return;
 
@@ -1719,7 +1748,7 @@ function conectar(){
 
   ws.onopen = () => pintarCara('idle');
 
-  ws.onclose = () => { animo.textContent = 'desconectado'; setTimeout(conectar, 1500); };
+  ws.onclose = () => { setTimeout(conectar, 1500); };
 
   ws.onmessage = (e) => {
 
@@ -1943,8 +1972,6 @@ async function cargarCfg(){
 
     const el = form.elements[k] || form2.elements[k]; if (el) el.value = v; }
 
-  if (a.ajustes?.nombre_mascota) $('#titulo').textContent = a.ajustes.nombre_mascota;
-
 }
 
 cargarCfg();
@@ -1964,8 +1991,6 @@ async function guardarTodo(aviso){
     body:JSON.stringify(d)});
 
   avisar('#aviso-cfg', aviso);
-
-  if (d.nombre_mascota) $('#titulo').textContent = d.nombre_mascota;
 
 }
 
