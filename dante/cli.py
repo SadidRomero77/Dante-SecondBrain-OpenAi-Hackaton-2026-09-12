@@ -13,6 +13,7 @@ Comandos de Dante:
   dante monitor        Reinicia el aparato y muestra lo que imprime por serie.
   dante puente         Microfono -> PC -> parlante. Aprieta BOOT y habla.
   dante hablar         Dante conversando. Aprieta BOOT, habla, suelta.
+  dante hablar --panel Ademas abre el panel web en el navegador.
   dante semilla        Carga una persona de ejemplo con su pasado.
   dante memoria        Muestra que recuerda Dante ahora mismo.
 """
@@ -39,6 +40,9 @@ def main(argv: list[str] | None = None) -> int:
                    help="finge apretar el boton N segundos, para probar sin la placa")
     h.add_argument("--limite", type=float, default=0.0, metavar="SEG",
                    help="salir solo despues de N segundos")
+    h.add_argument("--panel", nargs="?", type=int, const=8800, default=0,
+                   metavar="PUERTO",
+                   help="abrir el panel web (por defecto en el 8800)")
     h.add_argument("--diario", dest="diario", action="store_true", default=None,
                    help="forzar el saludo del dia aunque ya lo haya dado")
     h.add_argument("--sin-diario", dest="diario", action="store_false",
@@ -74,7 +78,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.comando == "hablar":
         from .sesion import correr as hablar
         return hablar(simular=args.simular, limite=args.limite,
-                      con_diario=args.diario)
+                      con_diario=args.diario, con_panel=args.panel)
 
     if args.comando == "puente":
         from .puente import correr as puentear

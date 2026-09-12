@@ -17,7 +17,7 @@ import time
 
 import websockets
 
-from . import config, consolidar, diario, memoria, mundo, vision
+from . import config, consolidar, diario, memoria, mundo, panel, vision
 from .transporte import T_AUDIO, T_CONTROL, T_LOG, TransporteSerie
 
 VID_ESPRESSIF = 0x303A
@@ -244,6 +244,11 @@ class Sesion:
         self.db = db
         self.episodio = memoria.abrir_episodio(db)
         self.ojos = vision.Ojos()
+        # El panel se cuelga de aqui: cada cosa que pasa se le avisa. Si no hay
+        # panel, la lista esta vacia y no cuesta nada.
+        self.oyentes: list = []
+        self.estado = "idle"
+        self.bucle = None
         self.dialogo: list[str] = []
         self.cola = asyncio.Queue()      # audio hacia el parlante, ya troceado
         self.hablando_usuario = False
@@ -253,8 +258,51 @@ class Sesion:
         self.respondiendo = False
 
     # ------------------------------------------------------------ enviar --
+    def avisar(self, tipo: str, **datos) -> None:
+        """Le cuenta al panel lo que esta pasando. Nunca revienta la sesion."""
+        if tipo == "estado":
+            self.estado = datos.get("v", self.estado)
+        for f in list(self.oyentes):
+            try:
+                f({"t": tipo, **datos})
+            except Exception:
+                pass
+
+    def cara(self, v: str) -> None:
+        """Cambia el estado en la pantalla del aparato y avisa al panel."""
+        self.t.enviar_control({"t": "emocion", "v": v})
+        self.avisar("estado", v=v)
+
+    def pantalla(self, titulo: str, cuerpo: str, seg: int = 8) -> None:
+        self.t.enviar_control({"t": "texto", "titulo": titulo,
+                               "cuerpo": cuerpo[:150], "seg": seg})
+        self.avisar("pantalla", titulo=titulo, cuerpo=cuerpo)
+
     async def _ev(self, obj: dict) -> None:
         await self.ws.send(json.dumps(obj))
+
+    # ------------------------------------------------- entradas del panel --
+    async def decir_texto(self, texto: str) -> None:
+        """Alguien escribio desde el panel. Mismo camino que la voz."""
+        if not texto.strip():
+            return
+        self.avisar("dijo", quien="usuario", texto=texto)
+        self.dialogo.append(f"Usuario: {texto}")
+        await self._ev({
+            "type": "conversation.item.create",
+            "item": {"type": "message", "role": "user",
+                     "content": [{"type": "input_text", "text": texto}]},
+        })
+        self.cara("pensando")
+        self.t0 = time.time()
+        self.respondiendo = True
+        await self._ev({"type": "response.create", "response": {}})
+
+    async def audio_del_panel(self, pcm: bytes) -> None:
+        if self.hablando_usuario and pcm:
+            self.enviados += 1
+            await self._ev({"type": "input_audio_buffer.append",
+                            "audio": base64.b64encode(pcm).decode()})
 
     async def configurar(self) -> None:
         # La tarjeta va al final y no cambia entre turnos: es lo que el cache
@@ -313,7 +361,7 @@ class Sesion:
             while not self.cola.empty():
                 self.cola.get_nowait()
             self.t.enviar_control({"t": "parar"})
-            self.t.enviar_control({"t": "emocion", "v": "escuchando"})
+            self.cara("escuchando")
             if self.respondiendo:
                 await self._ev({"type": "response.cancel"})
                 self.respondiendo = False
@@ -328,9 +376,9 @@ class Sesion:
             if self.enviados < 5:
                 print("   (muy corto, lo ignoro)")
                 await self._ev({"type": "input_audio_buffer.clear"})
-                self.t.enviar_control({"t": "emocion", "v": "idle"})
+                self.cara("idle")
                 return
-            self.t.enviar_control({"t": "emocion", "v": "pensando"})
+            self.cara("pensando")
             self.t0 = time.time()
             self.respondiendo = True
             await self._ev({"type": "input_audio_buffer.commit"})
@@ -349,7 +397,7 @@ class Sesion:
             elif tipo == "response.output_audio.delta":
                 if self.recibidos == 0:
                     print(f"   primera voz en {time.time() - self.t0:.1f} s")
-                    self.t.enviar_control({"t": "emocion", "v": "hablando"})
+                    self.cara("hablando")
                 pcm = base64.b64decode(ev["delta"])
                 self.recibidos += 1
                 for i in range(0, len(pcm), TROZO):
@@ -364,6 +412,7 @@ class Sesion:
                 txt = ev.get("transcript", "").strip()
                 print(f"   Dante: {txt}")
                 self.dialogo.append(f"Dante: {txt}")
+                self.avisar("dijo", quien="dante", texto=txt)
 
             elif tipo == "response.done":
                 self.respondiendo = False
@@ -381,6 +430,7 @@ class Sesion:
             a = json.loads(argumentos or "{}")
         except ValueError:
             a = {}
+        self.avisar("herramienta", nombre=nombre, argumentos=a)
 
         if nombre == "recordar":
             r = memoria.recordar(self.db, a.get("consulta", ""))
@@ -394,17 +444,15 @@ class Sesion:
             print(f"   [memoria] anotado: {hecho}")
             # Que se vea en la pantalla que quedo guardado. Con este usuario,
             # una confirmacion que solo se dice se olvida; una que se lee, no.
-            self.t.enviar_control({"t": "texto", "titulo": "Anotado",
-                                   "cuerpo": hecho[:150], "seg": 7})
-            self.t.enviar_control({"t": "emocion", "v": "feliz"})
+            self.pantalla("Anotado", hecho, 7)
+            self.cara("feliz")
 
         elif nombre == "agenda":
             e = memoria.agenda_de(self.db, "hoy")
             salida = {"hoy": e}
             print(f"   [memoria] agenda -> {len(e)}")
             if e:
-                self.t.enviar_control({"t": "texto", "titulo": "Hoy",
-                                       "cuerpo": " · ".join(e)[:150], "seg": 9})
+                self.pantalla("Hoy", " · ".join(e), 9)
 
         elif nombre == "quien_esta":
             salida = self.ojos.quien_esta()
@@ -415,7 +463,7 @@ class Sesion:
                                             a.get("relacion", ""))
             salida = {"registrada": True, "id": id_}
             print(f"   [memoria] persona: {a.get('nombre','')}")
-            self.t.enviar_control({"t": "emocion", "v": "atencion"})
+            self.cara("atencion")
 
         elif nombre == "recordar_cara":
             cuadro = self.ojos.camara.ultimo() if self.ojos.activa else None
@@ -492,7 +540,7 @@ class Sesion:
 
             if trozo is None:                       # fin de la respuesta
                 sonando = False
-                self.t.enviar_control({"t": "emocion", "v": "idle"})
+                self.cara("idle")
                 continue
 
             if not sonando:
@@ -540,7 +588,7 @@ async def _simular(s: "Sesion", segundos: float) -> None:
 
 
 async def _correr(simular: float = 0.0, limite: float = 0.0,
-                  con_diario: bool | None = None) -> int:
+                  con_diario: bool | None = None, con_panel: int = 0) -> int:
     if not config.API_KEY:
         print("Falta OPENAI_API_KEY en .env. Corre 'dante doctor'.")
         return 1
@@ -578,6 +626,13 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
                 print(f"  camara: activa, {n} cara(s) registrada(s)\n")
             else:
                 print(f"  camara: {s.ojos.motivo}\n")
+            if con_panel:
+                try:
+                    url = panel.arrancar(s, con_panel)
+                    print(f"  panel: {url}\n")
+                except Exception as e:
+                    print(f"  panel: no arranco ({type(e).__name__}: {e})\n")
+
             await s.configurar()
             t.enviar_control({"t": "hola?"})
             t.enviar_control({"t": "emocion", "v": "idle"})
@@ -628,10 +683,10 @@ async def _correr(simular: float = 0.0, limite: float = 0.0,
 
 
 def correr(simular: float = 0.0, limite: float = 0.0,
-           con_diario: bool | None = None) -> int:
+           con_diario: bool | None = None, con_panel: int = 0) -> int:
     _reloj_fino()
     try:
-        return asyncio.run(_correr(simular, limite, con_diario))
+        return asyncio.run(_correr(simular, limite, con_diario, con_panel))
     except KeyboardInterrupt:
         print("\nhasta luego")
         return 0

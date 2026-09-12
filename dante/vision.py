@@ -22,6 +22,18 @@ import numpy as np
 
 from . import config, memoria
 
+
+def _callar_opencv() -> None:
+    """OpenCV 5 avisa en cada carga que el motor nuevo ignora setPreferableTarget.
+    No podemos hacer nada al respecto y ensucia la consola."""
+    import os
+    os.environ.setdefault("OPENCV_LOG_LEVEL", "ERROR")
+    try:
+        import cv2
+        cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
+    except Exception:
+        pass
+
 CARAS = config.RAIZ / "data" / "caras"
 MODELO_CARAS = config.RAIZ / "data" / "caras" / "modelo.yml"
 
@@ -141,6 +153,7 @@ class Rostros:
     def __init__(self):
         import cv2
 
+        _callar_opencv()
         if not (YUNET.exists() and SFACE.exists()):
             descargar_modelos()
         self.detector = cv2.FaceDetectorYN.create(str(YUNET), "", (320, 320), 0.8, 0.3, 5000)
