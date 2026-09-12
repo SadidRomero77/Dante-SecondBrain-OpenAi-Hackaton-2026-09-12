@@ -37,6 +37,10 @@ Todo esto esta probado en hardware, no solo compilado.
 | **Vision** | Camara del PC o de red. Reconoce caras y **guarda el nombre**, no solo el rostro. |
 | **Pantalla** | Ojos con seis estados. Tambien muestra texto. |
 | **Oreja** | Un servo. Tres gestos, y ademas acompana al animo sola. |
+| **Recordatorios** | Diarios, anuales o de un dia. Los dice EL cuando llega la hora, sin boton. Se crean y se corrigen hablando o en el portal. |
+| **Recados** | La familia deja un mensaje -grabado o escrito- y Dante lo entrega al abrir la conversacion, sin que se lo pidan. |
+| **Objetos** | Donde quedaron los lentes, las llaves. Con historial: el sitio de antes es la mejor pista cuando algo no esta. |
+| **Resumen semanal** | Una nota para los hijos por Trigger.dev. Ademas compara con las semanas previas: cuanto hablo, que se repitio. |
 | **Panel** | FastAPI. Audio y texto, lo que ve la camara, caras, y toda la configuracion. |
 | **Auth0** | Login con Google, cookies firmadas, sin dependencias externas. |
 | **Transporte** | USB y WiFi a la vez, o ninguno: **sin hardware el agente funciona igual**. |
@@ -47,9 +51,6 @@ acuerdo"**.
 
 ## Que falta
 
-- **Resumen semanal para la familia.** Es lo que Trigger.dev esta esperando
-  entregar: las tareas existen, pero nadie genera todavia el texto. Lo mas
-  valioso que queda, y no toca hardware.
 - **Botones fisicos** (GPIO21 hablar, GPIO38 diario). El firmware ya los
   escucha; faltan los cables. **No hacen falta**: el boton BOOT de la placa
   hace lo mismo que el de hablar.
@@ -67,6 +68,9 @@ uv run dante hablar --panel    # lo de siempre: conversar, con portal
 uv run dante puente            # prueba el camino de audio por USB
 uv run dante monitor           # lee el puerto serie crudo
 uv run dante memoria           # ver que recuerda
+uv run dante resumen           # la nota semanal para la familia (--enviar)
+uv run dante olvidar Rosa      # sacar algo de la memoria (--si para borrar)
+uv run dante olvidar --todo    # vaciarla entera, conservando los ajustes
 ```
 
 Para grabar la placa, siempre con esta configuracion:
@@ -77,6 +81,31 @@ FlashSize=16M,PartitionScheme=app3M_fat9M_16MB,UploadMode=default
 ```
 
 ---
+
+## Como piensa Dante
+
+Esto es el corazon del proyecto y no se toca sin pensarlo dos veces.
+
+**Dos registros de verdad.** Sobre el mundo puede responder de lo que sabe y
+puede equivocarse. Sobre la vida de la persona, solo lo que le devuelva la
+memoria. Inventar un recuerdo es la unica falla grave que puede cometer.
+
+**La configuracion no es memoria, pero manda sobre ella en una cosa.** El
+nombre que la persona escribio en el portal vale mas que cualquier recuerdo
+viejo con otro nombre. Todo lo demas que se escribe en "Su vida" se graba
+como hechos atados a su nombre, no va al prompt: asi el prompt queda general
+y la vida de cada persona vive donde recordar la encuentra.
+
+**Hay una persona principal.** Es a quien acompana: su cara es la que importa
+reconocer, y sus recuerdos son los unicos que puede contarle a ella misma. De
+los demas guarda quienes son, no su vida.
+
+**Numeros, nunca conclusiones.** Cuando compara semanas dice "hablo un 40%
+menos", jamas "esta decayendo". Y calla si no tiene con que comparar: un
+aviso falso a una familia preocupada cuesta mas que no avisar.
+
+**Habla sin que le pregunten.** Los recordatorios y los recados los da el.
+Quien los necesita es justamente quien no se va a acordar de pedirlos.
 
 ## Trampas que ya costaron caro
 
@@ -116,16 +145,19 @@ eso ahorra buscar en el lugar equivocado.
 ## Donde esta cada cosa
 
 ```
-dante/sesion.py      el nucleo: Realtime, herramientas, transporte
-dante/memoria.py     SQLite y recuerdo por similitud
+dante/sesion.py      el nucleo: Realtime, las 19 herramientas, transporte
+dante/memoria.py     SQLite, recuerdo por similitud, agenda, objetos, cambios
 dante/ajustes.py     configuracion -> personalidad. Las reglas duras
                      (no inventar, no describir sin mirar) NO se configuran
+dante/semanal.py     la nota para la familia
+dante/conversar.py   con que llegar a hablar: tiempo, lo suyo, lo que conto
+dante/olvidar.py     borrar recuerdos, de a uno o todos
 dante/panel.py       el portal
-dante/vision.py      caras y objetos
+dante/vision.py      caras
 firmware/dante_puente/   el firmware de verdad
 firmware/dante_servo/    barre la oreja: separa fallo de PWM de fallo de cable
 firmware/dante_pines/    dice que GPIO es cada agujero, tocando con un jumper
 ```
 
-Detalles de cableado en `WIRING.md` y `HARDWARE.md`. El protocolo del cable,
+Publicar el portal para un demo: `HOSTING.md`. Cableado en `WIRING.md` y `HARDWARE.md`. El protocolo del cable,
 en `PROTOCOL.md`. Lo de datos personales, en `SECURITY.md`.

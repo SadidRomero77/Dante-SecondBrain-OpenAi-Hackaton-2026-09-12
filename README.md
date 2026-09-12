@@ -27,9 +27,12 @@ inventar.
 | **Se entera** | Hora en cualquier ciudad, clima, y búsqueda web con Exa. |
 | **Saluda** | Al empezar el día cuenta qué pasó ayer, quién viene y qué medicamento toca. |
 | **Tiene cara** | Dos ojos animados, y texto para recordatorios y confirmaciones. |
-| **Avisa a la familia** | Resumen semanal y alerta si algo no se confirmó, por Trigger.dev. |
+| **Recuerda por ella** | Recordatorios diarios, anuales o de un día. **Los dice él cuando llega la hora**, sin que nadie apriete nada. |
+| **Sabe dónde quedaron las cosas** | Los lentes, las llaves. Con historial: el sitio de antes es la mejor pista cuando algo no está donde debería. |
+| **Avisa a la familia** | Una nota semanal por Trigger.dev, con lo que pasó y **lo que cambió** respecto de las semanas anteriores. |
+| **Llega con algo que contar** | El tiempo, algo del mundo relacionado con lo que a ella le gusta, o un recuerdo suyo para retomarlo. |
 | **Nota lo que preocupa** | Marca menciones de dolor, caídas o confusión. Sin diagnosticar: repite lo que ella dijo y cuántas veces. |
-| **Lleva mensajes** | La familia graba treinta segundos y Dante se los reproduce con su voz, no con la suya. |
+| **Lleva recados** | La familia graba o escribe, y Dante lo entrega **al abrir la conversación**. Los grabados suenan con la voz de quien los dejó. |
 | **Se presenta solo** | La primera vez conoce a la persona conversando, no con un formulario. |
 | **El botón de «no me acuerdo»** | Pulsación larga: le cuenta quién es, dónde está y qué día es. |
 
@@ -166,6 +169,11 @@ dante doctor           Revisa el entorno y las integraciones. No gasta créditos
 dante smoke            Prueba la Realtime API con una conversación de texto.
 dante semilla          Carga una persona de ejemplo con su pasado.
 dante memoria          Muestra qué recuerda Dante ahora mismo.
+dante resumen          La nota semanal para la familia.
+       --enviar        ...y se la manda de verdad, por Trigger.dev
+dante olvidar Rosa     Saca de la memoria lo que mencione esa palabra.
+       --si            ...borrando de verdad. Sin esto solo muestra qué se iría
+dante olvidar --todo   Vacía la memoria entera, conservando los ajustes.
 
 dante hablar           Conversar.
        --panel         ...y abrir el portal en el 8800
@@ -181,25 +189,42 @@ dante puente           Micrófono → PC → parlante, sin modelo de por medio.
 
 ## El portal
 
-`--panel` abre una página con tres pestañas.
+`--panel` abre una página con cinco pestañas. Arriba, la carita de Dante
+cambia con su estado y la cola menea más rápido cuando está contento.
 
 **Conversar** — el video con las caras marcadas, la charla en vivo, chat por
-texto y micrófono. Arriba, la carita de Dante cambia con su estado.
+texto y micrófono. Encima, cuatro números: qué hay pendiente hoy, cuánto
+recuerda, a cuánta gente conoce y cuántas conversaciones lleva.
 
-**Mensajes** — grabá con tu voz y Dante se lo reproduce cuando pregunte por vos.
+**Personas** — poné a alguien frente a la cámara, escribí "Ana / hija", un
+botón. Dante la reconoce y la nombra en voz alta la próxima vez. Debajo, dónde
+quedaron las cosas que tiene anotadas.
+
+**Mensajes** — dejale un recado. Grabado, y Dante se lo reproduce **con tu
+voz**; o escrito, si estás en el trabajo y no te sale grabarte. Se lo entrega
+apenas hablen, sin que ella tenga que preguntar.
+
+**Recordatorios** — medicamentos, citas, visitas y cumpleaños. Se anotan, se
+corrigen y se quitan. Dante los dice **solo, cuando llega la hora**.
 
 **Cómo está** — lo que mencionó esta semana: dolor, caídas, confusión, ánimo.
-Con sus palabras y cuántas veces. **No es un diagnóstico.**
+Con sus palabras y cuántas veces. Debajo, **qué cambió** respecto de las
+semanas anteriores, y la nota que va a recibir la familia. **No es un
+diagnóstico**: son números, y si no hay con qué comparar, no dice nada.
 
-**Personas** — poné a alguien frente a la cámara, escribí "Ana / hija", un botón.
-Dante la reconoce y la nombra en voz alta la próxima vez.
-
-**Configuración** — propietario, tú o usted, nombre de la mascota, voz, ciudad,
-cómo debe comportarse, temas que le gustan y cuáles no. Se aplica sin reiniciar.
+**Ajustes** — propietario, tú o usted, nombre de la mascota, voz y su edad,
+ciudad, cómo debe comportarse, temas que le gustan y cuáles no. Y **Su vida**:
+cuándo nació, a qué se dedicó, su familia, su salud, su rutina, lo que le gusta
+contar. Eso no se queda en el formulario: se graba en su memoria, atado a su
+nombre, igual que lo que aprende conversando. Todo se aplica sin reiniciar.
 
 > **Lo que no es configurable**: no inventar, no describir sin haber mirado, y
 > responder en español. Esas reglas son lo que hace confiable al agente y no
 > dependen del gusto de nadie. Se configura el tono, no la honestidad.
+
+Para abrirlo desde fuera de tu máquina durante un demo, mirá **`HOSTING.md`**.
+El agente se queda en tu portátil —el aparato está en el USB— y lo que sale a
+internet es el portal.
 
 ### Login con Auth0
 
