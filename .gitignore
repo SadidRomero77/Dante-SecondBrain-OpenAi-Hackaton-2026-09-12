@@ -11,3 +11,7 @@ grabaciones/
 .claude/settings.local.json
 .tools/
 data/modelos/
+
+# Trigger.dev
+.trigger/
+node_modules/

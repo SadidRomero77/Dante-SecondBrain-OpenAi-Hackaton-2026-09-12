@@ -152,6 +152,28 @@ Si los tres dan eso —chips vivos, registros bien, nivel en cero— el problema
 14, 13 y 12) van por conectores distintos del mismo módulo: uno puede hacer
 contacto mientras el otro no. **Reasentar el módulo de audio.**
 
+## Trabajos en la nube
+
+`src/trigger/` es un proyecto de Trigger.dev al lado del agente. La division es
+deliberada:
+
+| | |
+|---|---|
+| **El PC de la casa** | lo que Dante **dice** en voz alta: la pastilla, la cita, el diario. Inmediato y sin depender de nadie. |
+| **Trigger.dev** | lo que **sale** hacia la familia: el resumen semanal, el aviso de que algo no se confirmó. Necesita reintentos, esperas largas y llegar aunque el computador esté dormido. |
+
+Un temporizador local no hace ninguna de las tres cosas de la derecha, y la
+nube no puede llamar a tu portátil. Por eso cada uno hace su mitad.
+
+Los datos de la persona **no salen de su casa**: a la nube solo viaja el texto
+que su familia iba a leer de todas formas.
+
+```
+npm install
+npx trigger.dev@latest login     # abre el navegador, lo corres tu
+npx trigger.dev@latest dev       # las tareas aparecen en el panel
+```
+
 ## Estructura
 
 ```

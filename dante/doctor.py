@@ -76,12 +76,13 @@ def revisar() -> int:
             _linea(OK, "El .env tiene todas las claves del ejemplo")
 
     # --- integraciones opcionales ---
-    from . import auth, proveedor
+    from . import auth, proveedor, trabajos
     partes = [
         f"modelos de texto: {proveedor.por_donde()}",
         f"busqueda: {'exa' if config.EXA_API_KEY else 'openai (mas lenta)'}",
         f"portal: {'con login de Auth0' if auth.activo() else 'abierto (solo local)'}",
         f"camara: {'activa' if config.CAMARA else 'apagada'}",
+        f"trabajos: {'trigger.dev' if trabajos.activo() else 'solo locales'}",
     ]
     _linea(OK, "Integraciones", "  ·  ".join(partes))
 

@@ -1,0 +1,18 @@
+{
+  "name": "dante-trabajos",
+  "private": true,
+  "type": "module",
+  "description": "Trabajos en la nube de Dante: lo que sale de la casa hacia la familia",
+  "scripts": {
+    "dev": "trigger.dev dev",
+    "deploy": "trigger.dev deploy"
+  },
+  "dependencies": {
+    "@trigger.dev/sdk": "latest"
+  },
+  "devDependencies": {
+    "@trigger.dev/build": "latest",
+    "@types/node": "^22.20.2",
+    "typescript": "^5.6.0"
+  }
+}
