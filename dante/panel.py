@@ -3020,10 +3020,13 @@ def crear_app(sesion, bucle):
         if demo.activo() and not demo.pide_login():
             return await siguiente(peticion)
 
+        # Lo publico: la portada, sus imagenes y el propio login. Sin las
+        # imagenes, la portada carga pero el diagrama sale roto, porque la
+        # puerta lo mandaba al login como a cualquier otra ruta.
         if not auth.activo() or ruta in (
             "/", "/login", "/callback", "/salir",
             "/favicon.svg", "/favicon.ico", "/favicon.png",
-        ):
+        ) or ruta.startswith("/portada/"):
 
             return await siguiente(peticion)
 
