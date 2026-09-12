@@ -98,6 +98,31 @@ Orientación: `MIRROR_X`, `SWAP_XY`.
 | Shield, página arriba | 20 |
 | Shield, página abajo | 19 |
 
+## Módulos nuevos: INMP441 + MAX98357A
+
+Tras dañarse el módulo original, el audio pasa a dos módulos I2S separados.
+Medido y funcionando el 10/09/2026.
+
+| Señal | GPIO | Va a |
+|---|---|---|
+| BCLK | 14 | `SCK` del micrófono y `BCLK` del amplificador |
+| WS | 13 | `WS` del micrófono y `LRC` del amplificador |
+| Entrada | 12 | `SD` del micrófono |
+| Salida | 45 | `DIN` del amplificador |
+| Silencio | 48 | `SD` del amplificador — en alto, encendido |
+
+**Nada de I2C y nada de MCLK.** Estos módulos no se configuran: se conectan. Se
+va toda la inicialización por registros y toda la lógica del reloj a 512 × fs.
+
+**El detalle que importa: el INMP441 entrega 24 bits dentro de una ranura de
+32, no 16.** Leerlo como 16 bits da basura. El bus va a 32 bits y la conversión
+se hace por software — al micrófono se le corren los bits a la derecha, y al
+amplificador se los corremos a la izquierda antes de escribir.
+
+El micrófono manda por el **canal izquierdo**, porque su pin `L/R` va a tierra.
+
+El cableado exacto sobre protoboard está en `WIRING.md`.
+
 ## Trampas descubiertas
 
 1. **El USB-Serial/JTAG descarta la salida si el host no activa DTR.**
