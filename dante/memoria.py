@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import contextvars
 from datetime import date, datetime
 
 import numpy as np
@@ -87,9 +88,19 @@ CREATE TABLE IF NOT EXISTS ajustes (
 """
 
 
-def abrir() -> sqlite3.Connection:
-    config.DB.parent.mkdir(parents=True, exist_ok=True)
-    c = sqlite3.connect(config.DB)
+# Que base usar en este momento. Vacia = la de siempre, la del dueno del
+# aparato. En el demo publico cada visitante tiene la suya, y se elige aqui en
+# vez de en los catorce sitios que abren la base: cambiar catorce llamadas el
+# dia de la entrega es como se cuelan los errores que no se ven hasta que
+# alguien ya esta mirando.
+RUTA = contextvars.ContextVar("ruta_bd", default=None)
+
+
+def abrir(ruta=None) -> sqlite3.Connection:
+    from pathlib import Path
+    ruta = Path(ruta or RUTA.get() or config.DB)
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    c = sqlite3.connect(ruta)
     c.row_factory = sqlite3.Row
     c.executescript(ESQUEMA)
     # Bases creadas antes de que existiera el reconocimiento de caras.

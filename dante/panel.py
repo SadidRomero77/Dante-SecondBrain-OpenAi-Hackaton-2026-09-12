@@ -44,7 +44,7 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Stre
 
 
 
-from . import ajustes, auth, config, memoria, mensajes as msg
+from . import ajustes, auth, config, demo, memoria, mensajes as msg
 from .favicon_b64 import B64 as FAVICON_B64
 
 
@@ -2597,6 +2597,29 @@ def crear_app(sesion, bucle):
 
 
     @app.middleware("http")
+    async def reparto(peticion, siguiente):
+        """En el demo publico, apunta esta peticion a la memoria del visitante.
+
+        Se ejecuta dentro de la puerta de Auth0, asi que lo primero que toca
+        cualquier consulta ya esta apuntando a la base correcta: ninguna
+        peticion de un visitante puede escribir en la del dueno del aparato.
+        """
+        if not demo.activo():
+            return await siguiente(peticion)
+        id_ = peticion.cookies.get(demo.GALLETA) or ""
+        # Su ruta se calcula desde la galleta, exista o no una conversacion
+        # abierta. Si aqui cayera en la base de siempre, el visitante veria
+        # -y podria cambiar- la vida del dueno del aparato.
+        memoria.RUTA.set(demo.ruta_de(id_) if id_ else demo.ruta_de("nuevo"))
+        respuesta = await siguiente(peticion)
+        if not id_:
+            # Se entrega ya, para que el websocket la traiga puesta y sepamos
+            # que visita es antes de abrirle un Dante propio.
+            respuesta.set_cookie(demo.GALLETA, demo.nueva_id(), httponly=True,
+                                 samesite="lax", max_age=3600)
+        return respuesta
+
+    @app.middleware("http")
 
     async def puerta(peticion, siguiente):
 
@@ -2605,6 +2628,11 @@ def crear_app(sesion, bucle):
         login. Si no lo esta, esto no hace nada."""
 
         ruta = peticion.url.path
+        # En el demo no se pide cuenta de Google. Cada visita esta aislada y
+        # dura minutos; exigirle un login a un jurado del otro lado del mundo
+        # es la forma mas segura de que cierre la pestana sin ver nada.
+        if demo.activo():
+            return await siguiente(peticion)
 
         if not auth.activo() or ruta in (
             "/login", "/callback", "/salir",
@@ -3307,87 +3335,108 @@ def crear_app(sesion, bucle):
 
 
     @app.websocket("/ws")
-
     async def canal(ws: WebSocket):
-
         # En Starlette el middleware http NO corre para websockets, asi que la
-
         # puerta de arriba no cubre esta ruta. Sin esto, cualquiera que alcance
-
         # el puerto puede leer la conversacion, oir el audio y hablarle al
-
         # agente. Comprobado explotandolo.
-
-        if auth.activo() and not auth.usuario_de(ws):
-
+        if not demo.activo() and auth.activo() and not auth.usuario_de(ws):
             await ws.close(1008, "sin sesion")
-
             return
 
+        # En el demo publico cada navegador tiene su propio Dante. Sin esto,
+        # diez jueces comparten una sola sesion: se pisan al hablar y el
+        # segundo lee la conversacion del primero.
+        visita, propio = None, sesion
+        if demo.activo():
+            id_ = ws.cookies.get(demo.GALLETA) or demo.nueva_id()
+            visita = demo.de(id_)
+            if visita is None:
+                if not demo.hay_sitio():
+                    await ws.accept()
+                    await ws.send_text(json.dumps({"t": "lleno", "v":
+                        f"Ahora mismo hay {demo.cuantas()} personas hablando "
+                        f"con Dante, que es el maximo. Probá en un par de "
+                        f"minutos."}))
+                    await ws.close(1013, "lleno")
+                    return
+                try:
+                    visita = await demo.abrir(id_)
+                except Exception as e:
+                    await ws.accept()
+                    await ws.send_text(json.dumps({"t": "lleno", "v":
+                        f"No pude abrir una sesion nueva: {e}"}))
+                    await ws.close(1011, "error")
+                    return
+            propio = visita.sesion
+            memoria.RUTA.set(visita.ruta)
+
         await ws.accept()
+        if visita is None:
+            clientes.add(ws)
+        else:
+            # No entra en 'clientes': lo que diga su Dante va solo a sus
+            # pestanas. Mezclarlo con el bus general le mandaria a un juez
+            # la conversacion de otro, que es justo lo que vinimos a evitar.
+            visita.clientes.add(ws)
+            if not visita.reparte:
+                visita.reparte = True
+                bucle_v = asyncio.get_running_loop()
 
-        clientes.add(ws)
+                def solo_suyo(ev: dict, v=visita, b=bucle_v) -> None:
+                    texto = json.dumps(ev, ensure_ascii=False)
+                    for c in list(v.clientes):
+                        try:
+                            asyncio.run_coroutine_threadsafe(c.send_text(texto), b)
+                        except Exception:
+                            pass
 
-        await ws.send_text(json.dumps({"t": "estado", "v": sesion.estado}))
+                def audio_suyo(pcm: bytes, v=visita, b=bucle_v) -> None:
+                    for c in list(v.clientes):
+                        try:
+                            asyncio.run_coroutine_threadsafe(c.send_bytes(pcm), b)
+                        except Exception:
+                            pass
 
+                propio.oyentes.append(solo_suyo)
+                propio.oyentes_audio.append(audio_suyo)
+            await ws.send_text(json.dumps({"t": "demo",
+                                           "minutos": visita.quedan}))
+        await ws.send_text(json.dumps({"t": "estado", "v": propio.estado}))
         try:
-
             while True:
-
                 m = await ws.receive()
-
                 if "bytes" in m and m["bytes"]:
-
                     if len(m["bytes"]) > 64000:
-
                         continue          # un trozo de audio son 960 bytes
-
                     # Audio del navegador: mismo camino que el del aparato.
-
                     asyncio.run_coroutine_threadsafe(
-
-                        sesion.audio_del_panel(m["bytes"]), sesion.bucle)
-
+                        propio.audio_del_panel(m["bytes"]), propio.bucle)
                 elif "text" in m and m["text"]:
-
                     if len(m["text"]) > 8000:
-
                         continue
-
                     try:
-
                         d = json.loads(m["text"])
-
                     except ValueError:
-
                         continue
-
                     if not isinstance(d, dict):
-
                         continue
-
                     if d.get("t") == "texto":
-
                         asyncio.run_coroutine_threadsafe(
-
-                            sesion.decir_texto(d.get("v", "")), sesion.bucle)
-
+                            propio.decir_texto(d.get("v", "")), propio.bucle)
                     elif d.get("t") == "boton":
-
                         asyncio.run_coroutine_threadsafe(
-
-                            sesion._boton(d.get("v") == "abajo"), sesion.bucle)
-
+                            propio._boton(d.get("v") == "abajo"), propio.bucle)
         except (WebSocketDisconnect, RuntimeError, KeyError):
-
             pass
-
         finally:
-
             clientes.discard(ws)
-
-
-
+            if visita is not None:
+                visita.clientes.discard(ws)
+                # Si cerro la pestana, su Dante se va con el: dejarlo abierto
+                # gastaria creditos hablandole a nadie.
+                if not visita.clientes:
+                    await demo.cerrar(visita.id)
     return app
 
 
