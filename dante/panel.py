@@ -40,7 +40,8 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import (FileResponse, HTMLResponse, RedirectResponse,
+                               Response, StreamingResponse)
 
 
 
@@ -3542,6 +3543,13 @@ def crear_app(sesion, bucle):
 
         cada cuadro: identificar cuesta y a 25 por segundo no aporta nada."""
 
+        # Sin camara hay que contestar YA. El generador de abajo se quedaba
+        # girando para siempre sin enviar nada: el navegador mostraba
+        # "cargando" eternamente y, peor, cada peticion se comia un hilo del
+        # servidor. Con unas pocas visitas el portal entero dejaba de
+        # responder, y parecia un problema de red o del navegador.
+        if not getattr(sesion, "ojos", None) or not sesion.ojos.activa:
+            return Response(status_code=404)
         import cv2
 
 
