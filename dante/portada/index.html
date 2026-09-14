@@ -55,15 +55,25 @@
     .req-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px}
     .req-card h3{margin:0 0 8px}.req-card ul{padding-left:19px;color:var(--muted);margin:10px 0 0}.req-card li{margin:7px 0}
     .req-card code{font-size:12px;background:#f7efe8;padding:2px 6px;border-radius:6px}
+    .hw-steps{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+    .hw-step{position:relative;min-width:0}.hw-step h3{margin:0 0 8px;padding-right:44px}.hw-step p{color:var(--muted);margin:8px 0}
+    .hw-n{position:absolute;top:20px;right:20px;width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;font-weight:900;display:grid;place-items:center}
+    .hw-code{margin:10px 0 0;background:var(--dark);color:#ffe8cc;border-radius:14px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.6}
+    .req-card .hw-code code{background:none;padding:0;font-size:13px;color:inherit;white-space:pre}
+    .hw-tabla{overflow-x:auto;margin-top:10px}.hw-tabla table{border-collapse:collapse;width:100%;font-size:13px}
+    .hw-tabla th,.hw-tabla td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+    .hw-tabla th{color:var(--muted);font-weight:750}
+    .hw-ojo{background:#fff0df;color:#7a3d00!important;border-radius:12px;padding:10px 12px;font-size:14px}
+    .hw-nota{color:var(--muted);margin-top:22px;max-width:820px}
     .privacy{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center}.privacy-box{background:var(--card);border:1px solid var(--line);border-radius:30px;padding:36px}.check{display:flex;gap:12px;margin:14px 0;color:var(--muted)}.check span:first-child{color:var(--accent);font-weight:900}
     .cta{background:linear-gradient(135deg,#321a12,#5a2d16);color:white;border-radius:36px;padding:48px;display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center}.cta p{color:#e7d7ce}
     .cta-form{display:flex;gap:10px;background:rgba(255,255,255,.08);padding:10px;border-radius:20px}.cta-form input{min-width:0;flex:1;border:0;border-radius:14px;padding:14px 16px;font-size:15px;outline:none}
     .disclaimer{font-size:12px;color:var(--muted);margin-top:14px}
     footer{padding:36px 0 48px;color:var(--muted);font-size:13px}.footer-inner{display:flex;justify-content:space-between;gap:20px;align-items:center;border-top:1px solid var(--line);padding-top:26px}.mini{font-size:12px;color:var(--muted)}
     @media (max-width:1040px){.nav-links{display:none}}
-    @media (max-width:900px){.hero-grid,.memory,.privacy,.cta{grid-template-columns:1fr}.problem-grid,.features-grid,.providers-grid,.steps,.requirements{grid-template-columns:1fr 1fr}.hero-card{min-height:380px}}
+    @media (max-width:900px){.hero-grid,.memory,.privacy,.cta{grid-template-columns:1fr}.problem-grid,.features-grid,.providers-grid,.steps,.requirements{grid-template-columns:1fr 1fr}.hw-steps{grid-template-columns:1fr}.hero-card{min-height:380px}}
     @media (max-width:720px){.nav-actions .btn-primary{display:none}.brand{font-size:30px}}
-    @media (max-width:620px){.container{width:min(100% - 24px,1180px)}.hero{padding-top:58px}h1{letter-spacing:-2px}.problem-grid,.features-grid,.providers-grid,.steps,.requirements{grid-template-columns:1fr}.cta-form{flex-direction:column}.memory,.cta{padding:28px}.hero-card{min-height:320px}.robot{transform:scale(.82)}.nav-actions{gap:5px}.btn{padding:11px 14px;font-size:13px}.lang-switch button{padding:7px 8px}}
+    @media (max-width:620px){.container{width:min(100% - 24px,1180px)}.hero{padding-top:58px}h1{letter-spacing:-2px}.problem-grid,.features-grid,.providers-grid,.steps,.requirements,.hw-steps{grid-template-columns:1fr}.cta-form{flex-direction:column}.memory,.cta{padding:28px}.hero-card{min-height:320px}.robot{transform:scale(.82)}.nav-actions{gap:5px}.btn{padding:11px 14px;font-size:13px}.lang-switch button{padding:7px 8px}}
   </style>
 </head>
 <body>
@@ -273,11 +283,12 @@
         <a href="#memoria" data-i18n="nav.memory">Memoria</a>
         <a href="#funciona" data-i18n="nav.how">Cómo funciona</a>
         <a href="#tecnologia" data-i18n="nav.tech">Tecnología</a>
+        <a href="#fisico" data-i18n="nav.hardware">En físico</a>
         <a href="#requisitos" data-i18n="nav.requirements">Requisitos</a>
       </div>
       <div class="nav-actions">
-        <a class="btn btn-primary" href="/portal" data-i18n="nav.join">Quiero participar</a>
-        <a class="btn btn-ghost" href="/portal" data-i18n="nav.login">Login</a>
+        <a class="btn btn-primary" href="/login#crear" data-i18n="nav.join">Quiero participar</a>
+        <a class="btn btn-ghost" href="/login" data-i18n="nav.login">Entrar</a>
         <div class="lang-switch" aria-label="Language selector">
           <button id="lang-es" class="active" type="button">ES</button>
           <button id="lang-en" type="button">EN</button>
@@ -294,7 +305,7 @@
           <h1 data-i18n="hero.title">Cuando tú no puedes estar ahí, Kibo recuerda contigo.</h1>
           <p data-i18n-html="hero.subtitle">Kibo es un compañero físico con inteligencia artificial y <strong>memoria del mundo</strong> que ayuda a adultos mayores a recordar, sentirse acompañados y mantenerse conectados con su familia y cuidadores.</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="/portal" data-i18n="hero.cta">Quiero participar en el piloto</a>
+            <a class="btn btn-primary" href="/login#crear" data-i18n="hero.cta">Quiero participar en el piloto</a>
             <a class="btn btn-secondary" href="#funciona" data-i18n="hero.how">Ver cómo funciona</a>
           </div>
           <div class="hero-note" data-i18n="hero.note">Acompañamiento, no vigilancia. Kibo no reemplaza a un cuidador ni realiza diagnósticos médicos.</div>
@@ -406,6 +417,85 @@
           <div class="card provider"><span class="tag">Vision</span><h3>Local Face Recognition</h3><p data-i18n="tech.face">Reconocimiento de personas mediante vectores faciales y asociación con memoria.</p></div>
           <div class="card provider"><span class="tag">Voice</span><h3>Speech-to-Text + Text-to-Speech</h3><p data-i18n="tech.voice">Entrada de voz, transcripción y conversión de respuestas nuevamente a audio.</p></div>
         </div>
+      </div>
+    </section>
+
+    <section id="fisico">
+      <div class="container">
+        <div class="section-head">
+          <div class="eyebrow"><span class="dot"></span><span data-i18n="hw.eyebrow">Kibo en físico</span></div>
+          <h2 data-i18n="hw.title">Arma tu propio Kibo con un ESP32.</h2>
+          <p data-i18n="hw.subtitle">Esta web funciona sin hardware. Si quieres el perrito de verdad —ojos en pantalla, oreja que se mueve, botón para hablar— el ESP32 se conecta a tu computador y Kibo corre ahí, con tu propia llave de OpenAI.</p>
+        </div>
+
+        <div class="hw-steps">
+          <div class="req-card hw-step">
+            <span class="hw-n">1</span>
+            <h3 data-i18n="hw.s1t">Consigue las piezas</h3>
+            <ul>
+              <li data-i18n="hw.s1a">Placa ESP32-S3 con 16 MB de flash.</li>
+              <li data-i18n="hw.s1b">Micrófono INMP441 y amplificador MAX98357A con un parlante pequeño.</li>
+              <li data-i18n="hw.s1c">Pantalla ST7789 de 320×240 para los ojos.</li>
+              <li data-i18n="hw.s1d">Un servo pequeño para la oreja (opcional).</li>
+              <li data-i18n="hw.s1e">Cable USB de datos, no solo de carga.</li>
+            </ul>
+          </div>
+
+          <div class="req-card hw-step">
+            <span class="hw-n">2</span>
+            <h3 data-i18n="hw.s2t">Conecta los cables</h3>
+            <div class="hw-tabla">
+              <table>
+                <thead><tr><th data-i18n="hw.colPart">Pieza</th><th data-i18n="hw.colPin">Pin</th><th>GPIO</th></tr></thead>
+                <tbody>
+                  <tr><td rowspan="3">INMP441</td><td>SCK · WS · SD</td><td>14 · 13 · 12</td></tr>
+                  <tr><td>VDD</td><td><strong>3V3</strong></td></tr>
+                  <tr><td>L/R</td><td>GND</td></tr>
+                  <tr><td rowspan="2">MAX98357A</td><td>BCLK · LRC · DIN</td><td>14 · 13 · 45</td></tr>
+                  <tr><td>SD · VIN</td><td>48 · 5V</td></tr>
+                  <tr><td>ST7789</td><td>CS · DC · CLK · SDA · BLK</td><td>47 · 39 · 41 · 40 · 42</td></tr>
+                  <tr><td data-i18n="hw.servo">Servo</td><td data-i18n="hw.signal">señal · rojo</td><td>10 · 5V</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="hw-ojo" data-i18n="hw.warn">⚠️ El micrófono va a 3V3, nunca a 5V: se quema. No uses los GPIO 19–20 (USB) ni 33–37 (memoria flash).</p>
+          </div>
+
+          <div class="req-card hw-step">
+            <span class="hw-n">3</span>
+            <h3 data-i18n="hw.s3t">Graba el firmware</h3>
+            <p data-i18n="hw.s3p">Con Arduino IDE o arduino-cli, instala el soporte ESP32 y las librerías «WebSockets» (Markus Sattler), «Adafruit GFX» y «Adafruit ST7735 and ST7789». Abre firmware/dante_puente y grábalo con esta configuración exacta:</p>
+            <pre class="hw-code"><code>esp32:esp32:esp32s3:USBMode=hwcdc,CDCOnBoot=cdc,
+PSRAM=disabled,FlashSize=16M,
+PartitionScheme=app3M_fat9M_16MB,UploadMode=default</code></pre>
+          </div>
+
+          <div class="req-card hw-step">
+            <span class="hw-n">4</span>
+            <h3 data-i18n="hw.s4t">Instala Kibo en tu computador</h3>
+            <p data-i18n="hw.s4p">Necesitas Python 3.11+ y uv. Pon tu llave de OpenAI en el archivo .env y revisa que todo esté en orden:</p>
+            <pre class="hw-code"><code>git clone https://github.com/SadidRomero77/Dante-SecondBrain-OpenAi-Hackaton-2026-09-12.git kibo
+cd kibo
+cp .env.example .env    # OPENAI_API_KEY=sk-...
+uv run kibo doctor</code></pre>
+          </div>
+
+          <div class="req-card hw-step">
+            <span class="hw-n">5</span>
+            <h3 data-i18n="hw.s5t">Conéctalo y háblale</h3>
+            <p data-i18n="hw.s5p">Enchufa la placa por USB y arranca. Mantén apretado el botón BOOT, habla y suéltalo. El portal queda en tu propia máquina, en http://127.0.0.1:8800.</p>
+            <pre class="hw-code"><code>uv run kibo hablar --panel</code></pre>
+          </div>
+
+          <div class="req-card hw-step">
+            <span class="hw-n">6</span>
+            <h3 data-i18n="hw.s6t">Sin cable, por WiFi (opcional)</h3>
+            <p data-i18n="hw.s6p">Con el cable todavía puesto, dale a la placa la red de tu casa. Después puedes desenchufarla: se conecta sola a tu computador por la misma red WiFi.</p>
+            <pre class="hw-code"><code>uv run kibo setup --ssid "MiCasa" --clave "..."</code></pre>
+          </div>
+        </div>
+
+        <p class="hw-nota" data-i18n="hw.note">¿No arranca? Graba primero un sketch que solo imprima por el puerto serie. Si ese tampoco corre, el problema está en la placa o el cable, no en Kibo. El cableado completo está en WIRING.md.</p>
       </div>
     </section>
 
@@ -580,7 +670,7 @@ const translations = {
   es: {
     "meta.description":"Kibo: compañero físico con inteligencia artificial y memoria del mundo para acompañar a adultos mayores y mantenerlos conectados con su familia.",
     "page.title":"Kibo — Tu compañía. Tu memoria.",
-    "nav.problem":"El problema","nav.memory":"Memoria","nav.how":"Cómo funciona","nav.tech":"Tecnología","nav.requirements":"Requisitos","nav.join":"Quiero participar","nav.login":"Login",
+    "nav.problem":"El problema","nav.memory":"Memoria","nav.how":"Cómo funciona","nav.tech":"Tecnología","nav.hardware":"En físico","nav.requirements":"Requisitos","nav.join":"Quiero participar","nav.login":"Entrar",
     "hero.badge":"Prototipo funcional","hero.title":"Cuando tú no puedes estar ahí, Kibo recuerda contigo.",
     "hero.subtitle":"Kibo es un compañero físico con inteligencia artificial y <strong>memoria del mundo</strong> que ayuda a adultos mayores a recordar, sentirse acompañados y mantenerse conectados con su familia y cuidadores.",
     "hero.cta":"Quiero participar en el piloto","hero.how":"Ver cómo funciona","hero.note":"Acompañamiento, no vigilancia. Kibo no reemplaza a un cuidador ni realiza diagnósticos médicos.",
@@ -604,6 +694,14 @@ const translations = {
     "tech.eyebrow":"Tecnología y proveedores","tech.title":"Un stack modular para conectar hardware, memoria e inteligencia.","tech.subtitle":"El prototipo combina componentes locales y servicios especializados. Cada proveedor cumple una función concreta dentro del flujo.",
     "tech.esp32":"Control del dispositivo, captura de audio, pantalla, parlante, botón y comunicación con los servicios de Kibo.","tech.auth0":"Autenticación y manejo del contexto de usuario para asociar cada interacción con la persona y su configuración.",
     "tech.openrouter":"Enrutamiento de solicitudes al modelo de IA más apropiado según la tarea.","tech.openai":"Conversación, razonamiento y síntesis de voz dentro del flujo mostrado.","tech.exa":"Búsqueda web para recuperar información actual cuando la conversación requiere datos externos.","tech.trigger":"Recordatorios, tareas programadas y procesos en segundo plano.","tech.db":"Conversaciones, recordatorios, entidades, relaciones y memoria de largo plazo.","tech.face":"Reconocimiento de personas mediante vectores faciales y asociación con memoria.","tech.voice":"Entrada de voz, transcripción y conversión de respuestas nuevamente a audio.",
+    "hw.eyebrow":"Kibo en físico","hw.title":"Arma tu propio Kibo con un ESP32.","hw.subtitle":"Esta web funciona sin hardware. Si quieres el perrito de verdad —ojos en pantalla, oreja que se mueve, botón para hablar— el ESP32 se conecta a tu computador y Kibo corre ahí, con tu propia llave de OpenAI.",
+    "hw.s1t":"Consigue las piezas","hw.s1a":"Placa ESP32-S3 con 16 MB de flash.","hw.s1b":"Micrófono INMP441 y amplificador MAX98357A con un parlante pequeño.","hw.s1c":"Pantalla ST7789 de 320×240 para los ojos.","hw.s1d":"Un servo pequeño para la oreja (opcional).","hw.s1e":"Cable USB de datos, no solo de carga.",
+    "hw.s2t":"Conecta los cables","hw.colPart":"Pieza","hw.colPin":"Pin","hw.servo":"Servo","hw.signal":"señal · rojo","hw.warn":"⚠️ El micrófono va a 3V3, nunca a 5V: se quema. No uses los GPIO 19–20 (USB) ni 33–37 (memoria flash).",
+    "hw.s3t":"Graba el firmware","hw.s3p":"Con Arduino IDE o arduino-cli, instala el soporte ESP32 y las librerías «WebSockets» (Markus Sattler), «Adafruit GFX» y «Adafruit ST7735 and ST7789». Abre firmware/dante_puente y grábalo con esta configuración exacta:",
+    "hw.s4t":"Instala Kibo en tu computador","hw.s4p":"Necesitas Python 3.11+ y uv. Pon tu llave de OpenAI en el archivo .env y revisa que todo esté en orden:",
+    "hw.s5t":"Conéctalo y háblale","hw.s5p":"Enchufa la placa por USB y arranca. Mantén apretado el botón BOOT, habla y suéltalo. El portal queda en tu propia máquina, en http://127.0.0.1:8800.",
+    "hw.s6t":"Sin cable, por WiFi (opcional)","hw.s6p":"Con el cable todavía puesto, dale a la placa la red de tu casa. Después puedes desenchufarla: se conecta sola a tu computador por la misma red WiFi.",
+    "hw.note":"¿No arranca? Graba primero un sketch que solo imprima por el puerto serie. Si ese tampoco corre, el problema está en la placa o el cable, no en Kibo. El cableado completo está en WIRING.md.",
     "req.eyebrow":"Requisitos de integración","req.title":"Qué necesita cada proveedor para funcionar.","req.subtitle":"Estos son los requisitos técnicos y credenciales que debe contemplar el proyecto para reproducir el flujo del diagrama. Los nombres concretos de variables pueden adaptarse al repositorio.",
     "req.esp1":"Placa ESP32 AI Chat Board con micrófono, pantalla, parlante y botón conectados.","req.esp2":"Firmware capaz de capturar audio, enviar solicitudes HTTP/WebSocket y reproducir audio.","req.esp3":"Wi‑Fi configurado y URL del backend de Kibo.","req.esp4":"Identificador único del dispositivo para asociarlo con el usuario.",
     "req.auth1":"Tenant de Auth0.","req.auth2":"Application configurada para la web del cuidador.","req.auth3":"API/Audience configurado para proteger el backend.","req.serverOnly":"(solo backend)","req.auth4":"Callback/logout URLs para los entornos local y desplegado.",
@@ -624,7 +722,7 @@ const translations = {
   en: {
     "meta.description":"Kibo: a physical AI companion with world memory that helps older adults remember, feel accompanied, and stay connected with family and caregivers.",
     "page.title":"Kibo — Your companion. Your memory.",
-    "nav.problem":"The problem","nav.memory":"Memory","nav.how":"How it works","nav.tech":"Technology","nav.requirements":"Requirements","nav.join":"Join the pilot","nav.login":"Login",
+    "nav.problem":"The problem","nav.memory":"Memory","nav.how":"How it works","nav.tech":"Technology","nav.hardware":"Hardware","nav.requirements":"Requirements","nav.join":"Join the pilot","nav.login":"Log in",
     "hero.badge":"Functional prototype","hero.title":"When you cannot be there, Kibo remembers with them.",
     "hero.subtitle":"Kibo is a physical AI companion with <strong>world memory</strong> that helps older adults remember, feel accompanied, and stay connected with family and caregivers.",
     "hero.cta":"I want to join the pilot","hero.how":"See how it works","hero.note":"Companionship, not surveillance. Kibo does not replace a caregiver and does not provide medical diagnosis.",
@@ -648,6 +746,14 @@ const translations = {
     "tech.eyebrow":"Technology and providers","tech.title":"A modular stack connecting hardware, memory, and intelligence.","tech.subtitle":"The prototype combines local components and specialized services. Each provider has a specific role in the workflow.",
     "tech.esp32":"Device control, audio capture, display, speaker, button, and communication with Kibo services.","tech.auth0":"Authentication and user context management so each interaction maps to the right person and configuration.",
     "tech.openrouter":"Routes requests to the most appropriate AI model for each task.","tech.openai":"Conversation, reasoning, and text-to-speech within the workflow shown.","tech.exa":"Web search for current external information when a conversation needs it.","tech.trigger":"Reminders, scheduled tasks, and background processes.","tech.db":"Conversations, reminders, entities, relationships, and long-term memory.","tech.face":"Recognizes people with face vectors and links identity to memory.","tech.voice":"Voice input, transcription, and conversion of generated responses back into audio.",
+    "hw.eyebrow":"Physical Kibo","hw.title":"Build your own Kibo with an ESP32.","hw.subtitle":"This website works without any hardware. If you want the real dog —eyes on a screen, a moving ear, a push-to-talk button— the ESP32 connects to your computer and Kibo runs there, with your own OpenAI key.",
+    "hw.s1t":"Get the parts","hw.s1a":"ESP32-S3 board with 16 MB flash.","hw.s1b":"INMP441 microphone and MAX98357A amplifier with a small speaker.","hw.s1c":"320×240 ST7789 display for the eyes.","hw.s1d":"A small servo for the ear (optional).","hw.s1e":"A USB data cable, not a charge-only one.",
+    "hw.s2t":"Wire it up","hw.colPart":"Part","hw.colPin":"Pin","hw.servo":"Servo","hw.signal":"signal · red","hw.warn":"⚠️ The microphone goes to 3V3, never 5V: it will burn. Don't use GPIO 19–20 (USB) or 33–37 (flash memory).",
+    "hw.s3t":"Flash the firmware","hw.s3p":"With Arduino IDE or arduino-cli, install ESP32 support and the libraries “WebSockets” (Markus Sattler), “Adafruit GFX” and “Adafruit ST7735 and ST7789”. Open firmware/dante_puente and flash it with this exact configuration:",
+    "hw.s4t":"Install Kibo on your computer","hw.s4p":"You need Python 3.11+ and uv. Put your OpenAI key in the .env file and check that everything is in order:",
+    "hw.s5t":"Plug it in and talk","hw.s5p":"Connect the board over USB and start. Hold the BOOT button, speak, and release. The portal runs on your own machine at http://127.0.0.1:8800.",
+    "hw.s6t":"Cable-free over WiFi (optional)","hw.s6p":"With the cable still plugged in, give the board your home network. Then you can unplug it: it connects to your computer over the same WiFi on its own.",
+    "hw.note":"Won't boot? First flash a sketch that only prints to the serial port. If that doesn't run either, the problem is the board or the cable, not Kibo. Full wiring is in WIRING.md.",
     "req.eyebrow":"Integration requirements","req.title":"What each provider needs to work.","req.subtitle":"These are the technical prerequisites and credentials required to reproduce the workflow shown in the diagram. Exact environment-variable names can be adapted to the repository.",
     "req.esp1":"ESP32 AI Chat Board with microphone, display, speaker, and button connected.","req.esp2":"Firmware capable of recording audio, sending HTTP/WebSocket requests, and playing audio.","req.esp3":"Configured Wi‑Fi and Kibo backend URL.","req.esp4":"A unique device ID linked to the user.",
     "req.auth1":"Auth0 tenant.","req.auth2":"Application configured for the caregiver web app.","req.auth3":"API/Audience configured to protect the backend.","req.serverOnly":"(backend only)","req.auth4":"Callback/logout URLs for local and deployed environments.",
