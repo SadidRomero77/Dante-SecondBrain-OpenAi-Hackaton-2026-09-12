@@ -13,8 +13,10 @@
 FROM python:3.12-slim AS base
 
 # opencv necesita estas dos; sin ellas importa pero revienta al primer cuadro.
+# tzdata es para la hora local: sin ella el contenedor vive en UTC y un
+# recordatorio de las 8:00 suena a las 3 de la madrugada en Bogota.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        libgl1 libglib2.0-0 ca-certificates curl \
+        libgl1 libglib2.0-0 ca-certificates curl tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 # Un usuario sin privilegios: si alguien se escapa del proceso, que no sea root.
@@ -44,13 +46,16 @@ RUN mkdir -p /app/data/modelos \
 COPY dante/ ./dante/
 COPY .env.example ./
 
-# La memoria, los modelos de rostro y los secretos viven aqui. Montalo como
+# La memoria de cada cuenta, las cuentas, los recados y el secreto de las
+# sesiones viven aqui. Montalo como
 # volumen o se pierden al recrear el contenedor.
 RUN mkdir -p /datos && chown -R dante:dante /app /datos
 USER dante
 
+# TZ se puede cambiar al lanzar el contenedor (-e TZ=...) para otra ciudad.
 ENV DANTE_DB=/datos/dante.db \
     DANTE_PANEL_HOST=0.0.0.0 \
+    TZ=America/Bogota \
     PYTHONUNBUFFERED=1
 
 EXPOSE 8800 8770
