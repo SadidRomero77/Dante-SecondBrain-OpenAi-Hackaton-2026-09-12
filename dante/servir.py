@@ -1,8 +1,8 @@
 """Dante como servicio: solo el portal, sin aparato y sin camara.
 
 Es la forma de correrlo en un servidor, donde no hay un USB al que enchufar
-un perrito ni una webcam mirando a nadie. Cada visitante trae lo suyo por el
-navegador y recibe su propio Dante, con memoria en blanco, desde 'demo.py'.
+un perrito ni una webcam mirando a nadie. Cada cuenta trae lo suyo por el
+navegador y recibe su propio Kibo, con su memoria, desde 'demo.py'.
 
 El aparato NO desaparece del proyecto: el firmware marca hacia afuera por
 WebSocket, asi que un perrito de verdad puede conectarse a este mismo
@@ -60,12 +60,15 @@ def correr(puerto: int = 0) -> int:
     print("\n=== dante servir ===")
     print(f"  modo demo: {'si' if demo.activo() else 'NO'}")
     if demo.activo():
-        print(f"  cada visitante recibe su propio Dante, memoria en blanco")
-        print(f"  {demo.MAXIMO()} visitas a la vez como maximo, "
+        print(f"  cada cuenta tiene su propio Kibo; memorias en {demo.RAIZ}")
+        print(f"  {demo.MAXIMO()} conversaciones a la vez como maximo, "
               f"{demo.MINUTOS()} minutos cada una")
     else:
         print("  OJO: sin DANTE_DEMO=1 todos los visitantes comparten UNA "
               "sesion y UNA memoria.")
+    from . import auth
+    for a in auth.avisos():
+        print(f"  [seguridad] {a}")
     print(f"  escuchando en {config.PANEL_HOST}:{puerto}\n")
 
     app = panel.crear_app(_SinCuerpo(), None)

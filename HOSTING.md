@@ -75,17 +75,16 @@ tres campos de Auth0 cada vez. Sirve para probar, no para presentar.
 
 ## Antes de compartir la direccion
 
-Con `AUTH0_CORREOS` vacio entra cualquiera que tenga cuenta de Google. Para un
-demo abierto eso puede ser lo que quieres, pero se honesto sobre lo que
-implica: quien entre **ve la camara en vivo** y **lee los recuerdos** de la
-persona, y puede cambiar la configuracion.
+Por un tunel el portal pide cuenta siempre. Pero en casa hay UNA memoria: con
+`DANTE_CORREOS` vacio, cualquiera que se cree una cuenta **ve la camara en
+vivo** y **lee los recuerdos** de la persona, y puede cambiar la configuracion.
 
-Dante te lo avisa al arrancar cuando detecta las dos cosas juntas.
+Dante te lo avisa al arrancar.
 
 Si prefieres que solo entren los jurados, pon sus correos:
 
 ```
-AUTH0_CORREOS=jurado1@ejemplo.com,jurado2@ejemplo.com
+DANTE_CORREOS=jurado1@ejemplo.com,jurado2@ejemplo.com
 ```
 
 Y si vas a mostrarlo abierto, revisa antes que recuerdos hay cargados. Para el
@@ -149,5 +148,6 @@ navegador, o probar desde uno de verdad.
   (modo Full). Para produccion, un certificado de origen de Cloudflare.
 - El puerto 22 sigue abierto en el grupo de seguridad aunque no se use.
   Cerrarlo.
-- La memoria de cada visitante vive en el disco de la maquina y se borra al
-  irse. Si la maquina se reinicia, las visitas en curso se pierden.
+- La memoria de cada cuenta vive en `/datos/cuentas/<id>/` y NO se borra.
+  El contenedor tiene que lanzarse con `-v kibo-datos:/datos`: sin volumen,
+  cada despliegue se lleva las cuentas y la memoria de todos.

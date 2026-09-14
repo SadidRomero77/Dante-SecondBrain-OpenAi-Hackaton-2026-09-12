@@ -61,8 +61,8 @@ por USB, la camara del PC y tu memoria de verdad. Es el Kibo que acompaña a
 una persona en su casa, y el que se muestra en vivo.
 
 **En un servidor, para que lo pruebe cualquiera.** `kibo servir`. No hay
-aparato ni camara: cada visitante recibe su propio Kibo con memoria en
-blanco y le presta la camara de su navegador. Es lo que corre en
+aparato ni camara: cada cuenta recibe su propio Kibo, con una memoria que
+se queda, y le presta la camara de su navegador. Es lo que corre en
 [kibo.kibosecondbrain.com](https://kibo.kibosecondbrain.com).
 
 El aparato no desaparece en la nube: el firmware marca hacia afuera por
@@ -72,18 +72,22 @@ WiFi. Deja de ser obligatorio, que es distinto de dejar de existir.
 ## Variables que solo importan en el servidor
 
 ```
-DANTE_DEMO=1              cada visitante, su propio Kibo con memoria en blanco
-DANTE_DEMO_MAX=4          cuantas visitas a la vez como maximo
-DANTE_DEMO_MINUTOS=8      cuanto dura cada una
-DANTE_DEMO_LOGIN=1        exigir cuenta para entrar al portal (0 lo apaga)
+DANTE_DEMO=1              cada cuenta, su propio Kibo con su memoria
+DANTE_DEMO_MAX=4          cuantas conversaciones a la vez como maximo
+DANTE_DEMO_MINUTOS=8      cuanto dura cada conversacion (la memoria se queda)
+DANTE_CORREOS=            quien puede crearse cuenta (vacio = cualquiera)
+DANTE_DEMO_LOGIN=1        ofrecer "Entrar con Google" si Auth0 esta puesto
 DANTE_PANEL_URL=https://…  la direccion publica, para que Auth0 vuelva bien
 DANTE_MARCA=Kibo          el nombre que se lee en pantalla
 ```
 
-`DANTE_DEMO_LOGIN` existe como interruptor a proposito: si la direccion de
-vuelta no esta dada de alta en Auth0, el login falla y el portal queda
-inaccesible **para todos**. Poder revertirlo en un minuto vale mas que la
-elegancia de no tener el interruptor.
+El login ya no se apaga. Antes dependia de Auth0 y el interruptor servia para
+no dejar el portal inaccesible; apagado, quedaba abierto a internet. Ahora hay
+cuentas propias que no dependen de nadie, y `DANTE_DEMO_LOGIN=0` solo esconde
+el boton de Google.
+
+La memoria de cada cuenta vive en `/datos/cuentas/<id>/`. **Monta `/datos`
+como volumen** (`-v kibo-datos:/datos`) o se pierde en cada despliegue.
 
 ## Auth0: lo que hay que dar de alta
 
@@ -293,16 +297,18 @@ Para abrirlo desde fuera de tu máquina durante un demo, mirá **`HOSTING.md`**.
 El agente se queda en tu portátil —el aparato está en el USB— y lo que sale a
 internet es el portal.
 
-### Login con Auth0
+### Login
 
-Sin configurar, el portal queda abierto — que es lo correcto en `127.0.0.1`. Si
-va a salir de tu máquina, creá una *Regular Web Application* en
+En `127.0.0.1` no se pide cuenta. Fuera de tu máquina —en la red, por un túnel
+o en la nube— el portal siempre pide entrar con correo y contraseña, sin
+depender de ningún servicio. `DANTE_CORREOS` limita quién puede crearse cuenta.
+
+Para ofrecer además *Entrar con Google*, creá una *Regular Web Application* en
 [manage.auth0.com](https://manage.auth0.com), habilitá Google, y poné
 `http://127.0.0.1:8800/callback` en *Allowed Callback URLs*.
 
-Después llená `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID`, `AUTH0_CLIENT_SECRET` y —
-importante — `AUTH0_CORREOS` con los correos autorizados, separados por coma.
-**Vacío significa que cualquiera con cuenta de Google puede entrar.**
+Después llená `AUTH0_DOMAIN`, `AUTH0_CLIENT_ID` y `AUTH0_CLIENT_SECRET`. Quien
+entra con Google cae en la misma cuenta que si entrara con su correo.
 
 El login protege **el portal**, no los datos: la memoria sigue siendo un archivo
 en tu disco. Autenticar no mueve nada a la nube, solo decide quién abre la
@@ -392,7 +398,8 @@ dante/
   vision.py       cámara, detección y reconocimiento de rostros
   ajustes.py      la configuración que arma la personalidad
   panel.py        el portal
-  auth.py         login con Auth0, opcional
+  auth.py         la puerta: sesiones firmadas y Google opcional
+  cuentas.py      cuentas propias con correo y contraseña
   trabajos.py     dispara las tareas de Trigger.dev
   setup.py        configura el WiFi del aparato
 

@@ -80,7 +80,8 @@ def revisar() -> int:
     partes = [
         f"modelos de texto: {proveedor.por_donde()}",
         f"busqueda: {'exa' if config.EXA_API_KEY else 'openai (mas lenta)'}",
-        f"portal: {'con login de Auth0' if auth.activo() else 'abierto (solo local)'}",
+        f"portal: login con cuentas propias{' y Google' if auth.google() else ''} "
+        f"(en esta maquina no se pide)",
         f"camara: {'activa' if config.CAMARA else 'apagada'}",
         f"trabajos: {'trigger.dev' if trabajos.activo() else 'solo locales'}",
     ]

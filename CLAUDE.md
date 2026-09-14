@@ -42,9 +42,17 @@ entrar a /opt/kibo, `git reset --hard origin/main`, `docker build`, relanzar.
 Las llaves viven en el almacen de AWS (`/kibo/openai`, `/kibo/exa-api-key`,
 `/kibo/auth0-*`), no dentro del contenedor.
 
-**El login esta APAGADO** (`DANTE_DEMO_LOGIN=0`) porque la direccion de
-vuelta no esta dada de alta en Auth0 y el portal quedaba inaccesible. Se
-enciende en cuanto esos tres campos esten puestos.
+**El login esta ENCENDIDO y no depende de nadie**: cuentas propias con correo
+y contrasena (`dante/cuentas.py`, scrypt, freno de intentos). Google por Auth0
+es un boton extra que solo aparece con Auth0 configurado y sin
+`DANTE_DEMO_LOGIN=0`; sigue apagado hasta dar de alta la direccion de vuelta.
+
+**Cada cuenta es duena de su memoria, y no se borra.** Vive en
+`/datos/cuentas/<id>/`: memoria, caras, recados. Antes colgaba de una galleta
+anonima en `/tmp` y se tiraba a los 8 minutos. Lo que se corta a los
+`DANTE_DEMO_MINUTOS` es la conversacion con OpenAI, no la memoria.
+**El contenedor necesita `-v kibo-datos:/datos`** o todo se va en cada
+despliegue.
 
 ## Que funciona hoy
 
@@ -62,7 +70,7 @@ Todo esto esta probado en hardware, no solo compilado.
 | **Objetos** | Donde quedaron los lentes, las llaves. Con historial: el sitio de antes es la mejor pista cuando algo no esta. |
 | **Resumen semanal** | Una nota para los hijos por Trigger.dev. Ademas compara con las semanas previas: cuanto hablo, que se repitio. |
 | **Panel** | FastAPI. Audio y texto, lo que ve la camara, caras, y toda la configuracion. |
-| **Auth0** | Login con Google, cookies firmadas, sin dependencias externas. |
+| **Login** | Cuentas propias (correo y contrasena) y Google opcional. Cookies firmadas, sin dependencias externas. |
 | **Transporte** | USB y WiFi a la vez, o ninguno: **sin hardware el agente funciona igual**. |
 
 Las cuatro funciones que dan el corazon del proyecto: **senales que preocupan**,
@@ -75,8 +83,8 @@ acuerdo"**.
   escucha; faltan los cables. **No hacen falta**: el boton BOOT de la placa
   hace lo mismo que el de hablar.
 - `TRIGGER_SECRET_KEY` sin poner. Proyecto `proj_slhciwuoxapsrziamieq`.
-- `AUTH0_CORREOS` vacio: hoy entra cualquiera con cuenta de Google. El agente
-  avisa al arrancar.
+- `DANTE_CORREOS` vacio: cualquiera puede crearse una cuenta. Cada una ve
+  solo su memoria, pero para una sola familia conviene poner sus correos.
 
 ---
 
@@ -155,6 +163,17 @@ despliegue parece roto y no lo esta.
 **Auth0 rechaza direcciones de vuelta no registradas.** Las llaves correctas
 no bastan; es la proteccion central de OAuth y solo se arregla en su panel.
 
+**Guardar en el portal reconfiguraba una sesion que no existe.** En la nube la
+sesion global es un cascaron: hay que avisar a la conversacion de la cuenta
+(`_aplicar` en panel.py). Se veia como "no guarda" con los datos guardados.
+
+**El contenedor vive en UTC** si no se le dice otra cosa. La imagen trae
+`TZ=America/Bogota`; sin eso un recordatorio de las 8:00 suena a las 3.
+
+**fetch sigue las redirecciones en silencio.** Una API que redirige al login
+devuelve 200 con el HTML de la pagina de entrar, y el portal decia "Guardado".
+Por eso `/api/*` sin cuenta contesta 401.
+
 ## Trampas que ya costaron caro
 
 Cada una de estas se pago con una hora o mas. Estan aca para no repetirlas.
@@ -200,7 +219,9 @@ dante/ajustes.py     configuracion -> personalidad. Las reglas duras
 dante/semanal.py     la nota para la familia
 dante/conversar.py   con que llegar a hablar: tiempo, lo suyo, lo que conto
 dante/olvidar.py     borrar recuerdos, de a uno o todos
-dante/panel.py       el portal
+dante/panel.py       el portal y la puerta
+dante/cuentas.py     cuentas propias: correo, contrasena, freno de intentos
+dante/demo.py        en la nube: un Kibo por cuenta, memoria en /datos/cuentas
 dante/vision.py      caras
 firmware/dante_puente/   el firmware de verdad
 firmware/dante_servo/    barre la oreja: separa fallo de PWM de fallo de cable

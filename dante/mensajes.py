@@ -15,7 +15,14 @@ from pathlib import Path
 
 from . import config, memoria
 
-CARPETA = config.RAIZ / "data" / "mensajes"
+def carpeta() -> Path:
+    """Los audios viven al lado de la memoria que los nombra.
+
+    Antes era una carpeta fija dentro del codigo: en la nube todas las cuentas
+    grababan en la misma, y cada despliegue la borraba con la imagen. En casa
+    sigue siendo data/mensajes, porque ahi es donde esta la memoria.
+    """
+    return Path(memoria.RUTA.get() or config.DB).parent / "mensajes"
 
 
 def guardar(de: str, pcm: bytes, transcripcion: str = "", para: str = "") -> dict:
@@ -25,9 +32,10 @@ def guardar(de: str, pcm: bytes, transcripcion: str = "", para: str = "") -> dic
     if len(pcm) < config.SAMPLE_RATE:      # menos de medio segundo
         return {"ok": False, "motivo": "el mensaje es demasiado corto"}
 
-    CARPETA.mkdir(parents=True, exist_ok=True)
+    donde = carpeta()
+    donde.mkdir(parents=True, exist_ok=True)
     nombre = f"{datetime.now():%Y%m%d-%H%M%S}-{_limpio(de)}.wav"
-    destino = CARPETA / nombre
+    destino = donde / nombre
     with wave.open(str(destino), "wb") as w:
         w.setnchannels(config.CANALES)
         w.setsampwidth(config.ANCHO_MUESTRA)
@@ -71,7 +79,7 @@ def guardar_texto(de: str, texto: str, para: str = "") -> dict:
 
 
 def leer_pcm(archivo: str) -> bytes:
-    ruta = CARPETA / archivo
+    ruta = carpeta() / Path(archivo).name
     if not ruta.exists():
         return b""
     with wave.open(str(ruta), "rb") as w:

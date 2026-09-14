@@ -55,14 +55,19 @@ avisa al arrancar si está así, y avisa más fuerte si además está expuesto a
 red.
 
 Por defecto el portal escucha solo en `127.0.0.1`. Para exponerlo hay que poner
-`DANTE_PANEL_HOST=0.0.0.0` a propósito — y entonces **Auth0 deja de ser
-opcional**.
+`DANTE_PANEL_HOST=0.0.0.0` a propósito — y entonces el portal pide cuenta a
+todo el que no esté en la propia máquina. "La propia máquina" se decide por la
+dirección de quien conecta, no por el encabezado `Host`, que lo escribe el
+cliente.
 
 ## Lo que falta
 
 - **Sin cifrado en reposo.** `data/dante.db` es un SQLite en claro. Quien tenga
   acceso al disco lee todo. Cifrarlo con SQLCipher es el siguiente paso.
-- **Sin límite de peticiones.** Nada impide intentar mil logins.
+- **Límite de peticiones solo en el login.** Entrar y crear cuenta se frenan
+  a 8 intentos fallidos cada 15 minutos por dirección y por correo. El resto de
+  la API no tiene freno, y el conteo vive en memoria: se reinicia con el
+  proceso.
 - **Sin HTTPS propio.** Detrás de un proxy con TLS está bien; expuesto directo,
   no.
 - **Las transcripciones se imprimen en la consola.** Cómodo para depurar,

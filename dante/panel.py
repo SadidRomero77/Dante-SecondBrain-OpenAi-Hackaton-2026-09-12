@@ -40,12 +40,13 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 
-from fastapi.responses import (FileResponse, HTMLResponse, RedirectResponse,
+from fastapi.responses import (FileResponse, HTMLResponse, JSONResponse,
+                               RedirectResponse,
                                Response, StreamingResponse)
 
 
 
-from . import ajustes, auth, config, demo, memoria, mensajes as msg
+from . import ajustes, auth, config, cuentas, demo, memoria, mensajes as msg
 from .favicon_b64 import B64 as FAVICON_B64
 
 
@@ -56,12 +57,17 @@ from .favicon_b64 import B64 as FAVICON_B64
 MARCA = config._v("DANTE_MARCA", "") or "Kibo"
 
 
+def _cuenta_de(peticion) -> str:
+    """El identificador de la cuenta de quien pregunta, o '' si no entro."""
+    return (auth.usuario_de(peticion) or {}).get("id") or ""
+
+
 def _visita_de(peticion):
-    """La visita de quien pregunta, o None si no hay demo."""
+    """La conversacion abierta de quien pregunta, o None si no hay."""
     from . import demo as _demo
     if not _demo.activo():
         return None
-    return _demo.de(peticion.cookies.get(_demo.GALLETA) or "")
+    return _demo.de(_cuenta_de(peticion))
 
 
 def _rostros_de(peticion, sesion):
@@ -72,6 +78,7 @@ def _rostros_de(peticion, sesion):
     resultados falsos, es enseñarle a alguien la cara de un desconocido.
     """
     from .vision import Rostros
+    from . import demo as _demo
     v = _visita_de(peticion)
     if v is not None:
         if getattr(v, "rostros", None) is None:
@@ -79,6 +86,11 @@ def _rostros_de(peticion, sesion):
             _m.RUTA.set(v.ruta)
             v.rostros = Rostros()
         return v.rostros
+    if _demo.activo():
+        # Sin conversacion abierta, uno de un solo uso sobre la memoria de
+        # esta cuenta. Nunca el global: ese se queda con las caras de la
+        # primera cuenta que lo toque.
+        return Rostros()
     if sesion.ojos.rostros is None:
         sesion.ojos.rostros = Rostros()
     return sesion.ojos.rostros
@@ -95,8 +107,7 @@ def _cuadro_de_la_visita(peticion):
     try:
         import cv2
         import numpy as np
-        from . import demo as _demo
-        v = _demo.de(peticion.cookies.get(_demo.GALLETA) or "")
+        v = _visita_de(peticion)
         b64 = getattr(v.sesion, "cuadro_navegador", "") if v and v.sesion else ""
         if not b64:
             return None
@@ -1935,6 +1946,15 @@ button:active{transform:translateY(0) scale(.98)}
 <script>
 
 const $ = (s) => document.querySelector(s);
+
+// Si la sesion vencio, cualquier llamada contesta 401: se vuelve a entrar en
+// vez de seguir mostrando un portal que ya no puede guardar nada.
+const _fetch = window.fetch.bind(window);
+window.fetch = async (...args) => {
+  const r = await _fetch(...args);
+  if (r.status === 401) location.href = '/login';
+  return r;
+};
 const charla = $('#charla');
 const danteBox = $('#dante-avatar-box');
 const parpadoIzq = $('#parpado-izq'), parpadoDer = $('#parpado-der');
@@ -1942,6 +1962,9 @@ const pupilaIzq = $('#pupila-izq'), pupilaDer = $('#pupila-der');
 const bocaCerrada = $('#boca-cerrada'), bocaAbierta = $('#boca-abierta');
 
 let ws, entra, sale, flujo, nodo, hablando = false, proximo = 0;
+// La conversacion se pausa sola cuando se le acaba el tiempo. No se reconecta
+// sola: eso abriria otra enseguida y el tope de minutos no serviria de nada.
+let pausada = false, pendiente = null;
 let altavozOn = localStorage.getItem('dante_altavoz') !== 'no';
 let estadoActual = 'idle';
 let parpadeando = false;
@@ -2110,9 +2133,21 @@ function conectar(){
 
   ws.binaryType = 'arraybuffer';
 
-  ws.onopen = () => pintarCara('idle');
+  ws.onopen = () => {
+    pintarCara('idle');
+    if (pendiente){ ws.send(pendiente); pendiente = null; }
+  };
 
-  ws.onclose = () => { setTimeout(conectar, 1500); };
+  ws.onclose = (e) => {
+    if (e.code === 4000){
+      pausada = true;
+      linea('sis', '@@MARCA@@ se tomó una pausa. Todo lo que guardaste sigue aquí: háblale o escríbele para seguir.');
+      return;
+    }
+    // Sin sesion no tiene sentido insistir: hay que volver a entrar.
+    if (e.code === 1008){ location.href = '/login'; return; }
+    setTimeout(conectar, 1500);
+  };
 
   ws.onmessage = (e) => {
 
@@ -2238,12 +2273,24 @@ async function hablarSi(){
 
   if (!await abrirMicro()) return;
 
+  if (despertar() || !ws || ws.readyState !== 1) return;
+
   hablando = true;
 
   micro.classList.add('hablando'); micro.textContent = '🎙️ Te escucho… soltá al terminar';
 
   ws.send(JSON.stringify({t:'boton', v:'abajo'}));
 
+}
+
+// Si la conversacion estaba en pausa, abre otra. Devuelve true si tuvo que
+// hacerlo, para que quien llama espere a que conecte.
+function despertar(){
+  if (!pausada) return false;
+  pausada = false;
+  linea('sis', 'Despertando a @@MARCA@@…');
+  conectar();
+  return true;
 }
 
 function hablarNo(){
@@ -2254,7 +2301,7 @@ function hablarNo(){
 
   micro.classList.remove('hablando'); micro.textContent = '🎙️ Mantené para hablar';
 
-  ws.send(JSON.stringify({t:'boton', v:'arriba'}));
+  if (ws && ws.readyState === 1) ws.send(JSON.stringify({t:'boton', v:'arriba'}));
 
 }
 
@@ -2280,9 +2327,15 @@ function mandar(){
 
   const i = $('#entrada');
 
-  if (!i.value.trim() || !ws || ws.readyState!==1) return;
+  if (!i.value.trim()) return;
 
-  ws.send(JSON.stringify({t:'texto', v:i.value})); i.value='';
+  const texto = JSON.stringify({t:'texto', v:i.value});
+
+  if (pausada){ pendiente = texto; i.value=''; despertar(); return; }
+
+  if (!ws || ws.readyState!==1) return;
+
+  ws.send(texto); i.value='';
 
 }
 
@@ -2350,9 +2403,14 @@ async function guardarTodo(aviso){
 
              ...Object.fromEntries(new FormData(form2).entries())};
 
-  await fetch('/api/ajustes',{method:'POST',headers:{'Content-Type':'application/json'},
-
-    body:JSON.stringify(d)});
+  // Se mira la respuesta. Antes decia "Guardado" pasara lo que pasara, y un
+  // fallo del servidor se veia igual que un guardado bueno.
+  try {
+    const r = await fetch('/api/ajustes',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(d)});
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.ok){ avisar('#aviso-cfg', 'No pude guardar: ' + (j.motivo || ('error ' + r.status))); return; }
+  } catch(_) { avisar('#aviso-cfg', 'No pude guardar: sin conexión con el servidor.'); return; }
 
   avisar('#aviso-cfg', aviso);
 
@@ -3001,6 +3059,119 @@ async function cargarVoces(){
 
 
 
+# La pagina de entrar. Sin formularios de verdad: manda JSON por fetch, asi no
+# hace falta instalar nada para leer formularios y la respuesta dice que fallo.
+ENTRAR = """<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrar — @@MARCA@@</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,@@FAVICON@@">
+<style>
+  :root{--bg:#fbf6ee;--card:#fffaf4;--ink:#21130f;--muted:#6f625c;--line:#eadfd3;
+        --accent:#ef7d00;--error:#b3261e}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px 16px;
+       background:var(--bg);color:var(--ink);
+       font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+  .caja{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);
+        border-radius:24px;padding:32px 28px;box-shadow:0 20px 50px rgba(74,42,27,.10)}
+  .marca{display:flex;align-items:center;gap:10px;font-size:28px;font-weight:900;
+         letter-spacing:-1px;margin-bottom:6px}
+  .marca svg{width:44px;height:44px}
+  p.sub{color:var(--muted);margin:0 0 22px;line-height:1.5}
+  .pestanas{display:flex;gap:6px;background:#f3e8dc;border-radius:999px;padding:4px;margin-bottom:20px}
+  .pestanas button{flex:1;border:0;background:transparent;border-radius:999px;padding:10px;
+                   font:inherit;font-weight:700;color:var(--muted);cursor:pointer}
+  .pestanas button.on{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  label{display:block;font-size:14px;font-weight:650;margin:14px 0 6px}
+  input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;
+        font:inherit;background:#fff;color:var(--ink)}
+  input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  .btn{width:100%;margin-top:20px;padding:13px;border:0;border-radius:999px;font:inherit;
+       font-weight:800;cursor:pointer;background:var(--accent);color:#fff}
+  .btn:disabled{opacity:.6;cursor:wait}
+  .btn.g{background:#fff;color:var(--ink);border:1px solid var(--line);margin-top:10px}
+  .o{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin-top:18px}
+  .o::before,.o::after{content:"";flex:1;height:1px;background:var(--line)}
+  .error{color:var(--error);font-size:14px;margin-top:12px;min-height:1.2em}
+  .pie{margin-top:18px;font-size:13px;color:var(--muted);text-align:center}
+  .pie a{color:var(--accent);font-weight:650;text-decoration:none}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main class="caja">
+  <div class="marca">@@PERRO@@ @@MARCA@@</div>
+  <p class="sub">Cada cuenta tiene su propio @@MARCA@@ y su propia memoria.
+     Nadie más ve lo que guardas.</p>
+
+  <div class="pestanas" role="tablist">
+    <button type="button" id="t-entrar" class="on">Entrar</button>
+    <button type="button" id="t-crear">Crear cuenta</button>
+  </div>
+
+  <form id="f" novalidate>
+    <div id="c-nombre" hidden>
+      <label for="nombre">Tu nombre</label>
+      <input id="nombre" autocomplete="name" maxlength="80">
+    </div>
+    <label for="correo">Correo</label>
+    <input id="correo" type="email" autocomplete="email" required>
+    <label for="clave">Contraseña</label>
+    <input id="clave" type="password" autocomplete="current-password" required minlength="8">
+    <div class="error" id="error" role="alert"></div>
+    <button class="btn" id="ir" type="submit">Entrar</button>
+  </form>
+
+  <div id="google" hidden>
+    <div class="o">o</div>
+    <a class="btn g" href="/login/google" style="display:block;text-align:center;text-decoration:none">Entrar con Google</a>
+  </div>
+
+  <div class="pie"><a href="/">Volver a la portada</a></div>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+let modo = 'entrar';
+if ('@@GOOGLE@@') $('#google').hidden = false;
+function poner(m){
+  modo = m;
+  $('#t-entrar').classList.toggle('on', m==='entrar');
+  $('#t-crear').classList.toggle('on', m==='crear');
+  $('#c-nombre').hidden = m!=='crear';
+  $('#ir').textContent = m==='crear' ? 'Crear cuenta' : 'Entrar';
+  $('#clave').autocomplete = m==='crear' ? 'new-password' : 'current-password';
+  $('#error').textContent = '';
+}
+$('#t-entrar').onclick = () => poner('entrar');
+$('#t-crear').onclick  = () => poner('crear');
+if (location.hash === '#crear') poner('crear');
+$('#f').onsubmit = async e => {
+  e.preventDefault();
+  const correo = $('#correo').value.trim(), clave = $('#clave').value;
+  if (!correo || !clave){ $('#error').textContent = 'Escribe tu correo y tu contraseña.'; return; }
+  if (modo==='crear' && clave.length < 8){
+    $('#error').textContent = 'La contraseña necesita al menos 8 caracteres.'; return; }
+  $('#ir').disabled = true; $('#error').textContent = '';
+  try {
+    const r = await fetch(modo==='crear' ? '/api/registro' : '/api/entrar', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({correo, clave, nombre: $('#nombre').value.trim()})});
+    const d = await r.json().catch(() => ({}));
+    if (r.ok && d.ok){ location.href = '/portal'; return; }
+    $('#error').textContent = d.motivo || 'No pude entrar. Intenta de nuevo.';
+  } catch(_) {
+    $('#error').textContent = 'Sin conexión con el servidor.';
+  }
+  $('#ir').disabled = false;
+};
+</script>
+</body>
+</html>"""
+
+
 def crear_app(sesion, bucle):
 
     """Arma la aplicacion web sobre una sesion que ya esta corriendo."""
@@ -3013,154 +3184,148 @@ def crear_app(sesion, bucle):
 
     @app.middleware("http")
     async def reparto(peticion, siguiente):
-        """En el demo publico, apunta esta peticion a la memoria del visitante.
+        """En la nube, apunta esta peticion a la memoria de su cuenta.
 
-        Se ejecuta dentro de la puerta de Auth0, asi que lo primero que toca
-        cualquier consulta ya esta apuntando a la base correcta: ninguna
-        peticion de un visitante puede escribir en la del dueno del aparato.
+        Se ejecuta dentro de la puerta, asi que para cuando corre ya se sabe
+        quien es. Ninguna peticion puede escribir en la base del dueno del
+        aparato, ni en la de otra cuenta: sin cuenta cae en un sitio
+        desechable.
         """
-        if not demo.activo():
-            return await siguiente(peticion)
-        id_ = peticion.cookies.get(demo.GALLETA) or ""
-        # Su ruta se calcula desde la galleta, exista o no una conversacion
-        # abierta. Si aqui cayera en la base de siempre, el visitante veria
-        # -y podria cambiar- la vida del dueno del aparato.
-        nuevo = "" if id_ else demo.nueva_id()
-        # Sin galleta se generaba una ya, en vez de mandar a todos los recien
-        # llegados a una misma base compartida llamada "nuevo".
-        memoria.RUTA.set(demo.ruta_de(id_ or nuevo))
-        respuesta = await siguiente(peticion)
-        if not id_:
-            # Se entrega ya, para que el websocket la traiga puesta y sepamos
-            # que visita es antes de abrirle un @@MARCA@@ propio.
-            respuesta.set_cookie(demo.GALLETA, nuevo, httponly=True,
-                                 samesite="lax", max_age=3600)
-        return respuesta
+        if demo.activo():
+            memoria.RUTA.set(demo.ruta_de(_cuenta_de(peticion)))
+        return await siguiente(peticion)
+
+    # Lo que se ve sin cuenta: la portada, sus imagenes, entrar y salir. Sin
+    # las imagenes, la portada carga pero el diagrama sale roto, porque la
+    # puerta lo mandaba al login como a cualquier otra ruta. quien_soy y salud
+    # los usa el chequeo de vida del contenedor, que no tiene cuenta.
+    PUBLICAS = {"/", "/login", "/login/google", "/callback", "/salir",
+                "/api/entrar", "/api/registro", "/api/quien_soy", "/salud",
+                "/favicon.svg", "/favicon.ico", "/favicon.png"}
 
     @app.middleware("http")
-
     async def puerta(peticion, siguiente):
+        """Todo pasa por tener cuenta, menos lo publico y la propia maquina.
 
-        """Si Auth0 esta configurado, todo pasa por el login menos el propio
-
-        login. Si no lo esta, esto no hace nada."""
-
+        Ya no hay interruptor para apagarla. Existia porque el login dependia
+        de Auth0 y, roto, dejaba el portal inaccesible; asi se quedo abierto a
+        internet. Las cuentas propias no dependen de nadie.
+        """
         ruta = peticion.url.path
-        # La portada es publica siempre; el portal, no. En el demo se puede
-        # apagar el login con DANTE_DEMO_LOGIN=0 si Auth0 diera problemas: un
-        # login roto deja el portal inaccesible para todos, y mas vale poder
-        # revertirlo en un minuto que descubrirlo delante de un jurado.
-        if demo.activo() and not demo.pide_login():
+        if (ruta in PUBLICAS or ruta.startswith("/portada/")
+                or auth.usuario_de(peticion)):
             return await siguiente(peticion)
-
-        # En la propia maquina no se pide cuenta. Quien corre esto en su casa,
-        # con el perrito enchufado al USB, ya demostro quien es abriendo la
-        # puerta: exigirle ademas una cuenta de Google solo consigue que el
-        # portal quede bloqueado cuando Auth0 no tiene dada de alta la
-        # direccion de vuelta, que es justo lo que pasaba. Fuera de localhost
-        # -o en cuanto hay una direccion publica- el login vuelve a mandar.
-        if (not config.PANEL_URL
-                and peticion.url.hostname in ("127.0.0.1", "localhost")):
-            return await siguiente(peticion)
-
-        # Lo publico: la portada, sus imagenes y el propio login. Sin las
-        # imagenes, la portada carga pero el diagrama sale roto, porque la
-        # puerta lo mandaba al login como a cualquier otra ruta.
-        if not auth.activo() or ruta in (
-            "/", "/login", "/callback", "/salir",
-            "/favicon.svg", "/favicon.ico", "/favicon.png",
-        ) or ruta.startswith("/portada/"):
-
-            return await siguiente(peticion)
-
-        if auth.usuario_de(peticion):
-
-            return await siguiente(peticion)
-
+        # A las llamadas del portal se les contesta 401, no una redireccion:
+        # fetch sigue la redireccion en silencio, recibe el HTML del login y
+        # el portal decia "Guardado" sin haber guardado nada.
+        if ruta.startswith("/api/"):
+            return JSONResponse({"ok": False, "motivo": "sin sesion"}, 401)
         return RedirectResponse("/login")
 
-
-
     def _raiz(peticion: Request) -> str:
-
         """De donde cree el portal que cuelga.
 
-
-
         Detras de un tunel, peticion.base_url dice localhost, que es donde
-
         escucha uvicorn y no donde entra la gente. Auth0 compara la direccion
-
         de vuelta caracter por caracter, asi que si no coincide el login falla
-
         entero. Por eso DANTE_PANEL_URL manda cuando esta puesta.
-
         """
-
         return config.PANEL_URL or str(peticion.base_url).rstrip("/")
 
+    def _con_sesion(respuesta, peticion: Request, cuenta: dict):
+        """Le pone la galleta de sesion a la respuesta.
 
+        Segura cuando se entra por https, aunque uvicorn vea http: detras de
+        Caddy y Cloudflare la peticion llega en claro y el esquema real viene
+        en X-Forwarded-Proto. Por http a secas -la red de la casa- no se marca,
+        porque el navegador tiraria la galleta y no habria forma de entrar.
+        """
+        segura = (config.PANEL_URL.startswith("https://")
+                  or peticion.headers.get("x-forwarded-proto", "") == "https"
+                  or peticion.url.scheme == "https")
+        respuesta.set_cookie(auth.COOKIE, auth.galleta_de(cuenta), httponly=True,
+                             samesite="lax", secure=segura,
+                             max_age=auth.DURACION)
+        return respuesta
 
-    @app.get("/login")
+    def _mismo_origen(peticion: Request) -> bool:
+        """Que el formulario de entrar se mande desde esta misma pagina.
 
+        Sin esto, otra web podria entrar a alguien en una cuenta ajena sin que
+        lo note, y lo que esa persona guarde despues iria a parar ahi.
+        """
+        origen = peticion.headers.get("origin", "")
+        if not origen:
+            return True
+        from urllib.parse import urlparse
+        return urlparse(origen).netloc == (peticion.headers.get("host") or "")
+
+    @app.get("/login", response_class=HTMLResponse)
     def login(peticion: Request):
+        if auth.usuario_de(peticion):
+            return RedirectResponse("/portal")
+        return (ENTRAR.replace("@@FAVICON@@", FAVICON_B64)
+                      .replace("@@PERRO@@", PERRO_SVG)
+                      .replace("@@GOOGLE@@", "1" if auth.google() else "")
+                      .replace("@@MARCA@@", MARCA))
 
-        if not auth.activo():
+    def _ip(peticion: Request) -> str:
+        # Detras de Cloudflare la direccion real viene en esta cabecera; sin
+        # ella todos los intentos parecen de la misma maquina, la del proxy.
+        return (peticion.headers.get("cf-connecting-ip")
+                or (peticion.client.host if peticion.client else ""))
 
-            return RedirectResponse("/")
+    @app.post("/api/entrar")
+    def entrar(datos: dict, peticion: Request):
+        if not _mismo_origen(peticion):
+            return JSONResponse({"ok": False, "motivo": "origen no valido"}, 403)
+        r = cuentas.entrar(str(datos.get("correo", "")),
+                           str(datos.get("clave", "")), _ip(peticion))
+        if not r["ok"]:
+            return JSONResponse(r, 401)
+        return _con_sesion(JSONResponse({"ok": True}), peticion, r["cuenta"])
 
+    @app.post("/api/registro")
+    def registro(datos: dict, peticion: Request):
+        if not _mismo_origen(peticion):
+            return JSONResponse({"ok": False, "motivo": "origen no valido"}, 403)
+        # Crear cuentas tambien se frena: si no, se prueban miles de correos
+        # para saber cuales ya tienen una.
+        if cuentas.frenado(_ip(peticion), ""):
+            return JSONResponse({"ok": False, "motivo":
+                "Demasiados intentos. Espera unos minutos."}, 429)
+        r = cuentas.crear(str(datos.get("correo", "")),
+                          str(datos.get("clave", "")),
+                          str(datos.get("nombre", "")))
+        if not r["ok"]:
+            cuentas._fallo(_ip(peticion), "")
+            return JSONResponse(r, 400)
+        return _con_sesion(JSONResponse({"ok": True}), peticion, r["cuenta"])
+
+    @app.get("/login/google")
+    def login_google(peticion: Request):
+        if not auth.google():
+            return RedirectResponse("/login")
         e = auth.nuevo_estado()
-
         return RedirectResponse(auth.url_de_login(_raiz(peticion) + "/callback", e))
 
-
-
     @app.get("/callback")
-
     def callback(peticion: Request, code: str = "", state: str = ""):
-
         if not auth.gastar_estado(state):
-
             return HTMLResponse(
-
                 "<p>El enlace de entrada vencio o ya se uso. "
-
                 "<a href='/login'>Vuelve a entrar</a>.</p>", 400)
-
         u = auth.canjear(code, _raiz(peticion) + "/callback")
-
         if not u:
-
-            return HTMLResponse("<p>No pude verificar tu cuenta.</p>", 400)
-
+            return HTMLResponse("<p>No pude verificar tu cuenta. "
+                                "<a href='/login'>Vuelve a entrar</a>.</p>", 400)
         if u.get("rechazado"):
-
             return HTMLResponse(
-
                 f"<p>La cuenta {u['rechazado']} no esta autorizada para este "
-
                 f"agente.</p>", 403)
-
-        r = RedirectResponse("/")
-
-        # secure solo fuera de localhost: en http://127.0.0.1 el navegador
-
-        # descartaria una galletita marcada como segura.
-
-        local = (not config.PANEL_URL
-
-                 and peticion.url.hostname in ("127.0.0.1", "localhost"))
-
-        r.set_cookie(auth.COOKIE, auth.galleta_de(u), httponly=True,
-
-                     samesite="lax", secure=not local, max_age=auth.DURACION)
-
-        return r
-
-
+        return _con_sesion(RedirectResponse("/portal"), peticion, u)
 
     @app.get("/salir")
-
     def salir(peticion: Request):
         """Cierra la sesion de Kibo y vuelve a la portada.
 
@@ -3175,16 +3340,38 @@ def crear_app(sesion, bucle):
         r.delete_cookie(auth.COOKIE)
         return r
 
-
-
     @app.get("/api/quien_soy")
-
     def quien_soy(peticion: Request):
-
         u = auth.usuario_de(peticion) or {}
+        return {"auth": True, "google": auth.google(),
+                "usuario": {k: u.get(k, "") for k in ("correo", "nombre")}}
 
-        return {"auth": auth.activo(), "usuario": u}
+    def _aplicar(peticion: Request, aviso: dict | None = None,
+                 pantalla: tuple | None = None) -> None:
+        """Le cuenta a la conversacion de quien guardo lo que acaba de cambiar.
 
+        En la nube la sesion global no existe: se reconfiguraba un cascaron
+        vacio, y Kibo seguia hablando con lo de antes. Se veia como "el portal
+        no guarda" con los datos perfectamente guardados.
+        """
+        v = _visita_de(peticion)
+        s = v.sesion if v is not None else (None if demo.activo() else sesion)
+        if s is None:
+            # Sin conversacion abierta no hay nada que avisar: la proxima que
+            # se abra ya arranca leyendo la memoria con lo nuevo.
+            return
+        try:
+            asyncio.run_coroutine_threadsafe(s.configurar(), s.bucle)
+        except Exception as e:
+            # Si esto falla, lo guardado no llega a la conversacion en curso y
+            # Dante sigue con las instrucciones viejas. Callarlo hace parecer
+            # que el portal no guarda, que es justo la pista equivocada.
+            print(f"  aviso: guarde los cambios pero no pude aplicarlos a la "
+                  f"conversacion en curso ({e}).")
+        if pantalla:
+            s.pantalla(*pantalla)
+        if aviso:
+            s.avisar(aviso.pop("t"), **aviso)
 
 
     def repartir(ev: dict) -> None:
@@ -3294,7 +3481,7 @@ def crear_app(sesion, bucle):
 
     @app.post("/api/ajustes")
 
-    async def poner_ajustes(datos: dict):
+    def poner_ajustes(datos: dict, peticion: Request):
 
         c = memoria.abrir()
 
@@ -3306,27 +3493,9 @@ def crear_app(sesion, bucle):
 
             c.close()
 
-        # La sesion en curso ya tiene sus instrucciones cargadas; se las
-
+        # La conversacion en curso ya tiene sus instrucciones cargadas; se las
         # cambiamos en caliente para no tener que reiniciar nada.
-
-        try:
-
-            asyncio.run_coroutine_threadsafe(sesion.configurar(), sesion.bucle)
-
-        except Exception as e:
-
-            # Si esto falla, lo guardado no llega a la conversacion en curso y
-
-            # Dante sigue con las instrucciones viejas. Callarlo hace parecer
-
-            # que el portal no guarda, que es justo la pista equivocada.
-
-            print(f"  aviso: guarde los ajustes pero no pude aplicarlos a la "
-
-                  f"conversacion en curso ({e}). Reinicia para que tomen.")
-
-        repartir({"t": "ajustes", "ajustes": nuevos})
+        _aplicar(peticion, {"t": "ajustes", "ajustes": nuevos})
 
         return {"ok": True, "ajustes": nuevos}
 
@@ -3434,7 +3603,7 @@ def crear_app(sesion, bucle):
 
     @app.post("/api/recordatorios")
 
-    async def poner_recordatorio(datos: dict):
+    def poner_recordatorio(datos: dict, peticion: Request):
 
         c = memoria.abrir()
 
@@ -3452,6 +3621,7 @@ def crear_app(sesion, bucle):
 
                         "error": "Falta el texto o la fecha no se entiende."}
 
+            _aplicar(peticion)
             return {"ok": True, "recordatorios": memoria.eventos_todos(c)}
 
         finally:
@@ -3462,7 +3632,7 @@ def crear_app(sesion, bucle):
 
     @app.put("/api/recordatorios/{id_}")
 
-    async def editar_recordatorio(id_: int, datos: dict):
+    def editar_recordatorio(id_: int, datos: dict, peticion: Request):
 
         c = memoria.abrir()
 
@@ -3480,6 +3650,7 @@ def crear_app(sesion, bucle):
 
                         "error": "Falta el texto o la fecha no se entiende."}
 
+            _aplicar(peticion)
             return {"ok": True, "recordatorios": memoria.eventos_todos(c)}
 
         finally:
@@ -3490,7 +3661,7 @@ def crear_app(sesion, bucle):
 
     @app.delete("/api/recordatorios/{id_}")
 
-    def quitar_recordatorio(id_: int):
+    def quitar_recordatorio(id_: int, peticion: Request):
 
         c = memoria.abrir()
 
@@ -3498,6 +3669,7 @@ def crear_app(sesion, bucle):
 
             memoria.quitar_evento(c, id_)
 
+            _aplicar(peticion)
             return {"ok": True, "recordatorios": memoria.eventos_todos(c)}
 
         finally:
@@ -3531,7 +3703,7 @@ def crear_app(sesion, bucle):
 
     @app.post("/api/cara")
 
-    async def registrar_cara(datos: dict, peticion: Request):
+    def registrar_cara(datos: dict, peticion: Request):
 
         """Toma el cuadro de ahora mismo y lo asocia a un nombre."""
 
@@ -3576,9 +3748,8 @@ def crear_app(sesion, bucle):
 
                 c.close()
 
-            sesion.pantalla("Nueva cara", f"Ahora reconozco a {nombre}", 7)
-
-            sesion.cara("atencion")
+            _aplicar(peticion, pantalla=("Nueva cara",
+                                         f"Ahora reconozco a {nombre}", 7))
 
         return r
 
@@ -3652,11 +3823,16 @@ def crear_app(sesion, bucle):
 
     @app.post("/api/recado")
 
-    async def dejar_recado(datos: dict):
+    def dejar_recado(datos: dict, peticion: Request):
 
         from . import mensajes as _m
 
-        return _m.guardar_texto(datos.get("de", ""), datos.get("texto", ""))
+        r = _m.guardar_texto(datos.get("de", ""), datos.get("texto", ""))
+        if r.get("ok"):
+            # Sin esto el recado quedaba guardado pero la conversacion abierta
+            # no se enteraba, y Kibo no lo daba hasta la proxima.
+            _aplicar(peticion, {"t": "mensaje_nuevo", "de": datos.get("de", "")})
+        return r
 
 
 
@@ -3706,27 +3882,9 @@ def crear_app(sesion, bucle):
 
 
 
-        # Que la sesion en curso se entere sin reiniciar.
-
-        try:
-
-            asyncio.run_coroutine_threadsafe(sesion.configurar(), sesion.bucle)
-
-        except Exception as e:
-
-            # Si esto falla, lo guardado no llega a la conversacion en curso y
-
-            # Dante sigue con las instrucciones viejas. Callarlo hace parecer
-
-            # que el portal no guarda, que es justo la pista equivocada.
-
-            print(f"  aviso: guarde los ajustes pero no pude aplicarlos a la "
-
-                  f"conversacion en curso ({e}). Reinicia para que tomen.")
-
-        sesion.pantalla("Mensaje nuevo", f"{de} te dejo un mensaje", 8)
-
-        repartir({"t": "mensaje_nuevo", "de": de})
+        # Que la conversacion en curso se entere sin reiniciar.
+        _aplicar(peticion, {"t": "mensaje_nuevo", "de": de},
+                 ("Mensaje nuevo", f"{de} te dejo un mensaje", 8))
 
         return r
 
@@ -3835,19 +3993,21 @@ def crear_app(sesion, bucle):
         # puerta de arriba no cubre esta ruta. Sin esto, cualquiera que alcance
         # el puerto puede leer la conversacion, oir el audio y hablarle al
         # agente. Comprobado explotandolo.
-        en_casa = (not config.PANEL_URL
-                   and ws.url.hostname in ("127.0.0.1", "localhost"))
-        if (not en_casa and (not demo.activo() or demo.pide_login())
-                and auth.activo() and not auth.usuario_de(ws)):
+        usuario = auth.usuario_de(ws)
+        if not usuario:
             await ws.close(1008, "sin sesion")
             return
 
-        # En el demo publico cada navegador tiene su propio @@MARCA@@. Sin esto,
-        # diez jueces comparten una sola sesion: se pisan al hablar y el
-        # segundo lee la conversacion del primero.
+        # En la nube cada cuenta tiene su propio @@MARCA@@. Sin esto, diez
+        # personas comparten una sola sesion: se pisan al hablar y la segunda
+        # lee la conversacion de la primera. Es la cuenta, y no el navegador,
+        # la que manda: la misma persona en el telefono y en el PC ve lo mismo.
         visita, propio = None, sesion
         if demo.activo():
-            id_ = ws.cookies.get(demo.GALLETA) or demo.nueva_id()
+            id_ = usuario.get("id") or ""
+            if not id_:
+                await ws.close(1008, "sin cuenta")
+                return
             visita = demo.de(id_)
             if visita is None:
                 if not demo.hay_sitio():

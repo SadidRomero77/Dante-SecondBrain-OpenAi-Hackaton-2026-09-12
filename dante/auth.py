@@ -1,12 +1,16 @@
-"""Auth0 para el portal. Opcional: si no esta configurado, no estorba.
+"""La puerta del portal: quien entra y con que cuenta.
+
+Hay dos formas de entrar y las dos terminan en la misma galleta firmada:
+correo y contrasena (cuentas.py, siempre disponible) o Google por Auth0, que
+es opcional y solo aparece si esta configurado.
 
 Que protege y que no, porque la diferencia importa: el login protege el
-PORTAL, que es lo que abre la familia y puede quedar expuesto en la red. La
-memoria sigue siendo un archivo en el disco del usuario. Autenticar no mueve
-ni un dato a la nube; solo decide quien puede abrir la ventana.
+PORTAL, que es lo que abre la familia y puede quedar expuesto en la red, y
+decide de quien es la memoria que se ve. En casa la memoria sigue siendo un
+archivo en el disco del usuario.
 
-Sin AUTH0_DOMAIN el portal queda abierto, que es lo correcto cuando corre en
-127.0.0.1 y nadie mas lo ve.
+En la propia maquina, sin direccion publica, no se pide cuenta: es lo correcto
+cuando corre en 127.0.0.1 y nadie mas lo ve.
 """
 from __future__ import annotations
 
@@ -28,7 +32,11 @@ from . import config  # noqa: F401
 DOMINIO = (os.getenv("AUTH0_DOMAIN") or "").strip().replace("https://", "").rstrip("/")
 CLIENTE = (os.getenv("AUTH0_CLIENT_ID") or "").strip()
 SECRETO = (os.getenv("AUTH0_CLIENT_SECRET") or "").strip()
-PERMITIDOS = [c.strip().lower() for c in (os.getenv("AUTH0_CORREOS") or "").split(",") if c.strip()]
+# Correos que pueden tener cuenta. Vale para las dos formas de entrar; el
+# nombre viejo se sigue leyendo para no romper un .env que ya lo tenga.
+PERMITIDOS = [c.strip().lower() for c in
+              (os.getenv("DANTE_CORREOS") or os.getenv("AUTH0_CORREOS") or "").split(",")
+              if c.strip()]
 
 COOKIE = "dante_sesion"
 DURACION = 60 * 60 * 24 * 14          # dos semanas
@@ -50,8 +58,10 @@ def _secreto_de_firma() -> bytes:
     if puesto:
         return puesto.encode()
 
-    from pathlib import Path
-    archivo = Path(__file__).resolve().parent.parent / "data" / ".secreto"
+    # Al lado de la memoria, no del codigo. En el contenedor el codigo se
+    # reconstruye en cada despliegue y el secreto se iba con el: todas las
+    # sesiones abiertas quedaban invalidas sin que nadie supiera por que.
+    archivo = config.DB.parent / ".secreto"
     try:
         if archivo.exists():
             return archivo.read_bytes()
@@ -73,7 +83,19 @@ _FIRMA = _secreto_de_firma()
 
 
 def activo() -> bool:
+    """Si Auth0 esta configurado. Ya no decide si hay login: solo si hay Google."""
     return bool(DOMINIO and CLIENTE and SECRETO)
+
+
+def google() -> bool:
+    """Si se ofrece entrar con Google.
+
+    DANTE_DEMO_LOGIN=0 lo apaga sin tocar codigo: si la direccion de vuelta no
+    esta dada de alta en Auth0, el boton lleva a una pantalla de error. Las
+    cuentas propias no dependen de eso y siguen funcionando.
+    """
+    return activo() and (os.getenv("DANTE_DEMO_LOGIN") or "1").strip().lower() \
+        not in ("0", "no", "false")
 
 
 # ------------------------------------------------------------- galletita --
@@ -98,11 +120,36 @@ def _abrir(galleta: str) -> dict | None:
         return None
 
 
+LOCAL = {"id": "", "correo": "local", "nombre": "modo local", "local": True}
+
+
+def en_casa(peticion) -> bool:
+    """Si quien pregunta esta sentado en la misma maquina, sin nada publicado.
+
+    No basta con mirar el nombre de la direccion: ese lo escribe el cliente, y
+    cualquiera puede mandar 'Host: localhost' desde internet. Tiene que venir
+    ademas de la propia maquina. Con una direccion publica o en la nube nunca
+    cuenta como casa, porque un tunel local tambien llega desde 127.0.0.1.
+    """
+    from . import demo
+    if config.PANEL_URL or demo.activo():
+        return False
+    cliente = getattr(getattr(peticion, "client", None), "host", "") or ""
+    return (peticion.url.hostname in ("127.0.0.1", "localhost")
+            and cliente in ("127.0.0.1", "::1"))
+
+
 def usuario_de(peticion) -> dict | None:
-    if not activo():
-        return {"correo": "local", "nombre": "modo local", "local": True}
+    """La cuenta de quien pregunta, o None si no entro."""
+    if en_casa(peticion):
+        return LOCAL
     g = peticion.cookies.get(COOKIE)
-    return _abrir(g) if g else None
+    d = _abrir(g) if g else None
+    # Las galletas de antes no llevaban cuenta: sin 'id' no hay memoria a la
+    # que apuntar, asi que se vuelve a entrar.
+    if not d or not d.get("id"):
+        return None
+    return d
 
 
 # ----------------------------------------------------------------- flujo --
@@ -146,12 +193,17 @@ def canjear(codigo: str, volver_a: str) -> dict | None:
     if PERMITIDOS and correo not in PERMITIDOS:
         return {"rechazado": correo}
 
-    return {"correo": correo, "nombre": perfil.get("name") or correo,
-            "foto": perfil.get("picture", ""), "exp": time.time() + DURACION}
+    from . import cuentas
+    cuenta = cuentas.por_correo(correo, perfil.get("name") or "")
+    if not cuenta:
+        return None
+    return {**cuenta, "foto": perfil.get("picture", "")}
 
 
 def galleta_de(usuario: dict) -> str:
-    return _firmar(usuario)
+    return _firmar({"id": usuario["id"], "correo": usuario.get("correo", ""),
+                    "nombre": usuario.get("nombre", ""),
+                    "exp": time.time() + DURACION})
 
 
 def url_de_salida(volver_a: str) -> str:
@@ -188,20 +240,11 @@ def avisos() -> list[str]:
     # mirar el host no alcanza para saber si esta a la vista de internet.
     expuesto = (_c.PANEL_HOST not in ("127.0.0.1", "localhost")
                 or bool(_c.PANEL_URL))
-    if not activo():
-        if expuesto:
-            fuera.append("EL PORTAL ESTA EXPUESTO A LA RED Y SIN LOGIN. "
-                         "Cualquiera que alcance este puerto puede oir las "
-                         "conversaciones y cambiar la configuracion. "
-                         "Configura Auth0 antes de dejarlo asi.")
-        else:
-            fuera.append("el portal esta abierto, pero solo escucha en esta "
-                         "maquina (sin Auth0)")
+    if not expuesto:
+        fuera.append("el portal solo escucha en esta maquina: ahi no se pide "
+                     "cuenta")
     elif not PERMITIDOS:
-        aviso = ("AUTH0_CORREOS esta vacio: CUALQUIERA con cuenta de "
-                 "Google puede entrar")
-        if _c.PANEL_URL:
-            aviso += (", y el portal esta publicado en internet. Va a ver la "
-                      "camara en vivo y los recuerdos de la persona.")
-        fuera.append(aviso)
+        fuera.append("DANTE_CORREOS esta vacio: cualquiera puede crearse una "
+                     "cuenta. Cada cuenta ve solo su propia memoria, pero si "
+                     "el portal es de una sola familia, pon sus correos.")
     return fuera

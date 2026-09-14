@@ -1,33 +1,32 @@
-"""El demo publico: un Dante propio para cada visitante.
+"""En la nube: un Kibo propio para cada cuenta, con memoria que se queda.
 
 Dante es de un solo inquilino por diseno -un perro, una persona, una memoria-
-y eso es correcto para el producto. Pero un portal que evalua gente de todo el
-mundo necesita lo contrario: si diez jueces entran a la vez y comparten una
-sola sesion, se pisan al hablar y el segundo lee la conversacion del primero.
+y eso es correcto para el producto. Pero un portal publicado lo abre gente de
+muchas casas: si comparten una sola sesion, se pisan al hablar y el segundo
+lee la vida del primero.
 
-Aqui cada navegador recibe lo suyo: su sesion, su memoria y su conexion con
-OpenAI. La memoria arranca EN BLANCO a proposito. No es que falte cargarla: es
-que asi Dante hace su propia presentacion por voz y el visitante lo configura
-conversando, que es la mejor forma de ensenar lo que hace.
+Aqui cada cuenta recibe lo suyo: su sesion, su memoria y su conexion con
+OpenAI. La memoria nace en blanco -asi Kibo se presenta por voz y la persona
+lo configura conversando- pero NO se borra. Antes colgaba de una galleta
+anonima y se tiraba a los ocho minutos: se configuraba el perro, se
+registraba una cara, se dejaba un recado, y al volver no habia nada. Una
+memoria que se borra sola es exactamente lo contrario de lo que promete esto.
 
-Dos limites que no son opcionales. El audio del Realtime cuesta dinero de
-verdad, y una direccion publica sin freno vacia una cuenta en una tarde: hay
-tope de visitas a la vez y tope de minutos por visita.
+Lo que si se corta es la conversacion. El audio del Realtime cuesta dinero de
+verdad y una direccion publica sin freno vacia una cuenta en una tarde: hay
+tope de conversaciones a la vez y de minutos por conversacion. Al cortarse,
+lo hablado se consolida en la memoria y volver a hablar abre otra.
 """
 
 from __future__ import annotations
 
 import asyncio
 import contextlib
-import secrets
-import shutil
 import tempfile
 import time
 from pathlib import Path
 
 from . import config, memoria
-
-GALLETA = "dante_visita"
 
 
 def activo() -> bool:
@@ -41,40 +40,30 @@ def _n(clave: str, defecto: int) -> int:
         return defecto
 
 
-def pide_login() -> bool:
-    """Si el demo exige entrar con cuenta.
-
-    Se puede apagar con DANTE_DEMO_LOGIN=0 sin tocar codigo, porque si la
-    direccion de vuelta no esta dada de alta en Auth0 el login falla y el
-    portal queda inaccesible para todos. Poder revertirlo en un minuto vale
-    mas que la elegancia de no tener el interruptor.
-    """
-    return str(config._v("DANTE_DEMO_LOGIN", "1")).strip().lower() not in (
-        "0", "no", "false")
-
-
 MINUTOS = lambda: _n("DANTE_DEMO_MINUTOS", 8)      # noqa: E731
 MAXIMO = lambda: _n("DANTE_DEMO_MAX", 4)           # noqa: E731
 
 
-# Todas las visitas viven aqui debajo, una carpeta cada una. Se llama por el
-# identificador de la galleta para que el navegador encuentre lo suyo antes
-# incluso de abrir la conversacion.
-RAIZ = Path(tempfile.gettempdir()) / "dante-visitas"
+# Una carpeta por cuenta, al lado de la memoria principal. En el contenedor
+# eso es el volumen /datos, que sobrevive a reinicios y despliegues. Antes
+# vivia en /tmp: cada despliegue se llevaba la vida de todos.
+RAIZ = config.DB.parent / "cuentas"
+
+# Para peticiones sin cuenta, que no deberian tocar memoria. Si alguna lo
+# hace, cae en un sitio desechable y nunca en la base del dueno del aparato.
+SIN_CUENTA = Path(tempfile.gettempdir()) / "kibo-sin-cuenta" / "memoria.db"
 
 
 def ruta_de(id_: str) -> Path:
-    """Donde vive la memoria de este visitante.
+    """Donde vive la memoria de esta cuenta.
 
     Existe separado de Visita porque el navegador pide cosas -los ajustes, la
     agenda- antes de abrir el websocket. Si en ese hueco no tuviera ruta
-    propia, caeria en la base del dueno del aparato y el visitante veria una
-    vida que no es la suya. Eso paso, y por eso esto esta aqui.
+    propia, caeria en la base del dueno del aparato y veria una vida que no es
+    la suya. Eso paso, y por eso esto esta aqui.
     """
     limpio = "".join(c for c in (id_ or "") if c.isalnum() or c in "-_")[:40]
-    if not limpio:
-        limpio = "anonimo"
-    carpeta = RAIZ / limpio
+    carpeta = RAIZ / limpio if limpio else SIN_CUENTA.parent
     carpeta.mkdir(parents=True, exist_ok=True)
     return carpeta / "memoria.db"
 
@@ -125,20 +114,23 @@ def de(id_: str) -> Visita | None:
     return _visitas.get(id_)
 
 
-def nueva_id() -> str:
-    return secrets.token_urlsafe(16)
-
-
 async def abrir(id_: str) -> Visita:
-    """Levanta un Dante entero, solo para este visitante."""
-    from .sesion import Sesion, TransporteNulo, _abrir_ws, _presentarse
+    """Levanta un Kibo entero, solo para esta cuenta, sobre su memoria."""
+    from . import ajustes
+    from .sesion import (Sesion, TransporteNulo, _abrir_ws, _dar_recados,
+                         _presentarse, _vigilar_recordatorios)
 
     v = Visita(id_)
     _visitas[id_] = v
     memoria.RUTA.set(v.ruta)
 
-    db = v.db = memoria.abrir(v.ruta)          # nace vacia: sin nadie, sin nada
-    v.ws = await _abrir_ws(config.MODELO_VOZ, config.API_KEY)
+    db = v.db = memoria.abrir(v.ruta)
+    try:
+        v.ws = await _abrir_ws(config.MODELO_VOZ, config.API_KEY)
+    except Exception:
+        _visitas.pop(id_, None)
+        db.close()
+        raise
     s = Sesion(TransporteNulo(), v.ws, db)
     s.bucle = asyncio.get_running_loop()
     v.sesion = s
@@ -147,11 +139,18 @@ async def abrir(id_: str) -> Visita:
     v.tareas = [
         asyncio.create_task(s.leer_modelo()),
         asyncio.create_task(s.reproducir()),
-        # Con la memoria en blanco, lo primero que hace es presentarse y
-        # preguntar quien es. El visitante configura el producto usandolo.
-        asyncio.create_task(_presentarse(s)),
+        # Los recordatorios los dice el cuando llega la hora. En la nube no
+        # corria: se creaban, se veian en la lista, y nunca sonaban.
+        asyncio.create_task(_vigilar_recordatorios(s)),
         asyncio.create_task(_cerrar_cuando_venza(id_)),
     ]
+    # Lo mismo que en casa: si todavia no conoce a nadie, se presenta; si
+    # alguien dejo un recado, abre con eso. Antes se presentaba siempre, como
+    # si la memoria estuviera vacia aunque ya supiera quien era.
+    if ajustes.falta_presentarse(db):
+        v.tareas.append(asyncio.create_task(_presentarse(s)))
+    elif memoria.mensajes_pendientes(db):
+        v.tareas.append(asyncio.create_task(_dar_recados(s)))
     print(f"  [demo] visita {id_[:6]} abierta ({cuantas()}/{MAXIMO()})")
     return v
 
@@ -171,29 +170,56 @@ async def _cerrar_cuando_venza(id_: str) -> None:
         await asyncio.sleep(10)
 
 
+# Codigo de cierre que el portal entiende como "se acabo el tiempo": no
+# reconecta solo, espera a que la persona vuelva a hablar.
+VENCIDA = 4000
+
+
 async def cerrar(id_: str) -> None:
-    """Se lleva todo: tareas, conexion y la memoria del visitante."""
+    """Corta la conversacion y guarda lo hablado. La memoria se queda."""
     v = _visitas.pop(id_, None)
     if v is None:
         return
-    for t in v.tareas:
+    # Cuando cierra el reloj, quien llama es una de estas tareas: cancelarse a
+    # si misma cortaria el cierre por la mitad, antes de guardar lo hablado.
+    otras = [t for t in v.tareas if t is not asyncio.current_task()]
+    for t in otras:
         t.cancel()
-    for t in v.tareas:
+    for t in otras:
         with contextlib.suppress(Exception, asyncio.CancelledError):
             await t
     if v.ws is not None:
         with contextlib.suppress(Exception):
             await v.ws.close()
-    # Windows no deja borrar un fichero que sigue abierto, asi que la base se
-    # cierra antes. Sin esto la carpeta se queda para siempre y el servidor se
-    # va llenando de memorias de gente que ya se fue.
+    for c in list(v.clientes):
+        with contextlib.suppress(Exception):
+            await c.close(VENCIDA, "pausa")
+    s = v.sesion
+    texto = "\n".join(s.dialogo) if s is not None else ""
     if v.db is not None:
         with contextlib.suppress(Exception):
+            memoria.cerrar_episodio(v.db, s.episodio, texto)
+        with contextlib.suppress(Exception):
             v.db.close()
-    # Lo que conto el visitante se va con el. No hay por que conservarlo, y
-    # conservarlo sin que lo sepa seria lo contrario de lo que predica esto.
-    shutil.rmtree(v.carpeta, ignore_errors=True)
-    print(f"  [demo] visita {id_[:6]} cerrada ({cuantas()} abiertas)")
+    # Lo que se hablo pasa a la memoria, igual que en casa al cerrar. Sin esto
+    # lo que la persona contaba de viva voz se perdia al cortarse. Va en otro
+    # hilo y con su propia conexion: llama a OpenAI y tarda.
+    if texto.strip() and s is not None:
+        asyncio.create_task(asyncio.to_thread(_consolidar, v.ruta, texto,
+                                              s.episodio))
+    print(f"  [demo] conversacion {id_[:6]} cerrada ({cuantas()} abiertas)")
+
+
+def _consolidar(ruta: Path, texto: str, episodio: int) -> None:
+    from . import consolidar
+    c = memoria.abrir(ruta)
+    try:
+        r = consolidar.de_transcripcion(c, texto, episodio)
+        print(f"  [demo] consolidado: {r.get('hechos', 0)} hechos nuevos")
+    except Exception as e:
+        print(f"  [demo] no pude consolidar la conversacion: {e}")
+    finally:
+        c.close()
 
 
 async def cerrar_todas() -> None:
